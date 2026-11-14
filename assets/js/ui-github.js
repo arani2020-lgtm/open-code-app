@@ -488,7 +488,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             }
           }, _callee7, null, [[0, 2]]);
         }));
-        return foot;
+        return [foot];
       }()
     });
   }

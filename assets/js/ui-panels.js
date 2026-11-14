@@ -25,6 +25,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     $ = OC.$,
     $$ = OC.$$;
   var I = OC.ui_icons;
+  var toast = OC.toast;
   function page(contentHTML) {
     OC.renderShell(contentHTML);
   }
