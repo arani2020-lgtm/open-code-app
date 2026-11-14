@@ -36,8 +36,22 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  // same-origin core: cache-first with network refresh
+  // same-origin: pages network-first (instant updates), assets cache-first with refresh
   if (url.origin === location.origin) {
+    if (e.request.mode === "navigate") {
+      e.respondWith(
+        fetch(e.request)
+          .then((res) => {
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(e.request, copy));
+            }
+            return res;
+          })
+          .catch(() => caches.match(e.request).then((h) => h || caches.match("index.html")))
+      );
+      return;
+    }
     e.respondWith(
       caches.match(e.request).then((hit) => {
         const fetching = fetch(e.request)
