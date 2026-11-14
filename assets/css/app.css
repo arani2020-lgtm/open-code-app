@@ -204,11 +204,11 @@ html[dir="rtl"] .switch input:checked + .track::before { transform: translateX(-
 /* ---------- App shell ---------- */
 .app {
   display: grid; height: 100%;
-  grid-template-columns: 288px 1fr;
+  grid-template-columns: 288px minmax(0, 1fr); /* minmax(0,1fr): main column may shrink on mobile */
   grid-template-rows: 58px 1fr;
   grid-template-areas: "side top" "side main";
 }
-.app.no-side { grid-template-columns: 1fr; grid-template-areas: "top" "main"; }
+.app.no-side { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "main"; }
 
 .topbar {
   grid-area: top;
@@ -234,6 +234,7 @@ html[dir="rtl"] .switch input:checked + .track::before { transform: translateX(-
 }
 .main {
   grid-area: main;
+  min-width: 0; /* allow shrinking below content min-content (mobile) */
   overflow: hidden auto;
   position: relative;
   background:
