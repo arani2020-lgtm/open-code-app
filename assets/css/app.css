@@ -687,3 +687,19 @@ mark { background: rgb(var(--accent) / .35); border-radius: 3px; padding: 0 2px;
   .auth-top { padding-bottom: 18px; }
   .page-title { font-size: 19px; }
 }
+
+/* ---------- GitHub panel ---------- */
+.btn-danger-ghost { background: rgb(var(--danger-soft)); color: rgb(var(--danger)); border: 1px solid rgb(var(--danger) / .25); }
+.gh-repo-row, .gh-file-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 6px; border-bottom: 1px solid rgb(var(--line) / .6);
+}
+.gh-repo-row:last-child, .gh-file-row:last-child { border-bottom: none; }
+.gh-repo-main { flex: 1; min-width: 0; }
+.gh-repo-main > b { font-size: 14px; }
+.gh-repo-actions { flex-wrap: wrap; gap: 6px; }
+.gh-file-icon { color: rgb(var(--brand)); flex: none; display: inline-flex; }
+.gh-path { font-size: 13.5px; font-weight: 600; word-break: break-all; }
+.gh-stage-panel { border: 1.5px solid rgb(var(--ok) / .5); background: rgb(var(--ok-soft) / .35); }
+.gh-chip { border-color: rgb(var(--brand) / .6); background: rgb(var(--brand-soft) / .6); }
+.gh-file-row .btn-sm { white-space: nowrap; }

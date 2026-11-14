@@ -1,3 +1,5 @@
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
 function _toConsumableArray(a) { return _arrayWithoutHoles(a) || _iterableToArray(a) || _unsupportedIterableToArray(a) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { var e = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (Array.isArray(r) && (null == e || e === ("undefined" != typeof Symbol && [][Symbol.iterator]) || e === []["@@iterator"])) return r; if (null != e) { for (var t, o = [], a = e.call(r); !(t = a.next()).done;) o.push(t.value); return o; } }
@@ -141,6 +143,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
   }
   OC.modal = modal;
+  OC.confirmDialog = confirmDialog;
   function confirmDialog(_ref2) {
     var title = _ref2.title,
       message = _ref2.message,
@@ -1110,15 +1113,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function renderPending() {
     var strip = $("#pending-strip");
     if (!strip) return;
-    if (!pendingFiles.length) {
+    var ghAt = OC.github && OC.github.attached() ? OC.github.attached() : null;
+    if (!pendingFiles.length && !ghAt) {
       strip.classList.add("hidden");
       strip.innerHTML = "";
       return;
     }
     strip.classList.remove("hidden");
-    strip.innerHTML = pendingFiles.map(function (f) {
+    var html = pendingFiles.map(function (f) {
       return '<span class="attach-chip">' + (f.dataUrl ? '<img src="' + f.dataUrl + '">' : I.file) + '<span class="aname">' + U.esc(f.name) + "</span>" + '<span class="muted small">' + U.fmtBytes(f.size) + "</span>" + '<button class="icon-btn" style="width:24px;height:24px" data-rm="' + f.id + '">' + I.x + "</button></span>";
     }).join("");
+    if (ghAt) {
+      html += '<span class="attach-chip gh-chip">' + I.book + '<span class="aname" style="direction:ltr">' + U.esc(ghAt.repo + " @" + ghAt.branch) + "</span>" + '<span class="muted small">Git</span>' + '<button class="icon-btn" style="width:24px;height:24px" id="gh-detach-btn">' + I.x + "</button></span>";
+    }
+    strip.innerHTML = html;
     $$("[data-rm]", strip).forEach(function (b) {
       b.onclick = function () {
         pendingFiles = pendingFiles.filter(function (f) {
@@ -1127,6 +1135,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         renderPending();
       };
     });
+    var det = $("#gh-detach-btn", strip);
+    if (det) det.onclick = function () {
+      if (OC.github) OC.github.detach();
+      renderPending();
+    };
   }
 
   /* ---------- message rendering ---------- */
@@ -1381,6 +1394,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function respond(_x, _x2, _x3) {
     return _respond.apply(this, arguments);
   }
+  /* ---------- GitHub repo agent loop (JSON tool protocol) ---------- */
   function _respond() {
     _respond = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(conv, userText, files) {
       var inner, user, aMsg, streamingEl, sc, pick, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, sendBtn, _t2;
@@ -1414,27 +1428,34 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           case 1:
             aMsg.model = pick.model;
 
+            // GitHub agent mode: a repo is attached → JSON tool-loop
+            if (!(OC.github && OC.github.attached())) {
+              _context6.n = 2;
+              break;
+            }
+            return _context6.a(2, respondWithRepo(conv, userText, aMsg, streamingEl, pick));
+          case 2:
             // web search
             sources = null;
             if (!conv.webSearch) {
-              _context6.n = 5;
+              _context6.n = 6;
               break;
             }
-            _context6.p = 2;
-            _context6.n = 3;
+            _context6.p = 3;
+            _context6.n = 4;
             return OC.providers.webSearch(userText);
-          case 3:
+          case 4:
             rs = _context6.v;
             sources = rs;
             aMsg.searched = true;
             userText += OC.providers.searchContextBlock(rs);
-            _context6.n = 5;
+            _context6.n = 6;
             break;
-          case 4:
-            _context6.p = 4;
+          case 5:
+            _context6.p = 5;
             _t2 = _context6.v;
             toast(_t2.message || t("webSearchOff"), "err");
-          case 5:
+          case 6:
             // build messages with system prompt
             settings = store.getUserSettings();
             msgs = [];
@@ -1450,35 +1471,35 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             used = 0;
             hist = [];
             i = conv.messages.length - 1;
-          case 6:
+          case 7:
             if (!(i >= 0)) {
-              _context6.n = 10;
+              _context6.n = 11;
               break;
             }
             m = conv.messages[i];
             if (!(m.role === "assistant" && m === aMsg)) {
-              _context6.n = 7;
-              break;
-            }
-            return _context6.a(3, 9);
-          case 7:
-            len = (m.content || "").length;
-            if (!(used + len > maxCtx * 3 && hist.length)) {
               _context6.n = 8;
               break;
             }
             return _context6.a(3, 10);
           case 8:
+            len = (m.content || "").length;
+            if (!(used + len > maxCtx * 3 && hist.length)) {
+              _context6.n = 9;
+              break;
+            }
+            return _context6.a(3, 11);
+          case 9:
             used += len;
             hist.unshift({
               role: m.role,
               content: m.content
             });
-          case 9:
-            i--;
-            _context6.n = 6;
-            break;
           case 10:
+            i--;
+            _context6.n = 7;
+            break;
+          case 11:
             msgs.push.apply(msgs, _toConsumableArray(hist.slice(0, -1))); // exclude the just-pushed user message dup
             msgs.push({
               role: "user",
@@ -1561,13 +1582,212 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                 if (streamHandle) streamHandle.stop();
               };
             }
-          case 11:
+          case 12:
             return _context6.a(2);
         }
-      }, _callee6, null, [[2, 4]]);
+      }, _callee6, null, [[3, 5]]);
     }));
     return _respond.apply(this, arguments);
   }
+  var GH_MAX_ROUNDS = 6;
+  function respondWithRepo(_x4, _x5, _x6, _x7, _x8) {
+    return _respondWithRepo.apply(this, arguments);
+  }
+  function _respondWithRepo() {
+    _respondWithRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(conv, userText, aMsg, streamingEl, pick) {
+      var bubble, sc, at, msgs, defPrompt, paint, sayParts, stagedPaths, stagedTotal, aborted, errText, _loop4, _ret2, round, content, isFa;
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.n) {
+          case 0:
+            bubble = $("#stream-bubble", streamingEl);
+            sc = $("#chat-scroll");
+            at = OC.github.attached();
+            msgs = [];
+            defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
+              return x.id === conv.promptId;
+            }) || null : OC.promptsDef();
+            if (defPrompt) msgs.push({
+              role: "system",
+              content: defPrompt.text
+            });
+            msgs.push({
+              role: "user",
+              content: userText + OC.github.contextBlock()
+            });
+            paint = function paint(txt, busy) {
+              if (!bubble) return;
+              bubble.innerHTML = U.esc(String(txt == null ? "" : txt)).replace(/\n/g, "<br>") + (busy ? '<span class="cursor-blink"></span>' : "");
+              if (sc && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) sc.scrollTop = sc.scrollHeight;
+            };
+            sayParts = [];
+            stagedPaths = [];
+            stagedTotal = 0;
+            aborted = false;
+            errText = "";
+            _loop4 = /*#__PURE__*/_regenerator().m(function _loop4() {
+              var raw, stopped, parsed, res, _iterator0, _step0, r;
+              return _regenerator().w(function (_context7) {
+                while (1) switch (_context7.n) {
+                  case 0:
+                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(GH_MAX_ROUNDS)) + " …]", true);
+                    raw = "";
+                    stopped = false;
+                    _context7.n = 1;
+                    return new Promise(function (resolve) {
+                      streamHandle = OC.providers.streamChat({
+                        provider: pick.provider,
+                        model: pick.model,
+                        messages: msgs,
+                        temperature: 0.2,
+                        maxTokens: store.getUserSettings().maxOutputTokens,
+                        onDelta: function onDelta(full) {
+                          raw = full;
+                          paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + full, true);
+                        },
+                        onDone: function onDone(_ref8) {
+                          var usage = _ref8.usage,
+                            estimated = _ref8.estimated,
+                            tin = _ref8.tin,
+                            tout = _ref8.tout,
+                            text = _ref8.text;
+                          streamHandle = null;
+                          raw = text || raw;
+                          aMsg.usage = {
+                            tin: tin || 0,
+                            tout: tout || 0
+                          };
+                          aMsg.estimated = !!estimated;
+                          resolve();
+                        },
+                        onError: function onError(e) {
+                          streamHandle = null;
+                          errText = e.message || t("errorOccurred");
+                          resolve();
+                        },
+                        onAbort: function onAbort(partial) {
+                          streamHandle = null;
+                          raw = partial || raw;
+                          stopped = true;
+                          resolve();
+                        }
+                      });
+                    });
+                  case 1:
+                    if (!errText) {
+                      _context7.n = 2;
+                      break;
+                    }
+                    return _context7.a(2, 0);
+                  case 2:
+                    parsed = OC.github.parseActions(raw);
+                    if (parsed && parsed.say) sayParts.push(parsed.say);
+                    if (parsed) {
+                      _context7.n = 3;
+                      break;
+                    }
+                    if (raw) sayParts.push(raw);
+                    return _context7.a(2, 0);
+                  case 3:
+                    msgs.push({
+                      role: "assistant",
+                      content: raw
+                    });
+                    paint(sayParts.join("\n\n") + "\n\n[" + t("ghWorking") + "]", true);
+                    _context7.n = 4;
+                    return OC.github.runActions(parsed.actions);
+                  case 4:
+                    res = _context7.v;
+                    stagedTotal += res.staged;
+                    _iterator0 = _createForOfIteratorHelper(res.results);
+                    try {
+                      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+                        r = _step0.value;
+                        if (r.type === "write") stagedPaths.push(r.path);
+                      }
+                    } catch (err) {
+                      _iterator0.e(err);
+                    } finally {
+                      _iterator0.f();
+                    }
+                    if (!(res.done || stopped || !res.results.length)) {
+                      _context7.n = 5;
+                      break;
+                    }
+                    return _context7.a(2, 0);
+                  case 5:
+                    msgs.push({
+                      role: "user",
+                      content: "[SYSTEM TOOL RESULTS]\n" + res.results.map(function (r) {
+                        return r.text;
+                      }).join("\n\n") + (OC.i18n.locale() === "fa" ? "\n\n[ادامه بده: فایل بعدی را با read ببین، اصلاح‌ها را با write اعمال کن؛ کار تمام شد با done تمامش کن.]" : "\n\n[Continue: read the next file, apply edits with write; finish with done.]")
+                    });
+                    if (!stopped) {
+                      _context7.n = 6;
+                      break;
+                    }
+                    aborted = true;
+                    return _context7.a(2, 0);
+                  case 6:
+                    return _context7.a(2);
+                }
+              }, _loop4);
+            });
+            round = 1;
+          case 1:
+            if (!(round <= GH_MAX_ROUNDS)) {
+              _context8.n = 4;
+              break;
+            }
+            return _context8.d(_regeneratorValues(_loop4()), 2);
+          case 2:
+            _ret2 = _context8.v;
+            if (!(_ret2 === 0)) {
+              _context8.n = 3;
+              break;
+            }
+            return _context8.a(3, 4);
+          case 3:
+            round++;
+            _context8.n = 1;
+            break;
+          case 4:
+            content = sayParts.filter(Boolean).join("\n\n");
+            isFa = OC.i18n.locale() === "fa";
+            if (stagedTotal) {
+              content += (content ? "\n\n" : "") + "**" + (isFa ? "تغییرات پله‌شده" : "Staged changes") + " (" + U.faNum(String(stagedTotal)) + "):**\n" + stagedPaths.slice(0, 12).map(function (p) {
+                return "- `" + p + "`";
+              }).join("\n") + (stagedPaths.length > 12 ? "\n- …" : "") + "\n\n" + (isFa ? "برای **کامیت و پوش** به صفحه «گیت‌هاب» برو (منوی کنار ← گیت‌هاب)؛ آنجا می‌توانی پیام کامیت بنویسی و شاخه جدید بسازی." : "To **commit & push** open the GitHub page (sidebar ← GitHub); write a commit message and create a branch there.");
+            }
+            if (errText) {
+              aMsg.error = errText;
+              content = (content ? content + "\n\n" : "") + errText;
+              store.recordUsage({
+                fail: true
+              });
+            } else {
+              store.recordUsage({
+                tin: aMsg.usage && aMsg.usage.tin || 0,
+                tout: aMsg.usage && aMsg.usage.tout || 0,
+                estimated: aMsg.estimated,
+                provider: pick.provider.id,
+                model: pick.model
+              });
+              store.logActivity(store.currentUser().email, "chat", pick.model + " · repo:" + (at ? at.repo : "?"));
+            }
+            aMsg.content = content;
+            if (at) aMsg.repo = at.repo + "@" + at.branch;
+            conv.messages.push(aMsg);
+            store.putConv(conv);
+            finishStream(conv, streamingEl, aMsg);
+            renderPending();
+          case 5:
+            return _context8.a(2);
+        }
+      }, _callee7);
+    }));
+    return _respondWithRepo.apply(this, arguments);
+  }
+  OC.renderGhChip = renderPending;
   function finishStream(conv, streamingEl, aMsg) {
     var sendBtn = $("#btn-send");
     if (sendBtn) {
@@ -1711,7 +1931,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }, _callee5, null, [[2, 7, 8, 9]]);
     }));
-    return function (_x4) {
+    return function (_x9) {
       return _ref6.apply(this, arguments);
     };
   }();

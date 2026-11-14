@@ -41,9 +41,14 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     }).join("") + "</div></div>" + "</div></div>";
     var secGeneration = '<div class="panel"><h3>' + t("generationDefaults") + "</h3><p class='p-desc'>" + t("usageNote") + "</p>" + '<div class="stack">' + '<div class="field"><label>' + t("temperature") + ' — <span id="temp-val">' + U.faNum(s.temperature) + "</span></label><input type='range' id='rng-temp' min='0' max='" + (sys.temperatureMax || 2) + "' step='0.1' value='" + s.temperature + "'></div>" + '<div class="grid-2">' + '<div class="field"><label>' + t("maxOutputTokens") + "</label><input class='input' id='in-maxtok' type='number' min='64' max='128000' value='" + s.maxOutputTokens + "'></div>" + '<div class="field"><label>' + t("contextWindow") + "</label><input class='input' id='in-ctx' type='number' min='1024' max='2000000' step='1024' value='" + s.contextWindow + "'></div>" + "</div>" + '<div class="check-row"><label class="switch"><input type="checkbox" id="ck-ws" ' + (s.webSearchDefault ? "checked" : "") + '><span class="track"></span></label><span>' + t("webSearchDefault") + "</span></div>" + '<button class="btn btn-primary" id="btn-save-gen">' + t("save") + "</button>" + "</div></div>";
     var secProviders = '<div class="panel"><h3>' + t("aiProviders") + "</h3><p class='p-desc'>" + t("privacyKeyNote") + "</p>" + '<div id="prov-list" class="stack"></div>' + '<div class="flex" style="margin-top:12px"><button class="btn btn-primary" id="btn-add-prov">' + I.plus + t("addProvider") + "</button></div>" + "</div>";
+    var ghSt = OC.github && OC.github.state() || {
+      connected: false,
+      user: null
+    };
+    var secGithub = ghSt.connected ? '<div class="panel"><h3>GitHub</h3><p class="p-desc">' + t("ghConnectedAs") + "</p>" + '<div class="flex" style="align-items:center;gap:12px">' + (ghSt.user && ghSt.user.avatar ? '<img src="' + U.esc(ghSt.user.avatar) + '" alt="" style="width:38px;height:38px;border-radius:11px">' : "") + '<div><b>' + U.esc(ghSt.user ? ghSt.user.name : "") + '</b><div class="muted small" style="direction:ltr">@' + U.esc(ghSt.user ? ghSt.user.login : "") + "</div></div>" + '<span style="flex:1"></span>' + '<button class="btn btn-primary" id="gh-open-panel">' + I.book + t("ghManageRepos") + "</button>" + '<button class="btn btn-danger-ghost" id="gh-disc-2">' + I.logout + t("ghDisconnect") + "</button>" + "</div></div>" : '<div class="panel"><h3>GitHub</h3><p class="p-desc">' + t("ghSettingsDesc") + "</p>" + '<div class="stack">' + '<div class="field"><label>' + t("ghTokenLabel") + "</label>" + '<input class="input" id="gh-token-s" type="password" placeholder="github_pat_… / ghp_…" style="direction:ltr" autocomplete="off"></div>' + '<div class="hint">' + t("ghTokenHint") + "</div>" + '<div class="flex"><button class="btn btn-primary" id="gh-connect-s">' + I.key + t("ghConnectBtn") + "</button>" + '<a class="btn" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">' + t("ghNewToken") + "</a></div>" + "</div></div>";
     var secData = '<div class="panel"><h3>' + t("data") + "</h3><p class='p-desc'>" + t("keysNeverExported") + "</p>" + '<div class="stack">' + '<div class="flex" style="flex-wrap:wrap;gap:8px">' + '<button class="btn" id="exp-all">' + I.download + t("exportAll") + "</button>" + '<button class="btn" id="exp-chats">' + t("exportChatsOnly") + "</button>" + '<button class="btn" id="exp-settings">' + t("exportSettingsOnly") + "</button>" + '<button class="btn" id="imp-btn">' + I.restore + t("restore") + "</button>" + '<input type="file" id="imp-file" accept=".json" class="hidden">' + "</div>" + '<div class="field"><label>' + t("storageSpace") + "</label>" + '<div class="progress"><div style="width:' + Math.min(100, Math.round(stats.totalBytes / 5e6 * 100)) + '%"></div></div>' + '<span class="hint">' + U.fmtBytes(stats.totalBytes) + " / 5 MB</span></div>" + '<div class="check-row"><label class="switch"><input type="checkbox" id="ck-shortcuts-info" checked disabled><span class="track" style="opacity:.5"></span></label><button class="btn btn-sm" id="btn-shortcuts">' + t("keyboardShortcuts") + "</button></div>" + "</div></div>";
     var secPrivacy = '<div class="panel"><h3>' + t("privacy") + "</h3><p class='p-desc'>" + t("privacyChatsNote") + "</p>" + '<ul style="margin:0;padding-inline-start:18px;color:rgb(var(--muted));font-size:13.5px">' + "<li>" + t("privacyKeyNote") + "</li>" + "<li>" + t("privacyFilesNote") + "</li>" + "<li>" + t("filesReadOnce") + " — " + t("fileNotKept") + "</li>" + "<li>" + t("systemPromptsHint") + "</li>" + "</ul></div>";
-    page('<div class="settings-wrap">' + '<h2 class="page-title">' + t("settings") + '</h2><p class="page-sub">' + t("appName") + " · " + t("version") + " " + U.faNum("1.0.0") + " · " + t("designer") + ": " + "عباس صدیق" + "</p>" + secAppearance + secGeneration + secProviders + secData + secPrivacy + "</div>");
+    page('<div class="settings-wrap">' + '<h2 class="page-title">' + t("settings") + '</h2><p class="page-sub">' + t("appName") + " · " + t("version") + " " + U.faNum("1.0.2") + " · " + t("designer") + ": " + "عباس صدیق" + "</p>" + secAppearance + secGeneration + secProviders + secGithub + secData + secPrivacy + "</div>");
 
     // bindings
     $$("#seg-theme button").forEach(function (b) {
@@ -90,6 +95,60 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     renderProviderList("#prov-list", false, function () {
       return OC.routes["/settings"]();
     });
+    var ghConn = $("#gh-connect-s");
+    if (ghConn) ghConn.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            ghConn.disabled = true;
+            _context.p = 1;
+            _context.n = 2;
+            return OC.github.connect($("#gh-token-s").value.trim());
+          case 2:
+            toast(t("ghConnectedOk"), "ok");
+            OC.routes["/settings"]();
+            _context.n = 4;
+            break;
+          case 3:
+            _context.p = 3;
+            _t = _context.v;
+            toast(_t.message || t("ghError"), "err");
+            ghConn.disabled = false;
+          case 4:
+            return _context.a(2);
+        }
+      }, _callee, null, [[1, 3]]);
+    }));
+    var ghOpen = $("#gh-open-panel");
+    if (ghOpen) ghOpen.onclick = function () {
+      location.hash = "/github";
+    };
+    var ghDisc2 = $("#gh-disc-2");
+    if (ghDisc2) ghDisc2.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.n) {
+          case 0:
+            _context2.n = 1;
+            return OC.confirmDialog({
+              title: t("ghDisconnect"),
+              message: t("ghDisconnectConfirm")
+            });
+          case 1:
+            if (_context2.v) {
+              _context2.n = 2;
+              break;
+            }
+            return _context2.a(2);
+          case 2:
+            OC.github.disconnect();
+            toast(t("ghDisconnected"), "ok");
+            OC.routes["/settings"]();
+          case 3:
+            return _context2.a(2);
+        }
+      }, _callee2);
+    }));
     $("#exp-all").onclick = function () {
       return doExport("all");
     };
@@ -165,23 +224,23 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       };
     });
     $$("[data-del]", box).forEach(function (b) {
-      return b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      return b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
         var p;
-        return _regenerator().w(function (_context) {
-          while (1) switch (_context.n) {
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.n) {
             case 0:
-              _context.n = 1;
+              _context3.n = 1;
               return OC.confirm({
                 title: t("deleteProviderMsg"),
                 message: t("deleteProviderMsg"),
                 danger: true
               });
             case 1:
-              if (_context.v) {
-                _context.n = 2;
+              if (_context3.v) {
+                _context3.n = 2;
                 break;
               }
-              return _context.a(2);
+              return _context3.a(2);
             case 2:
               p = list.find(function (x) {
                 return x.id === b.dataset.del;
@@ -191,42 +250,42 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               store.logActivity(store.currentUser().email, p.system ? "delete-system-provider" : "delete-provider", p.name);
               onChange && onChange();
             case 3:
-              return _context.a(2);
+              return _context3.a(2);
           }
-        }, _callee);
+        }, _callee3);
       }));
     });
     $$("[data-test]", box).forEach(function (b) {
-      return b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-        var p, r, _t;
-        return _regenerator().w(function (_context2) {
-          while (1) switch (_context2.p = _context2.n) {
+      return b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+        var p, r, _t2;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.p = _context4.n) {
             case 0:
               p = list.find(function (x) {
                 return x.id === b.dataset.test;
               });
               b.innerHTML = I.refresh;
               b.classList.add("active");
-              _context2.p = 1;
-              _context2.n = 2;
+              _context4.p = 1;
+              _context4.n = 2;
               return OC.providers.testConnection(p);
             case 2:
-              r = _context2.v;
+              r = _context4.v;
               OC.providers.setHealth(p.id, p.system, true, r.ms);
               toast(t("connected") + " (" + U.faNum(r.ms) + "ms)", "ok");
-              _context2.n = 4;
+              _context4.n = 4;
               break;
             case 3:
-              _context2.p = 3;
-              _t = _context2.v;
+              _context4.p = 3;
+              _t2 = _context4.v;
               OC.providers.setHealth(p.id, p.system, false);
-              toast(_t.message || t("connectionFailed"), "err");
+              toast(_t2.message || t("connectionFailed"), "err");
             case 4:
               onChange && onChange();
             case 5:
-              return _context2.a(2);
+              return _context4.a(2);
           }
-        }, _callee2, null, [[1, 3]]);
+        }, _callee4, null, [[1, 3]]);
       }));
     });
   }
@@ -298,60 +357,60 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     $("#pe-manual", body).addEventListener("keydown", function (e) {
       if (e.key === "Enter") $("#pe-add-model", body).click();
     });
-    $("#pe-fetch", body).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var models, _t2;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
+    $("#pe-fetch", body).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+      var models, _t3;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
           case 0:
             gather();
             $("#pe-fetch", body).disabled = true;
-            _context3.p = 1;
-            _context3.n = 2;
+            _context5.p = 1;
+            _context5.n = 2;
             return OC.providers.fetchModels(p);
           case 2:
-            models = _context3.v;
+            models = _context5.v;
             p.models = models.slice(0, 400);
             renderModels();
             $("#pe-mcount", body).textContent = U.faNum(p.models.length);
             toast(t("modelsUpdated") + " (" + U.faNum(p.models.length) + ")", "ok");
-            _context3.n = 4;
+            _context5.n = 4;
             break;
           case 3:
-            _context3.p = 3;
-            _t2 = _context3.v;
-            toast(_t2.message || t("providerNoModels"), "err");
+            _context5.p = 3;
+            _t3 = _context5.v;
+            toast(_t3.message || t("providerNoModels"), "err");
           case 4:
             $("#pe-fetch", body).disabled = false;
           case 5:
-            return _context3.a(2);
+            return _context5.a(2);
         }
-      }, _callee3, null, [[1, 3]]);
+      }, _callee5, null, [[1, 3]]);
     }));
-    $("#pe-test", body).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-      var r, _t3;
-      return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.p = _context4.n) {
+    $("#pe-test", body).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
+      var r, _t4;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
           case 0:
             gather();
             $("#pe-test", body).disabled = true;
-            _context4.p = 1;
-            _context4.n = 2;
+            _context6.p = 1;
+            _context6.n = 2;
             return OC.providers.testConnection(p);
           case 2:
-            r = _context4.v;
+            r = _context6.v;
             toast(t("connected") + " (" + U.faNum(r.ms) + "ms)", "ok");
-            _context4.n = 4;
+            _context6.n = 4;
             break;
           case 3:
-            _context4.p = 3;
-            _t3 = _context4.v;
-            toast(_t3.message || t("connectionFailed"), "err");
+            _context6.p = 3;
+            _t4 = _context6.v;
+            toast(_t4.message || t("connectionFailed"), "err");
           case 4:
             $("#pe-test", body).disabled = false;
           case 5:
-            return _context4.a(2);
+            return _context6.a(2);
         }
-      }, _callee4, null, [[1, 3]]);
+      }, _callee6, null, [[1, 3]]);
     }));
     function gather() {
       p.name = $("#pe-name", body).value.trim();
@@ -503,12 +562,12 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       $("#cp-old").value = "";
       $("#cp-new").value = "";
     };
-    $("#acc-del").onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+    $("#acc-del").onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
       var uid;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.n) {
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.n) {
           case 0:
-            _context5.n = 1;
+            _context7.n = 1;
             return OC.confirm({
               title: t("deleteAccountMsg"),
               message: t("deleteAccountWarn"),
@@ -516,11 +575,11 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               okText: t("delete")
             });
           case 1:
-            if (_context5.v) {
-              _context5.n = 2;
+            if (_context7.v) {
+              _context7.n = 2;
               break;
             }
-            return _context5.a(2);
+            return _context7.a(2);
           case 2:
             uid = user.id;
             store.saveUsers(store.getUsers().filter(function (x) {
@@ -538,9 +597,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             location.hash = "/login";
             renderRouteHash();
           case 3:
-            return _context5.a(2);
+            return _context7.a(2);
         }
-      }, _callee5);
+      }, _callee7);
     }));
   };
   function renderRouteHash() {
@@ -587,31 +646,31 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       $("[data-edit]", row).onclick = function () {
         return promptEditor(p);
       };
-      $("[data-del]", row).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-        return _regenerator().w(function (_context6) {
-          while (1) switch (_context6.n) {
+      $("[data-del]", row).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
+        return _regenerator().w(function (_context8) {
+          while (1) switch (_context8.n) {
             case 0:
-              _context6.n = 1;
+              _context8.n = 1;
               return OC.confirm({
                 title: t("deletePromptMsg"),
                 message: t("deletePromptMsg"),
                 danger: true
               });
             case 1:
-              if (_context6.v) {
-                _context6.n = 2;
+              if (_context8.v) {
+                _context8.n = 2;
                 break;
               }
-              return _context6.a(2);
+              return _context8.a(2);
             case 2:
               store.savePrompts(store.getPrompts().filter(function (x) {
                 return x.id !== p.id;
               }));
               renderPromptList();
             case 3:
-              return _context6.a(2);
+              return _context8.a(2);
           }
-        }, _callee6);
+        }, _callee8);
       }));
       box.appendChild(row);
     });
@@ -786,31 +845,31 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             adminTab("users");
             toast(t("userUpdated"), "ok");
           };
-          $("[data-pass]", tr).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
+          $("[data-pass]", tr).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9() {
             var v, us, x;
-            return _regenerator().w(function (_context7) {
-              while (1) switch (_context7.n) {
+            return _regenerator().w(function (_context9) {
+              while (1) switch (_context9.n) {
                 case 0:
-                  _context7.n = 1;
+                  _context9.n = 1;
                   return OC.promptDialog({
                     title: t("resetPassword"),
                     label: t("newPassword") + " (" + t("minChars") + ")",
                     okText: t("save")
                   });
                 case 1:
-                  v = _context7.v;
+                  v = _context9.v;
                   if (!(v == null)) {
-                    _context7.n = 2;
+                    _context9.n = 2;
                     break;
                   }
-                  return _context7.a(2);
+                  return _context9.a(2);
                 case 2:
                   if (store.passOk(v)) {
-                    _context7.n = 3;
+                    _context9.n = 3;
                     break;
                   }
                   toast(t("passWeak"), "err");
-                  return _context7.a(2);
+                  return _context9.a(2);
                 case 3:
                   us = store.getUsers();
                   x = us.find(function (y) {
@@ -821,33 +880,33 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                   store.logActivity(store.currentUser().email, "reset-pass", x.email);
                   toast(t("passwordChanged"), "ok");
                 case 4:
-                  return _context7.a(2);
+                  return _context9.a(2);
               }
-            }, _callee7);
+            }, _callee9);
           }));
-          $("[data-delu]", tr).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
-            return _regenerator().w(function (_context8) {
-              while (1) switch (_context8.n) {
+          $("[data-delu]", tr).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
+            return _regenerator().w(function (_context0) {
+              while (1) switch (_context0.n) {
                 case 0:
                   if (!adminEditingSelf) {
-                    _context8.n = 1;
+                    _context0.n = 1;
                     break;
                   }
                   toast(t("noAccess"), "err");
-                  return _context8.a(2);
+                  return _context0.a(2);
                 case 1:
-                  _context8.n = 2;
+                  _context0.n = 2;
                   return OC.confirm({
                     title: t("deleteUser"),
                     message: u.email,
                     danger: true
                   });
                 case 2:
-                  if (_context8.v) {
-                    _context8.n = 3;
+                  if (_context0.v) {
+                    _context0.n = 3;
                     break;
                   }
-                  return _context8.a(2);
+                  return _context0.a(2);
                 case 3:
                   store.saveUsers(store.getUsers().filter(function (x) {
                     return x.id !== u.id;
@@ -861,9 +920,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                   adminTab("users");
                   toast(t("userDeleted"), "ok");
                 case 4:
-                  return _context8.a(2);
+                  return _context0.a(2);
               }
-            }, _callee8);
+            }, _callee0);
           }));
         });
       };
