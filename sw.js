@@ -1,5 +1,5 @@
 /* Open Code — service worker: offline app shell. Designer: Abbas Sedigh */
-const CACHE = "open-code-v2.0.7";
+const CACHE = "open-code-v2.0.8";
 const CORE = [
   "./",
   "index.html",

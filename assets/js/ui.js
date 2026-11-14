@@ -1055,6 +1055,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (deliverBtn) deliverBtn.onclick = function () {
       return OC.deliverProject(currentConv());
     };
+    renderPending(); // keeps the attached-repo chip stable on re-render
     if (window.innerWidth > 900) input.focus();
   }
   function onFilesPicked(e) {
