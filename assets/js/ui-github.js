@@ -446,7 +446,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             content = ta.value;
             toast(t("ghStagedOk") + " ✓", "ok");
             m.close();
-            if ($("#page-root")) render();
+            if (location.hash.indexOf("/github") >= 0) render();
           } catch (e) {
             toast(e.message || t("ghError"), "err");
           }
