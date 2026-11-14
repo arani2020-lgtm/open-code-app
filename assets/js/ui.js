@@ -551,7 +551,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       var active = OC._currentConvId === c.id ? " active" : "";
       return '<div class="conv-item' + active + '" data-cid="' + c.id + '">' + '<span class="c-ico">' + I.code + "</span>" + '<span class="c-title">' + U.esc(c.title || t("newChat")) + "</span>" + (c.model ? "" : "") + '<button class="c-del" title="' + t("rename") + '" data-more="' + c.id + '">' + I.chevronDown + "</button>" + "</div>";
     };
-    var html = '<div class="side-head"><button class="new-chat-btn" id="btn-new-chat">' + I.plus + "<span>" + t("newChat") + "</span></button></div>" + '<div class="side-search"><input class="input" id="side-q" placeholder="' + t("searchChats") + '" value="' + U.esc(q) + '"></div>' + '<div class="side-list" id="side-list">';
+    var html = '<div class="side-head"><button class="new-chat-btn" id="btn-new-chat">' + I.plus + "<span>" + t("newChat") + "</span></button>" + '<button class="icon-btn" id="btn-new-wizard" title="' + t("wizTitle") + '">' + I.bolt + "</button></div>" + '<div class="side-search"><input class="input" id="side-q" placeholder="' + t("searchChats") + '" value="' + U.esc(q) + '"></div>' + '<div class="side-list" id="side-list">';
     if (q && !convs.length) html += '<div class="side-section">' + t("noChatFound") + "</div>";
     if (g.pinned.length) {
       html += sectionLabel("pinned", I.pin) + g.pinned.map(convItem).join("");
@@ -572,6 +572,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     $("#btn-new-chat").onclick = function () {
       OC.newChat();
       closeSidebar();
+    };
+    var wizBtn = $("#btn-new-wizard");
+    if (wizBtn) wizBtn.onclick = function () {
+      closeSidebar();
+      OC.openProjectWizard();
     };
     var qInp = $("#side-q");
     qInp.addEventListener("input", U.debounce(function () {

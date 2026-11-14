@@ -308,7 +308,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     var typeOpts = OC.providers.TYPES.map(function (tp) {
       return '<option value="' + tp.id + '"' + (p.type === tp.id ? " selected" : "") + ">" + U.esc(tp.label) + "</option>";
     }).join("");
-    var body = el('<div class="stack">' + '<div class="grid-2">' + '<div class="field"><label>' + t("providerName") + '</label><input class="input" id="pe-name" placeholder="OpenAI / Groq / …" value="' + U.esc(p.name) + '"></div>' + '<div class="field"><label>' + t("providerType") + '</label><select class="input" id="pe-type">' + typeOpts + "</select></div>" + "</div>" + '<div class="field"><label>' + t("apiBaseUrl") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="pe-base" dir="ltr" style="text-align:left" value="' + U.esc(p.base || "") + '" placeholder="https://api.example.com/v1"></div>' + '<div class="field"><label>' + t("apiKey") + (p.keyEnc ? ' <span class="badge badge-ok">' + t("connected").replace("اتصال ", "کلید ") + '</span>' : "") + '</label><input class="input" id="pe-key" type="password" dir="ltr" style="text-align:left" placeholder="' + (p.keyEnc ? t("keepKeyEmpty") : "sk-…") + '"><span class="hint">' + t("privacyKeyNote") + "</span></div>" + '<div class="field"><label>' + t("orgId") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="pe-org" dir="ltr" style="text-align:left" value="' + U.esc(p.orgId || "") + '"></div>' + '<div class="field"><label>' + t("customHeaders") + '</label><div id="pe-headers" class="stack"></div><button class="btn btn-sm" id="pe-add-header">' + I.plus + t("addHeader") + "</button></div>" + '<div class="check-row"><label class="switch"><input type="checkbox" id="pe-default" ' + (p.default ? "checked" : "") + '><span class="track"></span></label><span>' + t("defaultProvider") + "</span></div>" + '<div class="field"><label>' + t("models") + ' (<span id="pe-mcount">' + U.faNum((p.models || []).length) + '</span>)</label>' + '<div class="flex" style="flex-wrap:wrap;gap:6px" id="pe-models"></div>' + '<div class="flex" style="gap:6px">' + '<button class="btn btn-sm" id="pe-fetch">' + I.refresh + t("refreshModels") + "</button>" + '<button class="btn btn-sm" id="pe-test">' + I.plug + t("testConnection") + "</button>" + '<input class="input" id="pe-manual" placeholder="' + t("manualModelId") + '" style="flex:1;min-width:120px;direction:ltr;text-align:left">' + '<button class="btn btn-sm" id="pe-add-model">' + I.plus + "</button>" + "</div>" + '<span class="hint">' + t("noModelsHint") + "</span></div>" + "</div>");
+    var body = el('<div class="stack">' + '<div class="grid-2">' + '<div class="field"><label>' + t("providerName") + '</label><input class="input" id="pe-name" placeholder="OpenAI / Groq / …" value="' + U.esc(p.name) + '"></div>' + '<div class="field"><label>' + t("providerType") + '</label><select class="input" id="pe-type">' + typeOpts + "</select></div>" + "</div>" + '<div class="field"><label>' + t("apiBaseUrl") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="pe-base" dir="ltr" style="text-align:left" value="' + U.esc(p.base || "") + '" placeholder="https://api.example.com/v1"></div>' + '<div class="field"><label>' + t("apiKey") + (p.keyEnc ? ' <span class="badge badge-ok">' + t("connected").replace("اتصال ", "کلید ") + '</span>' : "") + '</label><input class="input" id="pe-key" type="password" dir="ltr" style="text-align:left" placeholder="' + (p.keyEnc ? t("keepKeyEmpty") : "sk-…") + '"><span class="hint">' + t("privacyKeyNote") + "</span></div>" + '<div class="field"><label>' + t("keyPoolTitle") + ' (<span id="pe-kcount">' + U.faNum((p.keys || []).length) + '</span>)</label>' + '<div class="stack" id="pe-pool"></div>' + '<div class="flex" style="gap:6px;margin-top:6px">' + '<input class="input" id="pe-pool-label" placeholder="' + t("keyPoolLabel") + '" style="flex:1;min-width:90px">' + '<input class="input" id="pe-pool-key" type="password" dir="ltr" style="flex:1.6;min-width:130px;text-align:left" placeholder="sk-…">' + '<button class="btn btn-sm" id="pe-add-key">' + I.plus + t("keyPoolAdd") + "</button></div>" + '<span class="hint">' + t("keyPoolHint") + "</span></div>" + '<div class="field"><label>' + t("orgId") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="pe-org" dir="ltr" style="text-align:left" value="' + U.esc(p.orgId || "") + '"></div>' + '<div class="field"><label>' + t("customHeaders") + '</label><div id="pe-headers" class="stack"></div><button class="btn btn-sm" id="pe-add-header">' + I.plus + t("addHeader") + "</button></div>" + '<div class="check-row"><label class="switch"><input type="checkbox" id="pe-default" ' + (p.default ? "checked" : "") + '><span class="track"></span></label><span>' + t("defaultProvider") + "</span></div>" + '<div class="field"><label>' + t("models") + ' (<span id="pe-mcount">' + U.faNum((p.models || []).length) + '</span>)</label>' + '<div class="flex" style="flex-wrap:wrap;gap:6px" id="pe-models"></div>' + '<div class="flex" style="gap:6px">' + '<button class="btn btn-sm" id="pe-fetch">' + I.refresh + t("refreshModels") + "</button>" + '<button class="btn btn-sm" id="pe-test">' + I.plug + t("testConnection") + "</button>" + '<input class="input" id="pe-manual" placeholder="' + t("manualModelId") + '" style="flex:1;min-width:120px;direction:ltr;text-align:left">' + '<button class="btn btn-sm" id="pe-add-model">' + I.plus + "</button>" + "</div>" + '<span class="hint">' + t("noModelsHint") + "</span></div>" + "</div>");
     var save = el('<button class="btn btn-primary">' + t("save") + "</button>");
     var cancel = el('<button class="btn">' + t("cancel") + "</button>");
     var m = OC.modal({
@@ -330,6 +330,64 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     });
     $("#pe-add-header", body).onclick = function () {
       return addHeaderRow("", "");
+    };
+
+    /* key pool */
+    var poolBox = $("#pe-pool", body);
+    function maskKey(keyEnc) {
+      try {
+        var k = store.decKey(keyEnc) || "";
+        if (k.length <= 10) return "••••" + k.slice(-3);
+        return k.slice(0, 5) + "••••••" + k.slice(-4);
+      } catch (e) {
+        return "••••";
+      }
+    }
+    function renderPool() {
+      poolBox.innerHTML = (p.keys || []).map(function (k) {
+        var st = k.status === "exhausted" ? '<span class="badge badge-err">' + t("keyStExhausted") + "</span>" : k.status === "invalid" ? '<span class="badge badge-err">' + t("keyStInvalid") + "</span>" : '<span class="badge badge-ok">' + t("keyStOk") + "</span>";
+        return '<div class="pool-row"><div class="pool-main"><b>' + U.esc(k.label || t("keyPoolLabel")) + '</b><span class="muted small" style="direction:ltr">' + maskKey(k.keyEnc) + "</span>" + st + "</div>" + '<div class="pool-ops">' + (k.status && k.status !== "ok" ? '<button class="btn btn-sm" data-kreset="' + U.esc(k.id) + '">' + I.refresh + t("keyReset") + "</button>" : "") + '<button class="icon-btn" data-kdel="' + U.esc(k.id) + '" title="' + t("delete") + '">' + I.trash + "</button></div></div>";
+      }).join("") || '<span class="muted small">' + t("keyPoolEmpty") + "</span>";
+      $$("[data-kdel]", poolBox).forEach(function (b) {
+        return b.onclick = function () {
+          p.keys = (p.keys || []).filter(function (k) {
+            return k.id !== b.dataset.kdel;
+          });
+          renderPool();
+          $("#pe-kcount", body).textContent = U.faNum((p.keys || []).length);
+        };
+      });
+      $$("[data-kreset]", poolBox).forEach(function (b) {
+        return b.onclick = function () {
+          var k = (p.keys || []).find(function (x) {
+            return x.id === b.dataset.kreset;
+          });
+          if (k) k.status = "ok";
+          renderPool();
+          toast(t("keyResetDone"), "ok");
+        };
+      });
+    }
+    renderPool();
+    $("#pe-add-key", body).onclick = function () {
+      var raw = $("#pe-pool-key", body).value.trim();
+      var lbl = $("#pe-pool-label", body).value.trim() || t("keyPoolLabel");
+      if (!raw) {
+        toast(t("keyPoolNeedKey"), "err");
+        return;
+      }
+      p.keys = p.keys || [];
+      p.keys.push({
+        id: "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        label: lbl,
+        keyEnc: store.encKey(raw),
+        status: "ok"
+      });
+      $("#pe-pool-key", body).value = "";
+      $("#pe-pool-label", body).value = "";
+      renderPool();
+      $("#pe-kcount", body).textContent = U.faNum(p.keys.length);
+      toast(t("keyPoolAdded"), "ok");
     };
     var modelsBox = $("#pe-models", body);
     function renderModels() {
@@ -430,7 +488,24 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       });
       p.headers = kv;
       var keyRaw = $("#pe-key", body).value;
-      if (keyRaw) p.keyEnc = store.encKey(keyRaw);
+      if (keyRaw) {
+        var enc = store.encKey(keyRaw);
+        p.keyEnc = enc;
+        // keep pool in sync: main key is the first pool entry
+        p.keys = p.keys || [];
+        var main = p.keys.find(function (k) {
+          return k.id === "main";
+        });
+        if (main) {
+          main.keyEnc = enc;
+          if (main.status === "invalid") main.status = "ok";
+        } else p.keys.unshift({
+          id: "main",
+          label: t("keyMainLabel"),
+          keyEnc: enc,
+          status: "ok"
+        });
+      }
       // auto-fill base from type if empty
       if (!p.base) {
         var tp = OC.providers.TYPES.find(function (x) {

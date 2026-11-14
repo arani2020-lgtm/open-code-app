@@ -67,12 +67,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }) || TYPES[1];
     return (p.base || tp.base || "").replace(/\/+$/, "");
   }
-  function authHeaders(p) {
+  function authHeaders(p, keyOverride) {
     var h = {
       "Content-Type": "application/json"
     };
-    if (p.keyEnc) {
-      var key = store.decKey(p.keyEnc);
+    var enc = keyOverride || p.keyEnc;
+    if (enc) {
+      var key = store.decKey(enc);
       if (key) h["Authorization"] = "Bearer " + key;
     }
     if (p.orgId && p.type === "openai") h["OpenAI-Organization"] = p.orgId;
@@ -91,6 +92,71 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       }
     }
     return h;
+  }
+
+  /* ---------- key pool ---------- */
+  // p.keys: [{id, label, keyEnc, status: "ok"|"exhausted"|"invalid"}] — rotated automatically
+  function keyCandidates(p) {
+    var pool = (p.keys || []).filter(function (k) {
+      return k.keyEnc;
+    });
+    if (!pool.length) {
+      if (p.keyEnc) return [{
+        id: "legacy",
+        label: "",
+        keyEnc: p.keyEnc,
+        status: "ok"
+      }];
+      return [];
+    }
+    return pool.slice();
+  }
+  function activeKeys(p) {
+    var c = keyCandidates(p);
+    var act = c.filter(function (k) {
+      return k.status !== "exhausted" && k.status !== "invalid";
+    });
+    return act.length ? act : [];
+  }
+  /* 402 → exhausted; 401/403 → invalid; 429 → ratelimit (rotate without marking) unless quota-ish body */
+  function classifyKeyError(status, bodyText) {
+    var s = String(bodyText || "").toLowerCase();
+    var quotaish = /insufficient|quota|billing|credit|balance|arrearage|payment/i.test(s);
+    if (status === 402 || status === 429 && quotaish || status === 403 && quotaish) return "exhausted";
+    if (status === 401 || status === 403) return "invalid";
+    if (status === 429) return "ratelimit";
+    return null;
+  }
+  function setKeyStatus(providerId, keyId, status) {
+    var patch = function patch(pr) {
+      if (pr.id !== providerId) return pr;
+      var np = Object.assign({}, pr, {
+        keys: (pr.keys || []).map(function (k) {
+          return k.id === keyId ? Object.assign({}, k, {
+            status: status,
+            lastErrAt: Date.now()
+          }) : k;
+        })
+      });
+      return np;
+    };
+    var mine = store.getProviders();
+    if (mine.some(function (x) {
+      return x.id === providerId;
+    })) {
+      store.saveProviders(mine.map(patch));
+      return "mine";
+    }
+    var sys = store.sysSettings();
+    if ((sys.systemProviders || []).some(function (x) {
+      return x.id === providerId;
+    })) {
+      store.saveSysSettings({
+        systemProviders: (sys.systemProviders || []).map(patch)
+      });
+      return "system";
+    }
+    return null;
   }
 
   /* ---------- errors ---------- */
@@ -365,7 +431,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       done: false
     };
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var blk, body, silenceMs, silenceTimer, armSilence, res, txt, j, text, u2, reader, dec, buf, _full, usage, gotAny, _yield$reader$read, done, value, idx, line, payload, _j, choice, delta, piece, estimated, tin, tout, _t, _t2;
+      var blk, body, silenceMs, silenceTimer, armSilence, cands, _full, lastKeyErr, handled, ci, cand, res, txt, cls, msg, j, text, u2, reader, dec, buf, usage, gotAny, _yield$reader$read, done, value, idx, line, payload, _j, choice, delta, piece, estimated, tin, tout, _t, _t2;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -413,36 +479,67 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             };
             armSilence();
             _context.p = 3;
-            _context.n = 4;
+            cands = activeKeys(p);
+            if (cands.length) {
+              _context.n = 4;
+              break;
+            }
+            clearTimeout(silenceTimer);
+            opts.onError(new Error(t("allKeysExhausted")));
+            return _context.a(2);
+          case 4:
+            _full = "";
+            lastKeyErr = "";
+            handled = false;
+            ci = 0;
+          case 5:
+            if (!(ci < cands.length && !handled)) {
+              _context.n = 25;
+              break;
+            }
+            cand = cands[ci];
+            armSilence();
+            _context.n = 6;
             return fetch(baseUrl(p) + "/chat/completions", {
               method: "POST",
-              headers: authHeaders(p),
+              headers: authHeaders(p, cand.keyEnc),
               body: JSON.stringify(body),
               signal: ctrl.signal
             });
-          case 4:
+          case 6:
             res = _context.v;
             if (res.ok) {
-              _context.n = 6;
-              break;
-            }
-            _context.n = 5;
-            return res.text().catch(function () {
-              return "";
-            });
-          case 5:
-            txt = _context.v;
-            clearTimeout(silenceTimer);
-            opts.onError(new Error(mapError(res.status, txt)));
-            return _context.a(2);
-          case 6:
-            if (res.body) {
-              _context.n = 8;
+              _context.n = 9;
               break;
             }
             _context.n = 7;
-            return res.json();
+            return res.text().catch(function () {
+              return "";
+            });
           case 7:
+            txt = _context.v;
+            cls = classifyKeyError(res.status, txt);
+            msg = mapError(res.status, txt);
+            if (!cls) {
+              _context.n = 8;
+              break;
+            }
+            if (cls !== "ratelimit" && cand.id !== "legacy") setKeyStatus(p.id, cand.id, cls);
+            lastKeyErr = msg;
+            return _context.a(3, 24);
+          case 8:
+            clearTimeout(silenceTimer);
+            opts.onError(new Error(msg));
+            handled = true;
+            return _context.a(3, 25);
+          case 9:
+            if (res.body) {
+              _context.n = 11;
+              break;
+            }
+            _context.n = 10;
+            return res.json();
+          case 10:
             j = _context.v;
             text = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content || "";
             clearTimeout(silenceTimer);
@@ -452,65 +549,65 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               usage: u2,
               estimated: false
             });
-            return _context.a(2);
-          case 8:
+            handled = true;
+            return _context.a(3, 25);
+          case 11:
             reader = res.body.getReader();
             dec = new TextDecoder("utf-8");
             buf = "";
-            _full = "";
             usage = null;
             gotAny = false;
-          case 9:
+          case 12:
             if (!true) {
-              _context.n = 19;
+              _context.n = 22;
               break;
             }
-            _context.n = 10;
+            _context.n = 13;
             return reader.read();
-          case 10:
+          case 13:
             _yield$reader$read = _context.v;
             done = _yield$reader$read.done;
             value = _yield$reader$read.value;
             if (!done) {
-              _context.n = 11;
+              _context.n = 14;
               break;
             }
-            return _context.a(3, 19);
-          case 11:
+            return _context.a(3, 22);
+          case 14:
             buf += dec.decode(value, {
               stream: true
             });
             idx = void 0;
-          case 12:
+          case 15:
             if (!((idx = buf.indexOf("\n")) >= 0)) {
-              _context.n = 18;
+              _context.n = 21;
               break;
             }
             line = buf.slice(0, idx).trim();
             buf = buf.slice(idx + 1);
             if (line.startsWith("data:")) {
-              _context.n = 13;
+              _context.n = 16;
               break;
             }
-            return _context.a(3, 12);
-          case 13:
+            return _context.a(3, 15);
+          case 16:
             payload = line.slice(5).trim();
             if (!(payload === "[DONE]")) {
-              _context.n = 14;
+              _context.n = 17;
               break;
             }
-            return _context.a(3, 12);
-          case 14:
-            _j = void 0;
-            _context.p = 15;
-            _j = JSON.parse(payload);
-            _context.n = 17;
-            break;
-          case 16:
-            _context.p = 16;
-            _t = _context.v;
-            return _context.a(3, 12);
+            return _context.a(3, 15);
           case 17:
+            _j = void 0;
+            _context.p = 18;
+            _j = JSON.parse(payload);
+            _context.n = 20;
+            break;
+          case 19:
+            _context.p = 19;
+            _t = _context.v;
+            return _context.a(3, 15);
+          case 20:
             if (_j.usage) usage = _j.usage;
             choice = _j.choices && _j.choices[0];
             delta = choice && (choice.delta || {});
@@ -522,20 +619,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               opts.onDelta(_full, piece);
             }
             if (choice && choice.finish_reason === "stop" && !piece) {/* noop */}
+            _context.n = 15;
+            break;
+          case 21:
             _context.n = 12;
             break;
-          case 18:
-            _context.n = 9;
-            break;
-          case 19:
+          case 22:
             clearTimeout(silenceTimer);
             if (gotAny) {
-              _context.n = 20;
+              _context.n = 23;
               break;
             }
             opts.onError(new Error(t("modelEndedEmpty")));
-            return _context.a(2);
-          case 20:
+            handled = true;
+            return _context.a(3, 25);
+          case 23:
             handle.done = true;
             estimated = !usage;
             tin = usage ? usage.prompt_tokens || 0 : estTokens(messages);
@@ -549,10 +647,20 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               tout: tout,
               text: _full
             });
-            _context.n = 22;
+            handled = true;
+          case 24:
+            ci++;
+            _context.n = 5;
             break;
-          case 21:
-            _context.p = 21;
+          case 25:
+            if (!handled && lastKeyErr) {
+              clearTimeout(silenceTimer);
+              opts.onError(new Error(lastKeyErr + " — " + t("allKeysTried")));
+            }
+            _context.n = 27;
+            break;
+          case 26:
+            _context.p = 26;
             _t2 = _context.v;
             clearTimeout(silenceTimer);
             if (_t2.name === "AbortError") {
@@ -560,10 +668,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             } else {
               opts.onError(_t2);
             }
-          case 22:
+          case 27:
             return _context.a(2);
         }
-      }, _callee, null, [[15, 16], [3, 21]]);
+      }, _callee, null, [[18, 19], [3, 26]]);
     }))();
     return handle;
   }
@@ -674,6 +782,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     fetchModels: fetchModels,
     testConnection: testConnection,
     mapError: mapError,
+    keyCandidates: keyCandidates,
+    activeKeys: activeKeys,
+    classifyKeyError: classifyKeyError,
+    setKeyStatus: setKeyStatus,
     webSearch: webSearch,
     searchContextBlock: searchContextBlock,
     limitBlocked: limitBlocked,
