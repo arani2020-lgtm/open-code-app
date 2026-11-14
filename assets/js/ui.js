@@ -388,7 +388,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   /* ================= topbar ================= */
   function topbarHTML(user) {
     var adminLink = user && user.role === "admin" ? '<button class="icon-btn" data-nav="/admin" title="' + t("admin") + '">' + I.shield + "</button>" : "";
-    return '<div class="topbar">' + '<button class="icon-btn" id="side-toggle">' + I.menu + "</button>" + '<div class="brand">' + logoSVG() + '<div><div class="bname">' + t("appName") + '</div><div class="btag">' + t("tagline") + "</div></div></div>" + '<div class="spacer"></div>' + adminLink + '<button class="icon-btn" data-nav="/prompts" title="' + t("prompts") + '">' + I.book + "</button>" + '<button class="icon-btn" data-nav="/usage" title="' + t("usage") + '">' + I.chart + "</button>" + '<button class="icon-btn" id="top-theme" title="' + t("theme") + '">' + I.sun + "</button>" + '<button class="icon-btn" id="top-lang" title="' + t("language") + '">' + I.globe + "</button>" + '<button class="icon-btn" id="top-user">' + avatarHTML(user, 30) + "</button>" + "</div>";
+    return '<div class="topbar">' + '<button class="icon-btn" id="side-toggle">' + I.menu + "</button>" + '<div class="brand">' + logoSVG() + '<div><div class="bname">' + t("appName") + '</div><div class="btag">' + t("tagline") + "</div></div></div>" + '<div class="spacer"></div>' + adminLink + '<button class="icon-btn" data-nav="/connections" title="' + t("connTitle") + '">' + I.plug + "</button>" + '<button class="icon-btn" data-nav="/prompts" title="' + t("prompts") + '">' + I.book + "</button>" + '<button class="icon-btn" data-nav="/usage" title="' + t("usage") + '">' + I.chart + "</button>" + '<button class="icon-btn" id="top-theme" title="' + t("theme") + '">' + I.sun + "</button>" + '<button class="icon-btn" id="top-lang" title="' + t("language") + '">' + I.globe + "</button>" + '<button class="icon-btn" id="top-user">' + avatarHTML(user, 30) + "</button>" + "</div>";
   }
   function bindTopbar(user) {
     var themeBtn = $("#top-theme");
@@ -1115,7 +1115,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var strip = $("#pending-strip");
     if (!strip) return;
     var ghAt = OC.github && OC.github.attached() ? OC.github.attached() : null;
-    if (!pendingFiles.length && !ghAt) {
+    var connAt = OC.connectors && OC.connectors.attached() ? OC.connectors.attached() : null;
+    if (!pendingFiles.length && !ghAt && !connAt) {
       strip.classList.add("hidden");
       strip.innerHTML = "";
       return;
@@ -1126,6 +1127,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }).join("");
     if (ghAt) {
       html += '<span class="attach-chip gh-chip">' + I.book + '<span class="aname" style="direction:ltr">' + U.esc(ghAt.repo + " @" + ghAt.branch) + "</span>" + '<span class="muted small">Git</span>' + '<button class="icon-btn" style="width:24px;height:24px" id="gh-detach-btn">' + I.x + "</button></span>";
+    }
+    if (connAt) {
+      var connNames = {
+        wordpress: "WordPress",
+        telegram: "Telegram",
+        rubika: "Rubika",
+        host: "Host"
+      };
+      html += '<span class="attach-chip conn-chip">' + I.plug + '<span class="aname">' + U.esc(connAt.name) + "</span>" + '<span class="muted small">' + U.esc(connNames[connAt.type] || connAt.type) + "</span>" + '<button class="icon-btn" style="width:24px;height:24px" id="conn-detach-btn">' + I.x + "</button></span>";
     }
     strip.innerHTML = html;
     $$("[data-rm]", strip).forEach(function (b) {
@@ -1139,6 +1149,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var det = $("#gh-detach-btn", strip);
     if (det) det.onclick = function () {
       if (OC.github) OC.github.detach();
+      renderPending();
+    };
+    var cdet = $("#conn-detach-btn", strip);
+    if (cdet) cdet.onclick = function () {
+      if (OC.connectors) OC.connectors.detach();
       renderPending();
     };
   }
@@ -1395,10 +1410,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function respond(_x, _x2, _x3) {
     return _respond.apply(this, arguments);
   }
-  /* ---------- GitHub repo agent loop (JSON tool protocol) ---------- */
+  /* ---------- Connector agent loop (WordPress / Telegram / Rubika / Host) ---------- */
   function _respond() {
     _respond = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(conv, userText, files) {
-      var inner, user, aMsg, streamingEl, sc, pick, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, sendBtn, _t2;
+      var inner, user, aMsg, streamingEl, sc, pick, connAt, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, sendBtn, _t2;
       return _regenerator().w(function (_context6) {
         while (1) switch (_context6.p = _context6.n) {
           case 0:
@@ -1429,34 +1444,41 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           case 1:
             aMsg.model = pick.model;
 
-            // GitHub agent mode: a repo is attached → JSON tool-loop
-            if (!(OC.github && OC.github.attached())) {
+            // Connector agent mode: a WordPress / Telegram / Rubika / Host link is attached
+            connAt = OC.connectors && OC.connectors.attached() ? OC.connectors.attached() : null;
+            if (!connAt) {
               _context6.n = 2;
               break;
             }
-            return _context6.a(2, respondWithRepo(conv, userText, aMsg, streamingEl, pick));
+            return _context6.a(2, respondWithConn(conv, userText, aMsg, streamingEl, pick, connAt));
           case 2:
+            if (!(OC.github && OC.github.attached())) {
+              _context6.n = 3;
+              break;
+            }
+            return _context6.a(2, respondWithRepo(conv, userText, aMsg, streamingEl, pick));
+          case 3:
             // web search
             sources = null;
             if (!conv.webSearch) {
-              _context6.n = 6;
+              _context6.n = 7;
               break;
             }
-            _context6.p = 3;
-            _context6.n = 4;
+            _context6.p = 4;
+            _context6.n = 5;
             return OC.providers.webSearch(userText);
-          case 4:
+          case 5:
             rs = _context6.v;
             sources = rs;
             aMsg.searched = true;
             userText += OC.providers.searchContextBlock(rs);
-            _context6.n = 6;
+            _context6.n = 7;
             break;
-          case 5:
-            _context6.p = 5;
+          case 6:
+            _context6.p = 6;
             _t2 = _context6.v;
             toast(_t2.message || t("webSearchOff"), "err");
-          case 6:
+          case 7:
             // build messages with system prompt
             settings = store.getUserSettings();
             msgs = [];
@@ -1472,35 +1494,35 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             used = 0;
             hist = [];
             i = conv.messages.length - 1;
-          case 7:
+          case 8:
             if (!(i >= 0)) {
-              _context6.n = 11;
+              _context6.n = 12;
               break;
             }
             m = conv.messages[i];
             if (!(m.role === "assistant" && m === aMsg)) {
-              _context6.n = 8;
-              break;
-            }
-            return _context6.a(3, 10);
-          case 8:
-            len = (m.content || "").length;
-            if (!(used + len > maxCtx * 3 && hist.length)) {
               _context6.n = 9;
               break;
             }
             return _context6.a(3, 11);
           case 9:
+            len = (m.content || "").length;
+            if (!(used + len > maxCtx * 3 && hist.length)) {
+              _context6.n = 10;
+              break;
+            }
+            return _context6.a(3, 12);
+          case 10:
             used += len;
             hist.unshift({
               role: m.role,
               content: m.content
             });
-          case 10:
-            i--;
-            _context6.n = 7;
-            break;
           case 11:
+            i--;
+            _context6.n = 8;
+            break;
+          case 12:
             msgs.push.apply(msgs, _toConsumableArray(hist.slice(0, -1))); // exclude the just-pushed user message dup
             msgs.push({
               role: "user",
@@ -1583,26 +1605,28 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                 if (streamHandle) streamHandle.stop();
               };
             }
-          case 12:
+          case 13:
             return _context6.a(2);
         }
-      }, _callee6, null, [[3, 5]]);
+      }, _callee6, null, [[4, 6]]);
     }));
     return _respond.apply(this, arguments);
   }
-  var GH_MAX_ROUNDS = 6;
-  function respondWithRepo(_x4, _x5, _x6, _x7, _x8) {
-    return _respondWithRepo.apply(this, arguments);
+  var CONN_MAX_ROUNDS = 6;
+  function respondWithConn(_x4, _x5, _x6, _x7, _x8, _x9) {
+    return _respondWithConn.apply(this, arguments);
   }
-  function _respondWithRepo() {
-    _respondWithRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(conv, userText, aMsg, streamingEl, pick) {
-      var bubble, sc, at, msgs, defPrompt, paint, sayParts, stagedPaths, stagedTotal, aborted, errText, _loop4, _ret2, round, content, isFa;
+  /* ---------- GitHub repo agent loop (JSON tool protocol) ---------- */
+  function _respondWithConn() {
+    _respondWithConn = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(conv, userText, aMsg, streamingEl, pick, a) {
+      var bubble, sc, conn, isFa, msgs, defPrompt, paint, sayParts, actLog, errText, stopped, _loop4, _ret2, round, content;
       return _regenerator().w(function (_context8) {
         while (1) switch (_context8.n) {
           case 0:
             bubble = $("#stream-bubble", streamingEl);
             sc = $("#chat-scroll");
-            at = OC.github.attached();
+            conn = OC.connectors.get(a.id);
+            isFa = OC.i18n.locale() === "fa";
             msgs = [];
             defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
               return x.id === conv.promptId;
@@ -1612,8 +1636,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               content: defPrompt.text
             });
             msgs.push({
+              role: "system",
+              content: OC.connectors.systemPrompt(a)
+            });
+            msgs.push({
               role: "user",
-              content: userText + OC.github.contextBlock()
+              content: userText + OC.connectors.contextBlock(a)
             });
             paint = function paint(txt, busy) {
               if (!bubble) return;
@@ -1621,18 +1649,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               if (sc && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) sc.scrollTop = sc.scrollHeight;
             };
             sayParts = [];
-            stagedPaths = [];
-            stagedTotal = 0;
-            aborted = false;
+            actLog = [];
             errText = "";
+            stopped = false;
             _loop4 = /*#__PURE__*/_regenerator().m(function _loop4() {
-              var raw, stopped, parsed, res, _iterator0, _step0, r;
+              var raw, parsed, res, _iterator0, _step0, r;
               return _regenerator().w(function (_context7) {
                 while (1) switch (_context7.n) {
                   case 0:
-                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(GH_MAX_ROUNDS)) + " …]", true);
+                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(CONN_MAX_ROUNDS)) + " …]", true);
                     raw = "";
-                    stopped = false;
                     _context7.n = 1;
                     return new Promise(function (resolve) {
                       streamHandle = OC.providers.streamChat({
@@ -1680,62 +1706,52 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                     }
                     return _context7.a(2, 0);
                   case 2:
-                    parsed = OC.github.parseActions(raw);
+                    parsed = OC.connectors.parseActions(raw, a.type);
                     if (parsed && parsed.say) sayParts.push(parsed.say);
-                    if (parsed) {
+                    if (!(!parsed || !parsed.actions.length)) {
                       _context7.n = 3;
                       break;
                     }
-                    if (raw) sayParts.push(raw);
+                    if (raw && !parsed) sayParts.push(raw);
                     return _context7.a(2, 0);
                   case 3:
                     msgs.push({
                       role: "assistant",
                       content: raw
                     });
-                    paint(sayParts.join("\n\n") + "\n\n[" + t("ghWorking") + "]", true);
+                    paint(sayParts.join("\n\n") + "\n\n[" + t("connWorking") + "]", true);
                     _context7.n = 4;
-                    return OC.github.runActions(parsed.actions);
+                    return OC.connectors.runActions(conn, parsed.actions);
                   case 4:
                     res = _context7.v;
-                    stagedTotal += res.staged;
                     _iterator0 = _createForOfIteratorHelper(res.results);
                     try {
                       for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
                         r = _step0.value;
-                        if (r.type === "write") stagedPaths.push(r.path);
+                        actLog.push(r.text.split("\n")[0]);
+                        msgs.push({
+                          role: "user",
+                          content: "[TOOL RESULT]\n" + r.text
+                        });
                       }
                     } catch (err) {
                       _iterator0.e(err);
                     } finally {
                       _iterator0.f();
                     }
-                    if (!(res.done || stopped || !res.results.length)) {
+                    if (!stopped) {
                       _context7.n = 5;
                       break;
                     }
                     return _context7.a(2, 0);
                   case 5:
-                    msgs.push({
-                      role: "user",
-                      content: "[SYSTEM TOOL RESULTS]\n" + res.results.map(function (r) {
-                        return r.text;
-                      }).join("\n\n") + (OC.i18n.locale() === "fa" ? "\n\n[ادامه بده: فایل بعدی را با read ببین، اصلاح‌ها را با write اعمال کن؛ کار تمام شد با done تمامش کن.]" : "\n\n[Continue: read the next file, apply edits with write; finish with done.]")
-                    });
-                    if (!stopped) {
-                      _context7.n = 6;
-                      break;
-                    }
-                    aborted = true;
-                    return _context7.a(2, 0);
-                  case 6:
                     return _context7.a(2);
                 }
               }, _loop4);
             });
             round = 1;
           case 1:
-            if (!(round <= GH_MAX_ROUNDS)) {
+            if (!(round <= CONN_MAX_ROUNDS)) {
               _context8.n = 4;
               break;
             }
@@ -1750,6 +1766,203 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           case 3:
             round++;
             _context8.n = 1;
+            break;
+          case 4:
+            content = sayParts.filter(Boolean).join("\n\n");
+            if (actLog.length) {
+              content += (content ? "\n\n" : "") + "**" + (isFa ? "اقدامات انجام‌شده" : "Actions taken") + " (" + U.faNum(String(actLog.length)) + "):**\n" + actLog.slice(0, 12).map(function (x) {
+                return "- `" + x.replace(/`/g, "'") + "`";
+              }).join("\n") + (actLog.length > 12 ? "\n- …" : "");
+            }
+            if (errText) {
+              aMsg.error = errText;
+              content = (content ? content + "\n\n" : "") + errText;
+              store.recordUsage({
+                fail: true
+              });
+            } else {
+              store.recordUsage({
+                tin: aMsg.usage && aMsg.usage.tin || 0,
+                tout: aMsg.usage && aMsg.usage.tout || 0,
+                estimated: aMsg.estimated,
+                provider: pick.provider.id,
+                model: pick.model
+              });
+              store.logActivity(store.currentUser().email, "chat", pick.model + " · conn:" + a.type);
+            }
+            aMsg.content = content;
+            if (a) aMsg.conn = a.type + ":" + a.name;
+            conv.messages.push(aMsg);
+            store.putConv(conv);
+            finishStream(conv, streamingEl, aMsg);
+            renderPending();
+          case 5:
+            return _context8.a(2);
+        }
+      }, _callee7);
+    }));
+    return _respondWithConn.apply(this, arguments);
+  }
+  var GH_MAX_ROUNDS = 6;
+  function respondWithRepo(_x0, _x1, _x10, _x11, _x12) {
+    return _respondWithRepo.apply(this, arguments);
+  }
+  function _respondWithRepo() {
+    _respondWithRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(conv, userText, aMsg, streamingEl, pick) {
+      var bubble, sc, at, msgs, defPrompt, paint, sayParts, stagedPaths, stagedTotal, aborted, errText, _loop5, _ret3, round, content, isFa;
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.n) {
+          case 0:
+            bubble = $("#stream-bubble", streamingEl);
+            sc = $("#chat-scroll");
+            at = OC.github.attached();
+            msgs = [];
+            defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
+              return x.id === conv.promptId;
+            }) || null : OC.promptsDef();
+            if (defPrompt) msgs.push({
+              role: "system",
+              content: defPrompt.text
+            });
+            msgs.push({
+              role: "user",
+              content: userText + OC.github.contextBlock()
+            });
+            paint = function paint(txt, busy) {
+              if (!bubble) return;
+              bubble.innerHTML = U.esc(String(txt == null ? "" : txt)).replace(/\n/g, "<br>") + (busy ? '<span class="cursor-blink"></span>' : "");
+              if (sc && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) sc.scrollTop = sc.scrollHeight;
+            };
+            sayParts = [];
+            stagedPaths = [];
+            stagedTotal = 0;
+            aborted = false;
+            errText = "";
+            _loop5 = /*#__PURE__*/_regenerator().m(function _loop5() {
+              var raw, stopped, parsed, res, _iterator1, _step1, r;
+              return _regenerator().w(function (_context9) {
+                while (1) switch (_context9.n) {
+                  case 0:
+                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(GH_MAX_ROUNDS)) + " …]", true);
+                    raw = "";
+                    stopped = false;
+                    _context9.n = 1;
+                    return new Promise(function (resolve) {
+                      streamHandle = OC.providers.streamChat({
+                        provider: pick.provider,
+                        model: pick.model,
+                        messages: msgs,
+                        temperature: 0.2,
+                        maxTokens: store.getUserSettings().maxOutputTokens,
+                        onDelta: function onDelta(full) {
+                          raw = full;
+                          paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + full, true);
+                        },
+                        onDone: function onDone(_ref9) {
+                          var usage = _ref9.usage,
+                            estimated = _ref9.estimated,
+                            tin = _ref9.tin,
+                            tout = _ref9.tout,
+                            text = _ref9.text;
+                          streamHandle = null;
+                          raw = text || raw;
+                          aMsg.usage = {
+                            tin: tin || 0,
+                            tout: tout || 0
+                          };
+                          aMsg.estimated = !!estimated;
+                          resolve();
+                        },
+                        onError: function onError(e) {
+                          streamHandle = null;
+                          errText = e.message || t("errorOccurred");
+                          resolve();
+                        },
+                        onAbort: function onAbort(partial) {
+                          streamHandle = null;
+                          raw = partial || raw;
+                          stopped = true;
+                          resolve();
+                        }
+                      });
+                    });
+                  case 1:
+                    if (!errText) {
+                      _context9.n = 2;
+                      break;
+                    }
+                    return _context9.a(2, 0);
+                  case 2:
+                    parsed = OC.github.parseActions(raw);
+                    if (parsed && parsed.say) sayParts.push(parsed.say);
+                    if (parsed) {
+                      _context9.n = 3;
+                      break;
+                    }
+                    if (raw) sayParts.push(raw);
+                    return _context9.a(2, 0);
+                  case 3:
+                    msgs.push({
+                      role: "assistant",
+                      content: raw
+                    });
+                    paint(sayParts.join("\n\n") + "\n\n[" + t("ghWorking") + "]", true);
+                    _context9.n = 4;
+                    return OC.github.runActions(parsed.actions);
+                  case 4:
+                    res = _context9.v;
+                    stagedTotal += res.staged;
+                    _iterator1 = _createForOfIteratorHelper(res.results);
+                    try {
+                      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
+                        r = _step1.value;
+                        if (r.type === "write") stagedPaths.push(r.path);
+                      }
+                    } catch (err) {
+                      _iterator1.e(err);
+                    } finally {
+                      _iterator1.f();
+                    }
+                    if (!(res.done || stopped || !res.results.length)) {
+                      _context9.n = 5;
+                      break;
+                    }
+                    return _context9.a(2, 0);
+                  case 5:
+                    msgs.push({
+                      role: "user",
+                      content: "[SYSTEM TOOL RESULTS]\n" + res.results.map(function (r) {
+                        return r.text;
+                      }).join("\n\n") + (OC.i18n.locale() === "fa" ? "\n\n[ادامه بده: فایل بعدی را با read ببین، اصلاح‌ها را با write اعمال کن؛ کار تمام شد با done تمامش کن.]" : "\n\n[Continue: read the next file, apply edits with write; finish with done.]")
+                    });
+                    if (!stopped) {
+                      _context9.n = 6;
+                      break;
+                    }
+                    aborted = true;
+                    return _context9.a(2, 0);
+                  case 6:
+                    return _context9.a(2);
+                }
+              }, _loop5);
+            });
+            round = 1;
+          case 1:
+            if (!(round <= GH_MAX_ROUNDS)) {
+              _context0.n = 4;
+              break;
+            }
+            return _context0.d(_regeneratorValues(_loop5()), 2);
+          case 2:
+            _ret3 = _context0.v;
+            if (!(_ret3 === 0)) {
+              _context0.n = 3;
+              break;
+            }
+            return _context0.a(3, 4);
+          case 3:
+            round++;
+            _context0.n = 1;
             break;
           case 4:
             content = sayParts.filter(Boolean).join("\n\n");
@@ -1782,9 +1995,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             finishStream(conv, streamingEl, aMsg);
             renderPending();
           case 5:
-            return _context8.a(2);
+            return _context0.a(2);
         }
-      }, _callee7);
+      }, _callee8);
     }));
     return _respondWithRepo.apply(this, arguments);
   }
@@ -1932,7 +2145,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         }
       }, _callee5, null, [[2, 7, 8, 9]]);
     }));
-    return function (_x9) {
+    return function (_x13) {
       return _ref6.apply(this, arguments);
     };
   }();

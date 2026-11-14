@@ -212,13 +212,60 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     }));
   }
 
-  /* ================= repo list ================= */
+  /* ================= repo list (professional card grid) ================= */
+  var repoFilter = "all"; // all | public | private
+  var repoSort = "updated"; // updated | name | stars
+
+  var LANG_COLORS = {
+    JavaScript: "#f1e05a",
+    TypeScript: "#3178c6",
+    Python: "#3572A5",
+    PHP: "#4F5D95",
+    HTML: "#e34c26",
+    CSS: "#563d7c",
+    Shell: "#89e051",
+    Go: "#00ADD8",
+    Rust: "#dea584",
+    Java: "#b07219",
+    "C++": "#f34b7d",
+    C: "#555555",
+    "C#": "#178600",
+    Ruby: "#701516",
+    Swift: "#F05138",
+    Kotlin: "#A97BFF",
+    Dart: "#00B4AB",
+    Vue: "#41b883",
+    Lua: "#000080"
+  };
+  function relTime(iso) {
+    var d = Date.parse(iso);
+    if (!d) return "";
+    var days = Math.floor((Date.now() - d) / 864e5);
+    if (days <= 0) return t("ghToday");
+    if (days === 1) return t("ghYesterday");
+    if (days < 31) return U.faNum(String(days)) + " " + t("ghDaysAgo");
+    var m = Math.floor(days / 30);
+    if (m < 12) return U.faNum(String(m)) + " " + t("ghMonthsAgo");
+    return U.fmtDate(d);
+  }
+  function avatarURL(owner) {
+    return "https://avatars.githubusercontent.com/" + encodeURIComponent(owner) + "?s=48&v=4";
+  }
+  function repoCard(r) {
+    var lc = LANG_COLORS[r.lang] || "#8b949e";
+    return '<div class="repo-card" data-open="' + esc(r.full) + '" title="' + esc(r.full) + '">' + '<div class="rc-head">' + '<img class="rc-avatar" src="' + avatarURL(r.owner) + '" alt="" loading="lazy">' + '<div class="rc-title"><span class="rc-owner">' + esc(r.owner) + '</span><b class="rc-name">' + esc(r.name) + "</b></div>" + '<span class="rc-vis' + (r.priv ? " priv" : "") + '">' + (r.priv ? t("ghPrivate") : t("ghPublic")) + "</span>" + "</div>" + '<p class="rc-desc">' + (r.desc ? esc(r.desc.slice(0, 110)) : '<span class="muted">' + t("ghNoDesc") + "</span>") + "</p>" + '<div class="rc-meta">' + (r.lang ? '<span class="rc-lang"><i style="background:' + lc + '"></i>' + esc(r.lang) + "</span>" : '<span class="rc-lang"><i style="background:#8b949e"></i>—</span>') + '<span class="rc-stars">' + I.star + U.faNum(String(r.stars || 0)) + "</span>" + '<span class="rc-upd">' + I.refresh + relTime(r.updated) + "</span>" + "</div>" + '<div class="rc-actions">' + '<button class="btn btn-sm" data-open="' + esc(r.full) + '">' + I.file + t("ghBrowse") + "</button>" + '<button class="btn btn-sm btn-primary" data-agent="' + esc(r.full) + '">' + I.bolt + t("ghReviewWithAI") + "</button>" + '<button class="btn btn-sm" data-zip="' + esc(r.full) + '" data-defbranch="' + esc(r.defaultBranch) + '">' + I.download + "ZIP</button>" + "</div></div>";
+  }
+  function skeletonCards() {
+    var h = '<div class="repo-grid">';
+    for (var i = 0; i < 6; i++) h += '<div class="repo-card skel"><div class="rc-head"><div class="sk sk-avatar"></div><div class="sk sk-name"></div></div><div class="sk sk-line"></div><div class="sk sk-line short"></div><div class="sk sk-line"></div></div>';
+    return h + "</div>";
+  }
   function loadRepos(_x) {
     return _loadRepos.apply(this, arguments);
   }
   function _loadRepos() {
     _loadRepos = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(reset) {
-      var listEl, got, q, hasMore, _t9;
+      var listEl, got, hasMore, _t9;
       return _regenerator().w(function (_context1) {
         while (1) switch (_context1.p = _context1.n) {
           case 0:
@@ -233,20 +280,13 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               repos = [];
               repoPage = 1;
             }
-            listEl.innerHTML = '<div class="muted small" style="padding:10px 4px">' + t("loading") + "…</div>";
+            if (!repos.length) listEl.innerHTML = skeletonCards();
             _context1.p = 2;
             _context1.n = 3;
             return OC.github.listRepos(repoPage);
           case 3:
             got = _context1.v;
-            if (repoQuery) {
-              q = repoQuery.toLowerCase();
-              repos = repos.concat(got.filter(function (r) {
-                return (r.full + " " + r.desc).toLowerCase().indexOf(q) >= 0;
-              }));
-            } else {
-              repos = repos.concat(got);
-            }
+            repos = repos.concat(got);
             hasMore = got.length === 30;
             renderRepoList(hasMore);
             repoPage++;
@@ -255,7 +295,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
           case 4:
             _context1.p = 4;
             _t9 = _context1.v;
-            listEl.innerHTML = '<div class="muted small" style="padding:10px 4px;color:rgb(var(--danger))">' + esc(_t9.message || t("ghError")) + "</div>";
+            listEl.innerHTML = '<div class="empty-state">' + I.book + "<p style=\"color:rgb(var(--danger))\">" + esc(_t9.message || t("ghError")) + "</p></div>";
           case 5:
             return _context1.a(2);
         }
@@ -263,47 +303,79 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     }));
     return _loadRepos.apply(this, arguments);
   }
-  function repoRow(r) {
-    return '<div class="gh-repo-row" data-repo="' + esc(r.full) + '">' + '<div class="gh-repo-main"><b style="direction:ltr">' + esc(r.full) + "</b>" + (r.priv ? '<span class="badge">' + t("ghPrivate") + "</span>" : "") + (r.desc ? '<div class="muted small">' + esc(r.desc.slice(0, 80)) + "</div>" : "") + '<div class="muted small">' + (r.lang ? esc(r.lang) + " · " : "") + t("ghUpdated") + " " + U.fmtDate(Date.parse(r.updated)) + "</div></div>" + '<div class="flex gh-repo-actions">' + '<button class="btn btn-sm" data-open="' + esc(r.full) + '">' + I.file + t("ghBrowse") + "</button>" + '<button class="btn btn-sm" data-agent="' + esc(r.full) + '">' + I.bolt + t("ghReviewWithAI") + "</button>" + '<button class="btn btn-sm" data-zip="' + esc(r.full) + '" data-defbranch="' + esc(r.defaultBranch) + '">' + I.download + "ZIP</button>" + "</div></div>";
+  function applyFilterSort(list) {
+    var out = list.filter(function (r) {
+      return repoFilter === "all" || (repoFilter === "private" ? r.priv : !r.priv);
+    });
+    if (repoQuery) {
+      var q = repoQuery.toLowerCase();
+      out = out.filter(function (r) {
+        return (r.full + " " + r.desc).toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    if (repoSort === "name") out = out.slice().sort(function (a, b) {
+      return a.full.toLowerCase() < b.full.toLowerCase() ? -1 : 1;
+    });else if (repoSort === "stars") out = out.slice().sort(function (a, b) {
+      return (b.stars || 0) - (a.stars || 0);
+    });else out = out.slice().sort(function (a, b) {
+      return Date.parse(b.updated || 0) - Date.parse(a.updated || 0);
+    });
+    return out;
   }
   function renderRepoList(hasMore) {
     var listEl = $("#gh-repo-list");
     if (!listEl) return;
-    listEl.innerHTML = repos.map(repoRow).join("") + (hasMore ? '<div style="padding:8px"><button class="btn" id="gh-more">' + t("ghMore") + "</button></div>" : "") + (!repos.length ? '<div class="muted small" style="padding:10px 4px">' + t("ghNoRepos") + "</div>" : "");
+    var view = applyFilterSort(repos);
+    listEl.innerHTML = (!view.length ? '<div class="empty-state">' + I.book + "<p>" + (repos.length ? t("ghNoMatch") : t("ghNoRepos")) + "</p></div>" : '<div class="repo-grid">' + view.map(repoCard).join("") + "</div>") + (hasMore ? '<div style="padding:10px;text-align:center"><button class="btn" id="gh-more">' + t("ghMore") + "</button></div>" : "");
+    // card body click → browse; buttons inside stop propagation
+    $$(".repo-card", listEl).forEach(function (card) {
+      card.onclick = function (e) {
+        if (e.target.closest("button")) return;
+        openRepo(card.dataset.open, null);
+      };
+    });
     $$("[data-open]", listEl).forEach(function (b) {
-      b.onclick = function () {
-        return openRepo(b.dataset.open, null);
+      b.onclick = function (e) {
+        e.stopPropagation();
+        openRepo(b.dataset.open, null);
       };
     });
     $$("[data-agent]", listEl).forEach(function (b) {
-      b.onclick = function () {
-        return attachAndGo(b.dataset.agent, null);
+      b.onclick = function (e) {
+        e.stopPropagation();
+        attachAndGo(b.dataset.agent, null);
       };
     });
     $$("[data-zip]", listEl).forEach(function (b) {
-      b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
-        var _t3;
-        return _regenerator().w(function (_context5) {
-          while (1) switch (_context5.p = _context5.n) {
-            case 0:
-              b.disabled = true;
-              _context5.p = 1;
-              _context5.n = 2;
-              return OC.github.exportZip(b.dataset.zip, b.dataset.defbranch);
-            case 2:
-              _context5.n = 4;
-              break;
-            case 3:
-              _context5.p = 3;
-              _t3 = _context5.v;
-              toast(_t3.message || t("ghError"), "err");
-            case 4:
-              b.disabled = false;
-            case 5:
-              return _context5.a(2);
-          }
-        }, _callee5, null, [[1, 3]]);
-      }));
+      b.onclick = /*#__PURE__*/function () {
+        var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(e) {
+          var _t3;
+          return _regenerator().w(function (_context5) {
+            while (1) switch (_context5.p = _context5.n) {
+              case 0:
+                e.stopPropagation();
+                b.disabled = true;
+                _context5.p = 1;
+                _context5.n = 2;
+                return OC.github.exportZip(b.dataset.zip, b.dataset.defbranch);
+              case 2:
+                _context5.n = 4;
+                break;
+              case 3:
+                _context5.p = 3;
+                _t3 = _context5.v;
+                toast(_t3.message || t("ghError"), "err");
+              case 4:
+                b.disabled = false;
+              case 5:
+                return _context5.a(2);
+            }
+          }, _callee5, null, [[1, 3]]);
+        }));
+        return function (_x2) {
+          return _ref5.apply(this, arguments);
+        };
+      }();
     });
     var more = $("#gh-more", listEl);
     if (more) more.onclick = function () {
@@ -312,7 +384,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
 
   /* ================= repo view (branch + tree) ================= */
-  function openRepo(_x2, _x3) {
+  function openRepo(_x3, _x4) {
     return _openRepo.apply(this, arguments);
   }
   function _openRepo() {
@@ -494,7 +566,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
 
   /* ================= attach to chat ================= */
-  function attachAndGo(_x4, _x5) {
+  function attachAndGo(_x5, _x6) {
     return _attachAndGo.apply(this, arguments);
   }
   /* ================= main render ================= */
@@ -545,7 +617,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     var repoViewHTML = !currentRepo ? "" : '<div class="panel" id="gh-repo-view"><h3 style="direction:ltr">' + esc(currentRepo.full) + "</h3>" + '<div class="field"><label>' + t("ghBranchLabel") + "</label>" + '<select class="input" id="gh-branch-sel" style="direction:ltr">' + (currentRepo.branches || []).map(function (b) {
       return '<option value="' + esc(b.name) + '"' + (b.name === currentBranch ? " selected" : "") + ">" + esc(b.name) + (b.prot ? " 🔒" : "") + "</option>";
     }).join("") + "</select></div>" + '<div class="flex" style="margin:10px 0">' + '<button class="btn btn-sm" id="gh-back">' + I.x + t("ghBackToList") + "</button>" + '<button class="btn btn-sm" id="gh-refresh-tree">' + I.refresh + t("ghRefreshTree") + "</button>" + '<button class="btn btn-sm btn-primary" id="gh-attach">' + I.bolt + t("ghAttachChat") + "</button>" + '<button class="btn btn-sm" id="gh-zip-branch">' + I.download + "ZIP</button></div>" + '<div class="tbl-wrap" style="max-height:52vh;overflow:auto">' + treeRows() + "</div></div>";
-    page('<div class="settings-wrap">' + '<h2 class="page-title">GitHub</h2><p class="page-sub">' + t("ghPageSub") + "</p>" + '<div id="gh-staged">' + stagedCardHTML() + "</div>" + connCardHTML() + (st.connected ? '<div class="panel"><h3>' + t("ghReposTitle") + "</h3><p class='p-desc'>" + t("ghReposDesc") + "</p>" + '<div class="field"><input class="input" id="gh-q" type="search" placeholder="' + t("ghSearchPh") + '" value="' + esc(repoQuery) + '"></div>' + '<div id="gh-repo-list">' + (repos.length ? repos.map(repoRow).join("") : '<div class="muted small" style="padding:10px 4px">' + t("ghLoadHint") + "</div>") + "</div>" + '<div class="flex" style="margin-top:10px"><button class="btn" id="gh-load">' + I.refresh + t("ghLoadRepos") + "</button></div>" + "</div>" : "") + repoViewHTML + '<div class="panel"><h3>' + t("ghSecurityTitle") + "</h3><p class='p-desc'>" + t("ghSecurityDesc") + "</p>" + '<ul style="margin:0;padding-inline-start:18px;color:rgb(var(--muted));font-size:13.5px">' + "<li>" + t("ghSec1") + "</li><li>" + t("ghSec2") + "</li><li>" + t("ghSec3") + "</li>" + "</ul></div>" + "</div>");
+    page('<div class="settings-wrap">' + '<h2 class="page-title">GitHub</h2><p class="page-sub">' + t("ghPageSub") + "</p>" + '<div id="gh-staged">' + stagedCardHTML() + "</div>" + connCardHTML() + (st.connected ? '<div class="panel"><div class="gh-head-row"><h3>' + t("ghReposTitle") + "</h3>" + '<button class="btn btn-sm" id="gh-load">' + I.refresh + t("ghLoadRepos") + "</button></div>" + '<p class="p-desc">' + t("ghReposDesc") + "</p>" + '<div class="gh-toolbar">' + '<div class="seg">' + '<button class="seg-btn' + (repoFilter === "all" ? " on" : "") + '" data-rf="all">' + t("ghFAll") + "</button>" + '<button class="seg-btn' + (repoFilter === "public" ? " on" : "") + '" data-rf="public">' + t("ghFPublic") + "</button>" + '<button class="seg-btn' + (repoFilter === "private" ? " on" : "") + '" data-rf="private">' + t("ghFPrivate") + "</button>" + "</div>" + '<select class="input gh-sort" id="gh-sort">' + '<option value="updated"' + (repoSort === "updated" ? " selected" : "") + ">" + t("ghSortUpdated") + "</option>" + '<option value="name"' + (repoSort === "name" ? " selected" : "") + ">" + t("ghSortName") + "</option>" + '<option value="stars"' + (repoSort === "stars" ? " selected" : "") + ">" + t("ghSortStars") + "</option>" + "</select></div>" + '<div class="field"><input class="input" id="gh-q" type="search" placeholder="' + t("ghSearchPh") + '" value="' + esc(repoQuery) + '"></div>' + '<div id="gh-repo-list">' + (repos.length ? "" : '<div class="muted small" style="padding:10px 4px">' + t("ghLoadHint") + "</div>") + "</div>" + "</div>" : "") + repoViewHTML + '<div class="panel"><h3>' + t("ghSecurityTitle") + "</h3><p class='p-desc'>" + t("ghSecurityDesc") + "</p>" + '<ul style="margin:0;padding-inline-start:18px;color:rgb(var(--muted));font-size:13.5px">' + "<li>" + t("ghSec1") + "</li><li>" + t("ghSec2") + "</li><li>" + t("ghSec3") + "</li>" + "</ul></div>" + "</div>");
     bindConnCard();
     bindStagedCard();
     var loadBtn = $("#gh-load");
@@ -555,8 +627,20 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     var q = $("#gh-q");
     if (q) q.oninput = U.debounce(function () {
       repoQuery = q.value.trim();
-      loadRepos(true);
-    }, 350);
+      renderRepoList(false);
+    }, 250);
+    $$("[data-rf]").forEach(function (b) {
+      b.onclick = function () {
+        repoFilter = b.dataset.rf;
+        render();
+        if (repos.length) renderRepoList(false);
+      };
+    });
+    var sortSel = $("#gh-sort");
+    if (sortSel) sortSel.onchange = function () {
+      repoSort = sortSel.value;
+      renderRepoList(false);
+    };
     if ($("#gh-repo-list") && repos.length) renderRepoList(false);
 
     // repo view bindings
