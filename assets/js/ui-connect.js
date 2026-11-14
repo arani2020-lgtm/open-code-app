@@ -20,7 +20,12 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return U.esc(s);
   }
   function markOf(type) {
-    return type === "wordpress" ? "wp" : type;
+    return {
+      wordpress: "wp",
+      telegram: "tg",
+      rubika: "rk",
+      github: "gh"
+    }[type] || type;
   }
 
   /* brand marks (inline, no external assets) */
