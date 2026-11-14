@@ -661,7 +661,7 @@ mark { background: rgb(var(--accent) / .35); border-radius: 3px; padding: 0 2px;
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; grid-template-areas: "top" "main"; }
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "main"; }
   .sidebar {
     position: fixed; inset-block: 0; inset-inline-start: 0; width: min(310px, 84vw);
     transform: translateX(-105%);
@@ -674,8 +674,8 @@ mark { background: rgb(var(--accent) / .35); border-radius: 3px; padding: 0 2px;
   .chat-inner { padding: 16px 15px 6px; }
   .settings-wrap { padding: 20px 14px 60px; }
   .msg-body { max-width: calc(100% - 44px); }
-  .sugg-grid { grid-template-columns: 1fr; }
-  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .sugg-grid { grid-template-columns: minmax(0, 1fr); }
+  .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); }
   .brand .btag { display: none; }
   .auth-card { padding: 26px 20px; }
   .modal { border-radius: 18px; }
