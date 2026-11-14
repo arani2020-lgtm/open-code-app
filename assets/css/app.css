@@ -58,6 +58,10 @@ html { overscroll-behavior: none; }
 /* mobile: kill double-tap zoom delay + input auto-zoom guards */
 button, a, input, textarea, select, label, summary, [role="button"] { touch-action: manipulation; }
 input, textarea, select { font-size: 16px; } /* ≥16px prevents focus auto-zoom on phones */
+/* mobile width guards: nothing may stretch the document horizontally */
+svg, img, video, canvas, iframe { max-width: 100%; }
+.topbar, .main, #app-shell { max-width: 100%; overflow-x: clip; }
+.topbar .icon-btn, .topbar .brand { flex: none; }
 html, body { height: 100%; }
 body {
   margin: 0;
