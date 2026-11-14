@@ -43,15 +43,15 @@
     };
   }
 
-  if (!A.prototype.includes) {
-    A.prototype.includes = function (x) {
+  if (!A.includes) {
+    A.includes = function (x) {
       if (this == null) return false;
-      return A.prototype.indexOf.call(this, x) !== -1;
+      return A.indexOf.call(this, x) !== -1;
     };
   }
 
-  if (!A.prototype.flat) {
-    A.prototype.flat = function (d) {
+  if (!A.flat) {
+    A.flat = function (d) {
       d = arguments.length ? d : 1;
       var r = [];
       (function go(a, n) {
@@ -63,14 +63,14 @@
     };
   }
 
-  if (!S.prototype.includes) {
-    S.prototype.includes = function (s) {
+  if (!S.includes) {
+    S.includes = function (s) {
       if (this == null) return false;
-      return S.prototype.indexOf.call(this, String(s)) !== -1;
+      return S.indexOf.call(this, String(s)) !== -1;
     };
   }
 
-  if (!S.prototype.padStart || !S.prototype.padEnd) {
+  if (!S.padStart || !S.padEnd) {
     var pad = function (obj, n, s, fromStart) {
       obj = String(obj);
       s = s == null ? " " : String(s);
@@ -81,8 +81,8 @@
       fill = fill.slice(0, need);
       return fromStart ? fill + obj : obj + fill;
     };
-    if (!S.prototype.padStart) S.prototype.padStart = function (n, s) { return pad(this, n, s, true); };
-    if (!S.prototype.padEnd) S.prototype.padEnd = function (n, s) { return pad(this, n, s, false); };
+    if (!S.padStart) S.padStart = function (n, s) { return pad(this, n, s, true); };
+    if (!S.padEnd) S.padEnd = function (n, s) { return pad(this, n, s, false); };
   }
 
   if (!Promise.prototype.finally) {
