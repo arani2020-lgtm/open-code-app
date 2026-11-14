@@ -1,11 +1,13 @@
 /* Open Code — service worker: offline app shell. Designer: Abbas Sedigh */
-const CACHE = "open-code-v1";
+const CACHE = "open-code-v2.0.1";
 const CORE = [
   "./",
   "index.html",
   "manifest.webmanifest",
   "assets/css/app.css",
   "assets/fonts/Vazirmatn-Variable.woff2",
+  "assets/js/polyfills.js",
+  "assets/js/regen.js",
   "assets/js/i18n.js",
   "assets/js/store.js",
   "assets/js/providers.js",

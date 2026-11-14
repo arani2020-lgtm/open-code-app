@@ -63,18 +63,34 @@
     </div>
     <div id="root"></div>
 
-    <script src="assets/js/i18n.js?v=1.0.1794682852"></script>
-    <script src="assets/js/store.js?v=1.0.1794682852"></script>
-    <script src="assets/js/providers.js?v=1.0.1794682852"></script>
-    <script src="assets/js/markdown.js?v=1.0.1794682852"></script>
-    <script src="assets/js/zip.js?v=1.0.1794682852"></script>
-    <script src="assets/js/ui.js?v=1.0.1794682852"></script>
-    <script src="assets/js/ui-panels.js?v=1.0.1794682852"></script>
+    <script src="assets/js/polyfills.js?v=1.0.1"></script>
+    <script src="assets/js/regen.js?v=1.0.1"></script>
+    <script src="assets/js/i18n.js?v=1.0.1"></script>
+    <script src="assets/js/store.js?v=1.0.1"></script>
+    <script src="assets/js/providers.js?v=1.0.1"></script>
+    <script src="assets/js/markdown.js?v=1.0.1"></script>
+    <script src="assets/js/zip.js?v=1.0.1"></script>
+    <script src="assets/js/ui.js?v=1.0.1"></script>
+    <script src="assets/js/ui-panels.js?v=1.0.1"></script>
     <script>
       (function () {
-        try { OC.boot(); } catch (e) { console.error(e); }
+        var ok = false;
+        try {
+          if (window.OC && typeof OC.boot === "function") { OC.boot(); ok = true; }
+        } catch (e) { console.error(e); }
         var b = document.getElementById("boot");
-        if (b) { b.style.opacity = "0"; setTimeout(function () { b.remove(); }, 300); }
+        if (ok) {
+          if (b) { b.style.opacity = "0"; setTimeout(function () { b.remove(); }, 300); }
+        } else {
+          // never leave a blank screen: old WebView / failed scripts / no network
+          if (b) {
+            b.innerHTML = '<div style="text-align:center;padding:24px;direction:rtl">' +
+              '<div style="font-size:16px;font-weight:800;margin-bottom:10px">برنامه بارگذاری نشد</div>' +
+              '<div style="font-size:13.5px;line-height:2;opacity:.85">WebView این دستگاه قدیمی است یا اتصال برقرار نشده.<br>از Chrome به‌روز استفاده کنید و یک بار صفحه را رفرش کنید.</div>' +
+              '<button onclick="location.reload()" style="margin-top:16px;padding:11px 26px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:15px">تلاش مجدد</button></div>';
+          }
+          return;
+        }
         // PWA service worker (skip on local dev hosts)
         var isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
         if ("serviceWorker" in navigator && location.protocol.startsWith("http") && !isLocal) {

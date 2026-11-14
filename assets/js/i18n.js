@@ -1,6 +1,10 @@
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(r, t, o) { return (t = _toPropertyKey(t)) in r ? Object.defineProperty(r, t, { value: o, enumerable: !0, configurable: !0, writable: !0 }) : r[t] = o, r; }
+function _toPropertyKey(r) { var o = _toPrimitive(r, "string"); return "symbol" == _typeof(o) ? o : o + ""; }
+function _toPrimitive(t, e) { if ("object" != _typeof(t) || !t) return t; var r; if ("undefined" != typeof Symbol && void 0 !== (r = t[Symbol.toPrimitive])) { var i = r.call(t, e || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === e ? String : Number)(t); }
 /* Open Code — i18n (fa/en). Designer: Abbas Sedigh */
-(function () {
-  const fa = {
+(function (_fa, _en) {
+  var fa = (_fa = {
     appName: "Open Code",
     tagline: "یک فضای کاری، همه‌ی مدل‌ها",
     // auth
@@ -343,78 +347,9 @@
     active: "فعال",
     disabled: "غیرفعال",
     adminRole: "مدیر",
-    userRole: "کاربر",
-    login: "ورود",
-    register: "ثبت‌نام",
-    overview: "نمای کلی",
-    totalChats: "گفت‌وگوها",
-    totalMessages: "پیام‌ها",
-    totalProviders: "سرویس‌دهنده‌ها",
-    totalUsers: "کاربران",
-    maintenanceMode: "حالت تعمیرات",
-    signupOpen: "ثبت‌نام آزاد",
-    systemSettings: "تنظیمات سامانه",
-    saveChanges: "ذخیره",
-    saved: "تغییرات ذخیره شد",
-    settingsSaved: "تنظیمات ذخیره شد",
-    reset: "بازنشانی",
-    clearTrash: "خالی کردن زباله‌دان",
-    // misc
-    close: "بستن",
-    save: "ذخیره",
-    cancel: "انصراف",
-    confirm: "تأیید",
-    delete: "حذف",
-    edit: "ویرایش",
-    ok: "باشه",
-    optional: "اختیاری",
-    required: "الزامی",
-    back: "بازگشت",
-    retry: "تلاش دوباره",
-    loading: "در حال بارگذاری",
-    saving: "در حال ذخیره",
-    showMore: "نمایش بیشتر",
-    showLess: "نمایش کمتر",
-    print: "چاپ",
-    readyToPrint: "آماده‌ی چاپ",
-    download: "دانلود",
-    downloaded: "خروجی دانلود شد",
-    openInNewTab: "در تب جدید باز شد",
-    search: "جست‌وجو",
-    filter: "برای فیلتر تایپ کنید",
-    none: "هیچ",
-    unlimited: "بی‌نهایت",
-    today_: "امروز",
-    now: "اکنون وارد کن",
-    officialUrl: "آدرس رسمی سرویس",
-    designer: "طراح",
-    builtWith: "ساخته‌شده با",
-    version: "نسخه",
-    demoMode: "حالت نمایشی",
-    demoModeHint: "بدون سرویس‌دهنده، پاسخ‌ها شبیه‌سازی می‌شوند. برای پاسخ واقعی یک سرویس‌دهنده اضافه کنید.",
-    installApp: "نصب برنامه",
-    installed: "نصب شد",
-    updateModelsHint: "فهرست را به‌روزرسانی کنید یا شناسه مدل را دستی بیفزایید",
-    enterManually: "شناسه مدل را دستی وارد کنید",
-    attachments: "فایل‌های همراه",
-    files: "فایل‌ها",
-    removedAttach: "حذف پیوست",
-    fileDeletedAfterRead: "این فایل پس از بررسی توسط مدل حذف شده است",
-    fileNotKept: "فایل شما ذخیره نمی‌شود",
-    filesReadOnce: "فایل‌ها فقط برای پاسخ به پیام شما خوانده می‌شوند",
-    selectFile: "انتخاب فایل",
-    remove: "برداشتن",
-    aiTitle: "ساخت عنوان با هوش مصنوعی",
-    titleFromChat: "عنوان از محتوای گفت‌وگو ساخته می‌شود",
-    chatRenamed: "نام گفت‌وگو تغییر کرد",
-    newName: "نام جدید",
-    value: "مقدار",
-    quantity: "مقدار",
-    // english-ish keys reused
-    chat: "گفت‌وگو",
-  };
-
-  const en = {
+    userRole: "کاربر"
+  }, _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "login", "ورود"), "register", "ثبت‌نام"), "overview", "نمای کلی"), "totalChats", "گفت‌وگوها"), "totalMessages", "پیام‌ها"), "totalProviders", "سرویس‌دهنده‌ها"), "totalUsers", "کاربران"), "maintenanceMode", "حالت تعمیرات"), "signupOpen", "ثبت‌نام آزاد"), "systemSettings", "تنظیمات سامانه"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "saveChanges", "ذخیره"), "saved", "تغییرات ذخیره شد"), "settingsSaved", "تنظیمات ذخیره شد"), "reset", "بازنشانی"), "clearTrash", "خالی کردن زباله‌دان"), "close", "بستن"), "save", "ذخیره"), "cancel", "انصراف"), "confirm", "تأیید"), "delete", "حذف"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "edit", "ویرایش"), "ok", "باشه"), "optional", "اختیاری"), "required", "الزامی"), "back", "بازگشت"), "retry", "تلاش دوباره"), "loading", "در حال بارگذاری"), "saving", "در حال ذخیره"), "showMore", "نمایش بیشتر"), "showLess", "نمایش کمتر"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "print", "چاپ"), "readyToPrint", "آماده‌ی چاپ"), "download", "دانلود"), "downloaded", "خروجی دانلود شد"), "openInNewTab", "در تب جدید باز شد"), "search", "جست‌وجو"), "filter", "برای فیلتر تایپ کنید"), "none", "هیچ"), "unlimited", "بی‌نهایت"), "today_", "امروز"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "now", "اکنون وارد کن"), "officialUrl", "آدرس رسمی سرویس"), "designer", "طراح"), "builtWith", "ساخته‌شده با"), "version", "نسخه"), "demoMode", "حالت نمایشی"), "demoModeHint", "بدون سرویس‌دهنده، پاسخ‌ها شبیه‌سازی می‌شوند. برای پاسخ واقعی یک سرویس‌دهنده اضافه کنید."), "installApp", "نصب برنامه"), "installed", "نصب شد"), "updateModelsHint", "فهرست را به‌روزرسانی کنید یا شناسه مدل را دستی بیفزایید"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "enterManually", "شناسه مدل را دستی وارد کنید"), "attachments", "فایل‌های همراه"), "files", "فایل‌ها"), "removedAttach", "حذف پیوست"), "fileDeletedAfterRead", "این فایل پس از بررسی توسط مدل حذف شده است"), "fileNotKept", "فایل شما ذخیره نمی‌شود"), "filesReadOnce", "فایل‌ها فقط برای پاسخ به پیام شما خوانده می‌شوند"), "selectFile", "انتخاب فایل"), "remove", "برداشتن"), "aiTitle", "ساخت عنوان با هوش مصنوعی"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_fa, "titleFromChat", "عنوان از محتوای گفت‌وگو ساخته می‌شود"), "chatRenamed", "نام گفت‌وگو تغییر کرد"), "newName", "نام جدید"), "value", "مقدار"), "quantity", "مقدار"), "chat", "گفت‌وگو"));
+  var en = (_en = {
     appName: "Open Code",
     tagline: "One workspace, all models",
     welcomeBack: "Welcome back",
@@ -742,93 +677,42 @@
     active: "Active",
     disabled: "Disabled",
     adminRole: "Admin",
-    userRole: "User",
-    login: "Login",
-    register: "Register",
-    overview: "Overview",
-    totalChats: "Chats",
-    totalMessages: "Messages",
-    totalProviders: "Providers",
-    totalUsers: "Users",
-    maintenanceMode: "Maintenance mode",
-    signupOpen: "Open registration",
-    systemSettings: "System settings",
-    saveChanges: "Save",
-    saved: "Changes saved",
-    settingsSaved: "Settings saved",
-    reset: "Reset",
-    clearTrash: "Empty trash",
-    close: "Close",
-    save: "Save",
-    cancel: "Cancel",
-    confirm: "Confirm",
-    delete: "Delete",
-    edit: "Edit",
-    ok: "OK",
-    optional: "optional",
-    required: "required",
-    back: "Back",
-    retry: "Retry",
-    loading: "Loading",
-    saving: "Saving",
-    showMore: "Show more",
-    showLess: "Show less",
-    print: "Print",
-    readyToPrint: "Ready to print",
-    download: "Download",
-    downloaded: "Export downloaded",
-    openInNewTab: "Opened in a new tab",
-    search: "Search",
-    filter: "Type to filter",
-    none: "None",
-    unlimited: "Unlimited",
-    officialUrl: "Official service URL",
-    designer: "Designer",
-    builtWith: "Built with",
-    version: "Version",
-    demoMode: "Demo mode",
-    demoModeHint: "Without a provider, answers are simulated. Add a provider for real answers.",
-    installApp: "Install app",
-    installed: "Installed",
-    updateModelsHint: "Refresh the list or add a model ID manually",
-    enterManually: "Enter the model ID manually",
-    attachments: "Attachments",
-    files: "Files",
-    removedAttach: "Attachment removed",
-    fileDeletedAfterRead: "This file was removed after the model reviewed it",
-    fileNotKept: "Your file is not stored",
-    filesReadOnce: "Files are read only to answer your message",
-    selectFile: "Select file",
-    remove: "Remove",
-    aiTitle: "AI title",
-    titleFromChat: "Title is generated from chat content",
-    chatRenamed: "Chat renamed",
-    newName: "New name",
-    value: "Value",
-    chat: "Chat",
+    userRole: "User"
+  }, _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "login", "Login"), "register", "Register"), "overview", "Overview"), "totalChats", "Chats"), "totalMessages", "Messages"), "totalProviders", "Providers"), "totalUsers", "Users"), "maintenanceMode", "Maintenance mode"), "signupOpen", "Open registration"), "systemSettings", "System settings"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "saveChanges", "Save"), "saved", "Changes saved"), "settingsSaved", "Settings saved"), "reset", "Reset"), "clearTrash", "Empty trash"), "close", "Close"), "save", "Save"), "cancel", "Cancel"), "confirm", "Confirm"), "delete", "Delete"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "edit", "Edit"), "ok", "OK"), "optional", "optional"), "required", "required"), "back", "Back"), "retry", "Retry"), "loading", "Loading"), "saving", "Saving"), "showMore", "Show more"), "showLess", "Show less"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "print", "Print"), "readyToPrint", "Ready to print"), "download", "Download"), "downloaded", "Export downloaded"), "openInNewTab", "Opened in a new tab"), "search", "Search"), "filter", "Type to filter"), "none", "None"), "unlimited", "Unlimited"), "officialUrl", "Official service URL"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "designer", "Designer"), "builtWith", "Built with"), "version", "Version"), "demoMode", "Demo mode"), "demoModeHint", "Without a provider, answers are simulated. Add a provider for real answers."), "installApp", "Install app"), "installed", "Installed"), "updateModelsHint", "Refresh the list or add a model ID manually"), "enterManually", "Enter the model ID manually"), "attachments", "Attachments"), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_en, "files", "Files"), "removedAttach", "Attachment removed"), "fileDeletedAfterRead", "This file was removed after the model reviewed it"), "fileNotKept", "Your file is not stored"), "filesReadOnce", "Files are read only to answer your message"), "selectFile", "Select file"), "remove", "Remove"), "aiTitle", "AI title"), "titleFromChat", "Title is generated from chat content"), "chatRenamed", "Chat renamed"), _defineProperty(_defineProperty(_defineProperty(_en, "newName", "New name"), "value", "Value"), "chat", "Chat"));
+  var dict = {
+    fa: fa,
+    en: en
   };
-
-  const dict = { fa, en };
-  let current = "fa";
-
+  var current = "fa";
   function detect() {
     try {
-      const v = localStorage.getItem("oc-locale");
+      var v = localStorage.getItem("oc-locale");
       if (v === "fa" || v === "en") current = v;
     } catch (e) {}
   }
   function setLocale(l) {
     current = l;
-    try { localStorage.setItem("oc-locale", l); } catch (e) {}
+    try {
+      localStorage.setItem("oc-locale", l);
+    } catch (e) {}
     document.documentElement.lang = l;
     document.documentElement.dir = l === "fa" ? "rtl" : "ltr";
   }
   function t(key) {
     return dict[current][key] || dict.fa[key] || key;
   }
-  function locale() { return current; }
-  function isRTL() { return current === "fa"; }
-
+  function locale() {
+    return current;
+  }
+  function isRTL() {
+    return current === "fa";
+  }
   window.OC = window.OC || {};
-  window.OC.i18n = { t, setLocale, locale, isRTL, detect };
+  window.OC.i18n = {
+    t: t,
+    setLocale: setLocale,
+    locale: locale,
+    isRTL: isRTL,
+    detect: detect
+  };
 })();

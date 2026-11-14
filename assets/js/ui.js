@@ -1,17 +1,37 @@
+function _toConsumableArray(a) { return _arrayWithoutHoles(a) || _iterableToArray(a) || _unsupportedIterableToArray(a) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { var e = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (Array.isArray(r) && (null == e || e === ("undefined" != typeof Symbol && [][Symbol.iterator]) || e === []["@@iterator"])) return r; if (null != e) { for (var t, o = [], a = e.call(r); !(t = a.next()).done;) o.push(t.value); return o; } }
+function _arrayWithoutHoles(a) { if (Array.isArray(a)) return _arrayLikeToArray(a); }
+function _slicedToArray(e, i) { return _iterableToArrayLimit(e, i) || _unsupportedIterableToArray(e, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, t) { var e = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (Array.isArray(r) && (null == e || e === ("undefined" != typeof Symbol && [][Symbol.iterator]) || e === []["@@iterator"])) return r; if (null != e) { var l, n, i, a, u = [], o = !0, f = !1; try { if (i = (e = e.call(r)).next, 0 === t) { if (Object(e) !== e) return; o = !1; } else for (; !(o = (l = i.call(e)).done) && (u.push(l.value), u.length !== t); o = !0); } catch (r) { f = !0, n = r; } finally { try { if (!o && null != e.return && (a = e.return(), Object(a) !== a)) return; } finally { if (f) throw n; } } return u; } }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var r, e, o = "function" == typeof Symbol ? Symbol : {}, n = o.iterator || "@@iterator", a = o.toStringTag || "@@toStringTag"; function i(o, n, a, i) { var u = n && n.prototype instanceof Generator ? n : Generator, f = Object.create(u.prototype); return _regeneratorDefine2(f, "_invoke", function (t, o, n) { var a, i, u, f = 0, p = n || [], y = !1, G = { p: 0, n: 0, v: r, a: l, f: l.bind(r, 4), d: function d(t, e) { return a = t, i = 0, u = r, G.n = e, c; } }; function l(t, o) { for (i = t, u = o, e = 0; !y && f && !n && e < p.length; e++) { var n, a = p[e], l = G.p, F = a[2]; t > 3 ? (n = F === o) && (u = a[(i = a[4]) ? 5 : (i = 3, 3)], a[4] = a[5] = r) : a[0] <= l && ((n = t < 2 && l < a[1]) ? (i = 0, G.v = o, G.n = a[1]) : l < F && (n = t < 3 || a[0] > o || o > F) && (a[4] = t, a[5] = o, G.n = F, i = 0)); } if (n || t > 1) return c; throw y = !0, o; } return function (n, p, F) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && l(p, F), i = p, u = F; (e = i < 2 ? r : u) || !y;) { a || (i ? (i > 1 && (G.n = i < 3 ? -1 : u), l(i, u)) : G.v = u); try { if (f = 2, a) { if (i || (n = "next"), e = a[n]) { if (!(e = e.call(a, u))) throw TypeError("iterator result is not an object"); if (!e.done) return e; u = e.value, i < 2 && (i = 0); } else 1 === i && (e = a.return) && e.call(a), i < 2 && (u = TypeError("The iterator does not provide a '" + n + "' method"), i = 1); a = r; } else if ((e = (y = G.n < 0) ? u : t.call(o, G)) !== c) break; } catch (t) { a = r, i = 1, u = t; } finally { f = 1; } } return { value: e, done: y }; }; }(o, a, i), !0), f; } var c = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} e = Object.getPrototypeOf; var u = [][n] ? e(e([][n]())) : (_regeneratorDefine2(e = {}, n, function () { return this; }), e), f = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(u); function p(r) { return Object.setPrototypeOf ? Object.setPrototypeOf(r, GeneratorFunctionPrototype) : (r.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(r, a, "GeneratorFunction")), r.prototype = Object.create(f), r; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(f, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, a, "GeneratorFunction"), _regeneratorDefine2(f), _regeneratorDefine2(f, a, "Generator"), _regeneratorDefine2(f, n, function () { return this; }), _regeneratorDefine2(f, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: p }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _createForOfIteratorHelper(e, t) { var _n = "undefined" != typeof Symbol && e[Symbol.iterator] || e["@@iterator"]; if (!_n) { if (Array.isArray(e) || (_n = _unsupportedIterableToArray(e)) || t && e && "number" == typeof e.length) { _n && (e = _n); var o = 0, F = function F() {}; return { s: F, n: function n() { return o >= e.length ? { done: !0 } : { done: !1, value: e[o++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var a, u, i = !0; return { s: function s() { _n = _n.call(e); }, n: function n() { i = !0; var r = _n.next(); return r.done ? { done: !0 } : { value: r.value, done: i = !1 }; }, e: function e(r) { a = !0, u = r; }, f: function f() { try { i || null == _n.return || _n.return(); } finally { if (a) throw u; } } }; }
+function _unsupportedIterableToArray(t, e) { if (t) { if ("string" == typeof t) return _arrayLikeToArray(t, e); var o = {}.toString.call(t).slice(8, -1); return "Object" === o && t.constructor && (o = t.constructor.name), "Map" === o || "Set" === o ? Array.from(t) : "Arguments" === o || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(o) ? _arrayLikeToArray(t, e) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 /* Open Code — UI layer: shell, router, auth, chat. Designer: Abbas Sedigh */
 (function () {
-  const { t } = OC.i18n;
-  const { U, store } = OC;
-  const el = (html) => {
-    const d = document.createElement("div");
+  var t = OC.i18n.t;
+  var _OC = OC,
+    U = _OC.U,
+    store = _OC.store;
+  var el = function el(html) {
+    var d = document.createElement("div");
     d.innerHTML = html.trim();
     return d.firstElementChild;
   };
-  const $ = (sel, root) => (root || document).querySelector(sel);
-  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+  var $ = function $(sel, root) {
+    return (root || document).querySelector(sel);
+  };
+  var $$ = function $$(sel, root) {
+    return Array.from((root || document).querySelectorAll(sel));
+  };
 
   /* ================= icons ================= */
-  const I = {
+  var I = {
     bolt: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3.8 13.3c-.4.5 0 1.2.6 1.2H10l-1.4 7.2c-.1.7.8 1 1.2.5L19 10.9c.4-.5 0-1.2-.6-1.2H14l1.4-7.2c.1-.7-.8-1-1.2-.5z"/></svg>',
     code: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
     plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
@@ -49,10 +69,12 @@
     book: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
     eye: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
     print: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>',
-    plug: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 8V2m6 6V2M5 8h14v3a7 7 0 0 1-14 0z"/></svg>',
+    plug: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 8V2m6 6V2M5 8h14v3a7 7 0 0 1-14 0z"/></svg>'
   };
   OC.ui_icons = I;
-  OC.el = el; OC.$ = $; OC.$$ = $$;
+  OC.el = el;
+  OC.$ = $;
+  OC.$$ = $$;
 
   /* ================= logo ================= */
   function logoSVG(size) {
@@ -60,155 +82,275 @@
   }
 
   /* ================= toasts ================= */
-  let toastBox = null;
+  var toastBox = null;
   function toast(msg, kind) {
-    if (!toastBox) { toastBox = el('<div class="toasts"></div>'); document.body.appendChild(toastBox); }
-    const n = el('<div class="toast ' + (kind || "") + '">' + U.esc(msg) + "</div>");
+    if (!toastBox) {
+      toastBox = el('<div class="toasts"></div>');
+      document.body.appendChild(toastBox);
+    }
+    var n = el('<div class="toast ' + (kind || "") + '">' + U.esc(msg) + "</div>");
     toastBox.appendChild(n);
-    setTimeout(() => { n.style.opacity = "0"; n.style.transition = "opacity .3s"; setTimeout(() => n.remove(), 320); }, 2600);
+    setTimeout(function () {
+      n.style.opacity = "0";
+      n.style.transition = "opacity .3s";
+      setTimeout(function () {
+        return n.remove();
+      }, 320);
+    }, 2600);
   }
   OC.toast = toast;
 
   /* ================= modal ================= */
-  function modal({ title, body, foot, wide, onClose }) {
-    const back = el('<div class="modal-back"><div class="modal' + (wide ? " wide" : "") + '"><div class="modal-head"><h3>' + U.esc(title) + '</h3><button class="icon-btn" data-x>' + I.x + '</button></div><div class="modal-body"></div>' + (foot !== null ? '<div class="modal-foot"></div>' : "") + '</div></div>');
-    const bodyEl = $(".modal-body", back);
-    if (typeof body === "string") bodyEl.innerHTML = body; else bodyEl.appendChild(body);
-    const footEl = $(".modal-foot", back);
-    if (foot) for (const f of foot) footEl.appendChild(f);
+  function modal(_ref) {
+    var title = _ref.title,
+      body = _ref.body,
+      foot = _ref.foot,
+      wide = _ref.wide,
+      onClose = _ref.onClose;
+    var back = el('<div class="modal-back"><div class="modal' + (wide ? " wide" : "") + '"><div class="modal-head"><h3>' + U.esc(title) + '</h3><button class="icon-btn" data-x>' + I.x + '</button></div><div class="modal-body"></div>' + (foot !== null ? '<div class="modal-foot"></div>' : "") + '</div></div>');
+    var bodyEl = $(".modal-body", back);
+    if (typeof body === "string") bodyEl.innerHTML = body;else bodyEl.appendChild(body);
+    var footEl = $(".modal-foot", back);
+    if (foot) {
+      var _iterator = _createForOfIteratorHelper(foot),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var f = _step.value;
+          footEl.appendChild(f);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
     document.body.appendChild(back);
-    const close = () => { back.remove(); onClose && onClose(); };
+    var close = function close() {
+      back.remove();
+      onClose && onClose();
+    };
     $("[data-x]", back).onclick = close;
-    back.addEventListener("mousedown", e => { if (e.target === back) close(); });
-    return { el: back, body: bodyEl, close };
+    back.addEventListener("mousedown", function (e) {
+      if (e.target === back) close();
+    });
+    return {
+      el: back,
+      body: bodyEl,
+      close: close
+    };
   }
   OC.modal = modal;
-
-  function confirmDialog({ title, message, danger, okText }) {
-    return new Promise(resolve => {
-      const ok = el('<button class="btn ' + (danger ? "btn-danger" : "btn-primary") + '">' + U.esc(okText || t("confirm")) + "</button>");
-      const cancel = el('<button class="btn">' + t("cancel") + "</button>");
-      const m = modal({
+  function confirmDialog(_ref2) {
+    var title = _ref2.title,
+      message = _ref2.message,
+      danger = _ref2.danger,
+      okText = _ref2.okText;
+    return new Promise(function (resolve) {
+      var ok = el('<button class="btn ' + (danger ? "btn-danger" : "btn-primary") + '">' + U.esc(okText || t("confirm")) + "</button>");
+      var cancel = el('<button class="btn">' + t("cancel") + "</button>");
+      var m = modal({
         title: title || t("confirm"),
         body: '<p class="muted" style="margin:4px 0;font-size:14px">' + U.esc(message) + "</p>",
-        foot: [cancel, ok],
+        foot: [cancel, ok]
       });
-      ok.onclick = () => { m.close(); resolve(true); };
-      cancel.onclick = () => { m.close(); resolve(false); };
-      const prev = m.el.remove.bind(m.el);
-      m.el.remove = () => { resolve(false); prev(); };
+      ok.onclick = function () {
+        m.close();
+        resolve(true);
+      };
+      cancel.onclick = function () {
+        m.close();
+        resolve(false);
+      };
+      var prev = m.el.remove.bind(m.el);
+      m.el.remove = function () {
+        resolve(false);
+        prev();
+      };
     });
   }
   OC.confirm = confirmDialog;
 
   /* ================= prompt dialog ================= */
-  function promptDialog({ title, label, value, okText }) {
-    return new Promise(resolve => {
-      const inp = el('<input class="input" value="' + U.esc(value || "") + '">');
-      const ok = el('<button class="btn btn-primary">' + U.esc(okText || t("save")) + "</button>");
-      const cancel = el('<button class="btn">' + t("cancel") + "</button>");
-      const m = modal({ title, body: '<div class="field"><label>' + U.esc(label || "") + "</label></div>", foot: [cancel, ok] });
+  function promptDialog(_ref3) {
+    var title = _ref3.title,
+      label = _ref3.label,
+      value = _ref3.value,
+      okText = _ref3.okText;
+    return new Promise(function (resolve) {
+      var inp = el('<input class="input" value="' + U.esc(value || "") + '">');
+      var ok = el('<button class="btn btn-primary">' + U.esc(okText || t("save")) + "</button>");
+      var cancel = el('<button class="btn">' + t("cancel") + "</button>");
+      var m = modal({
+        title: title,
+        body: '<div class="field"><label>' + U.esc(label || "") + "</label></div>",
+        foot: [cancel, ok]
+      });
       $(".field", m.body).appendChild(inp);
-      ok.onclick = () => { const v = inp.value.trim(); m.close(); resolve(v); };
-      cancel.onclick = () => { m.close(); resolve(null); };
-      inp.focus(); inp.select();
-      inp.addEventListener("keydown", e => { if (e.key === "Enter") ok.click(); });
+      ok.onclick = function () {
+        var v = inp.value.trim();
+        m.close();
+        resolve(v);
+      };
+      cancel.onclick = function () {
+        m.close();
+        resolve(null);
+      };
+      inp.focus();
+      inp.select();
+      inp.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") ok.click();
+      });
     });
   }
   OC.promptDialog = promptDialog;
 
   /* ================= context menu ================= */
   function ctxMenu(x, y, items) {
-    $$(".ctx").forEach(n => n.remove());
-    const m = el('<div class="ctx"></div>');
-    for (const it of items) {
-      if (it === "-") { m.appendChild(el('<div class="sep"></div>')); continue; }
-      const b = el('<button class="' + (it.danger ? "danger" : "") + '">' + (it.icon || "") + "<span>" + U.esc(it.label) + "</span></button>");
-      b.onclick = () => { close(); it.onClick && it.onClick(); };
-      m.appendChild(b);
+    $$(".ctx").forEach(function (n) {
+      return n.remove();
+    });
+    var m = el('<div class="ctx"></div>');
+    var _iterator2 = _createForOfIteratorHelper(items),
+      _step2;
+    try {
+      var _loop = function _loop() {
+        var it = _step2.value;
+        if (it === "-") {
+          m.appendChild(el('<div class="sep"></div>'));
+          return 1; // continue
+        }
+        var b = el('<button class="' + (it.danger ? "danger" : "") + '">' + (it.icon || "") + "<span>" + U.esc(it.label) + "</span></button>");
+        b.onclick = function () {
+          close();
+          it.onClick && it.onClick();
+        };
+        m.appendChild(b);
+      };
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        if (_loop()) continue;
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
     }
     document.body.appendChild(m);
-    const r = m.getBoundingClientRect();
-    const vw = window.innerWidth, vh = window.innerHeight;
+    var r = m.getBoundingClientRect();
+    var vw = window.innerWidth,
+      vh = window.innerHeight;
     m.style.left = Math.min(x, vw - r.width - 8) + "px";
     m.style.top = Math.min(y, vh - r.height - 8) + "px";
-    const close = () => { m.remove(); document.removeEventListener("mousedown", onDoc); };
-    const onDoc = e => { if (!m.contains(e.target)) close(); };
+    var close = function close() {
+      m.remove();
+      document.removeEventListener("mousedown", onDoc);
+    };
+    var onDoc = function onDoc(e) {
+      if (!m.contains(e.target)) close();
+    };
     document.addEventListener("mousedown", onDoc);
     return close;
   }
   OC.ctxMenu = ctxMenu;
-
   function dropMenu(anchor, items, opts) {
-    $$(".menu-pop").forEach(n => n.remove());
-    const m = el('<div class="menu-pop"></div>');
+    $$(".menu-pop").forEach(function (n) {
+      return n.remove();
+    });
+    var m = el('<div class="menu-pop"></div>');
     if (opts && opts.header) m.appendChild(el(opts.header));
-    for (const it of items) {
-      const b = el('<button class="mi ' + (it.danger ? "danger" : "") + '">' + (it.icon || "") + "<span>" + U.esc(it.label) + "</span></button>");
-      b.onclick = () => { close(); it.onClick && it.onClick(); };
-      m.appendChild(b);
+    var _iterator3 = _createForOfIteratorHelper(items),
+      _step3;
+    try {
+      var _loop2 = function _loop2() {
+        var it = _step3.value;
+        var b = el('<button class="mi ' + (it.danger ? "danger" : "") + '">' + (it.icon || "") + "<span>" + U.esc(it.label) + "</span></button>");
+        b.onclick = function () {
+          close();
+          it.onClick && it.onClick();
+        };
+        m.appendChild(b);
+      };
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        _loop2();
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
     }
     document.body.appendChild(m);
-    const ar = anchor.getBoundingClientRect(), r = m.getBoundingClientRect();
-    const isRTLdir = OC.i18n.isRTL();
-    let left = isRTLdir ? ar.left - r.width + ar.width : ar.left;
+    var ar = anchor.getBoundingClientRect(),
+      r = m.getBoundingClientRect();
+    var isRTLdir = OC.i18n.isRTL();
+    var left = isRTLdir ? ar.left - r.width + ar.width : ar.left;
     left = Math.max(8, Math.min(left, window.innerWidth - r.width - 8));
-    let top = ar.bottom + 6;
+    var top = ar.bottom + 6;
     if (top + r.height > window.innerHeight - 8) top = ar.top - r.height - 6;
     m.style.left = left + "px";
     m.style.top = Math.max(8, top) + "px";
-    const close = () => { m.remove(); document.removeEventListener("mousedown", onDoc); };
-    const onDoc = e => { if (!m.contains(e.target) && e.target !== anchor) close(); };
-    setTimeout(() => document.addEventListener("mousedown", onDoc), 0);
+    var close = function close() {
+      m.remove();
+      document.removeEventListener("mousedown", onDoc);
+    };
+    var onDoc = function onDoc(e) {
+      if (!m.contains(e.target) && e.target !== anchor) close();
+    };
+    setTimeout(function () {
+      return document.addEventListener("mousedown", onDoc);
+    }, 0);
     return close;
   }
   OC.dropMenu = dropMenu;
 
   /* ================= theme ================= */
   function applyTheme(theme) {
-    const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var dark = theme === "dark" || theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", dark);
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
-    const meta = $('meta[name="theme-color"]');
+    var meta = $('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", dark ? "#0a0c12" : "#f7f8fb");
   }
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    const s = store.getUserSettings();
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+    var s = store.getUserSettings();
     if (s.theme === "system") applyTheme("system");
   });
   OC.applyTheme = applyTheme;
 
   /* ================= avatar ================= */
   function avatarHTML(user, size) {
-    const s = size || 36;
+    var s = size || 36;
     if (user && user.avatar) return '<span class="avatar" style="width:' + s + 'px;height:' + s + 'px"><img src="' + user.avatar + '" alt=""></span>';
-    const ini = user && user.name ? user.name.trim().slice(0, 1) : "؟";
+    var ini = user && user.name ? user.name.trim().slice(0, 1) : "؟";
     return '<span class="avatar" style="width:' + s + 'px;height:' + s + 'px">' + U.esc(ini) + "</span>";
   }
   OC.avatarHTML = avatarHTML;
 
   /* ================= router ================= */
-  const routes = {};
+  var routes = {};
   OC.routes = routes;
-  let currentRoute = "";
-  function route(path, view) { routes[path] = view; }
+  var currentRoute = "";
+  function route(path, view) {
+    routes[path] = view;
+  }
   OC.route = route;
-  function navigate(path) { location.hash = path; }
+  function navigate(path) {
+    location.hash = path;
+  }
   OC.navigate = navigate;
-
   function renderRoute() {
-    const user = store.currentUser();
-    let hash = location.hash.replace(/^#/, "") || "/chat";
+    var user = store.currentUser();
+    var hash = location.hash.replace(/^#/, "") || "/chat";
     if (!user && !hash.startsWith("/login") && !hash.startsWith("/register")) {
       hash = "/login";
       location.hash = "/login";
     }
     if (user && (hash.startsWith("/login") || hash.startsWith("/register"))) {
-      hash = "/chat"; location.hash = "/chat";
+      hash = "/chat";
+      location.hash = "/chat";
     }
     // match longest prefix
-    let path = hash.split("?")[0];
-    let fn = routes[path];
+    var path = hash.split("?")[0];
+    var fn = routes[path];
     while (!fn && path.includes("/")) {
       path = path.slice(0, path.lastIndexOf("/"));
       fn = routes[path];
@@ -222,19 +364,19 @@
 
   /* ================= sidebar (mobile) ================= */
   function openSidebar() {
-    const sb = $("#sidebar");
+    var sb = $("#sidebar");
     if (!sb) return;
     sb.classList.add("open");
     if (!$(".side-scrim")) {
-      const sc = el('<div class="side-scrim"></div>');
+      var sc = el('<div class="side-scrim"></div>');
       sc.onclick = closeSidebar;
       document.body.appendChild(sc);
     }
   }
   function closeSidebar() {
-    const sb = $("#sidebar");
+    var sb = $("#sidebar");
     if (sb) sb.classList.remove("open");
-    const sc = $(".side-scrim");
+    var sc = $(".side-scrim");
     if (sc) sc.remove();
   }
   OC.openSidebar = openSidebar;
@@ -242,63 +384,78 @@
 
   /* ================= topbar ================= */
   function topbarHTML(user) {
-    const adminLink = user && user.role === "admin" ? '<button class="icon-btn" data-nav="/admin" title="' + t("admin") + '">' + I.shield + "</button>" : "";
-    return (
-      '<div class="topbar">' +
-      '<button class="icon-btn" id="side-toggle">' + I.menu + "</button>" +
-      '<div class="brand">' + logoSVG() + '<div><div class="bname">' + t("appName") + '</div><div class="btag">' + t("tagline") + "</div></div></div>" +
-      '<div class="spacer"></div>' +
-      adminLink +
-      '<button class="icon-btn" data-nav="/prompts" title="' + t("prompts") + '">' + I.book + "</button>" +
-      '<button class="icon-btn" data-nav="/usage" title="' + t("usage") + '">' + I.chart + "</button>" +
-      '<button class="icon-btn" id="top-theme" title="' + t("theme") + '">' + I.sun + "</button>" +
-      '<button class="icon-btn" id="top-lang" title="' + t("language") + '">' + I.globe + "</button>" +
-      '<button class="icon-btn" id="top-user">' + avatarHTML(user, 30) + "</button>" +
-      "</div>"
-    );
+    var adminLink = user && user.role === "admin" ? '<button class="icon-btn" data-nav="/admin" title="' + t("admin") + '">' + I.shield + "</button>" : "";
+    return '<div class="topbar">' + '<button class="icon-btn" id="side-toggle">' + I.menu + "</button>" + '<div class="brand">' + logoSVG() + '<div><div class="bname">' + t("appName") + '</div><div class="btag">' + t("tagline") + "</div></div></div>" + '<div class="spacer"></div>' + adminLink + '<button class="icon-btn" data-nav="/prompts" title="' + t("prompts") + '">' + I.book + "</button>" + '<button class="icon-btn" data-nav="/usage" title="' + t("usage") + '">' + I.chart + "</button>" + '<button class="icon-btn" id="top-theme" title="' + t("theme") + '">' + I.sun + "</button>" + '<button class="icon-btn" id="top-lang" title="' + t("language") + '">' + I.globe + "</button>" + '<button class="icon-btn" id="top-user">' + avatarHTML(user, 30) + "</button>" + "</div>";
   }
-
   function bindTopbar(user) {
-    const themeBtn = $("#top-theme");
-    const s = store.getUserSettings();
+    var themeBtn = $("#top-theme");
+    var s = store.getUserSettings();
     themeBtn.innerHTML = s.theme === "dark" ? I.moon : I.sun;
-    themeBtn.onclick = () => {
-      const cur = store.getUserSettings().theme;
-      const order = { system: "dark", dark: "light", light: "system" };
-      const next = order[cur] || "system";
-      store.saveUserSettings({ theme: next });
+    themeBtn.onclick = function () {
+      var cur = store.getUserSettings().theme;
+      var order = {
+        system: "dark",
+        dark: "light",
+        light: "system"
+      };
+      var next = order[cur] || "system";
+      store.saveUserSettings({
+        theme: next
+      });
       applyTheme(next);
       themeBtn.innerHTML = next === "dark" ? I.moon : I.sun;
       toast(t("theme") + ": " + (next === "system" ? t("themeSystem") : next === "dark" ? t("themeDark") : t("themeLight")));
     };
-    $("#top-lang").onclick = () => {
-      const cur = OC.i18n.locale();
+    $("#top-lang").onclick = function () {
+      var cur = OC.i18n.locale();
       OC.i18n.setLocale(cur === "fa" ? "en" : "fa");
       renderRoute();
     };
-    $("#side-toggle").onclick = () => {
-      if (window.innerWidth <= 900) openSidebar();
-      else {
-        const sb = $("#sidebar");
+    $("#side-toggle").onclick = function () {
+      if (window.innerWidth <= 900) openSidebar();else {
+        var sb = $("#sidebar");
         if (!sb) return;
-        const hidden = sb.style.display === "none";
+        var hidden = sb.style.display === "none";
         sb.style.display = hidden ? "" : "none";
         $("#main-area").parentElement.classList.toggle("no-side", !hidden);
       }
     };
-    $("#top-user").onclick = (e) => {
-      dropMenu(e.currentTarget, [
-        { icon: I.user, label: user.name + " " + (user.last || ""), onClick: () => navigate("/profile") },
-        { icon: I.settings, label: t("settings"), onClick: () => navigate("/settings") },
-        { icon: I.key, label: t("changePassword"), onClick: () => navigate("/profile") },
-        "-",
-        { icon: I.logout, label: t("loggedOut").replace("شدید", "شدن") || t("logout"), onClick: doLogout, danger: false },
-      ], { header: '<div class="mi-user"><div class="u-name">' + U.esc(user.name + " " + (user.last || "")) + '</div><div class="u-mail small muted">' + U.esc(user.email) + "</div></div>" });
+    $("#top-user").onclick = function (e) {
+      dropMenu(e.currentTarget, [{
+        icon: I.user,
+        label: user.name + " " + (user.last || ""),
+        onClick: function onClick() {
+          return navigate("/profile");
+        }
+      }, {
+        icon: I.settings,
+        label: t("settings"),
+        onClick: function onClick() {
+          return navigate("/settings");
+        }
+      }, {
+        icon: I.key,
+        label: t("changePassword"),
+        onClick: function onClick() {
+          return navigate("/profile");
+        }
+      }, "-", {
+        icon: I.logout,
+        label: t("loggedOut").replace("شدید", "شدن") || t("logout"),
+        onClick: doLogout,
+        danger: false
+      }], {
+        header: '<div class="mi-user"><div class="u-name">' + U.esc(user.name + " " + (user.last || "")) + '</div><div class="u-mail small muted">' + U.esc(user.email) + "</div></div>"
+      });
     };
-    $$("[data-nav]").forEach(b => { b.onclick = () => navigate(b.dataset.nav); });
+    $$("[data-nav]").forEach(function (b) {
+      b.onclick = function () {
+        return navigate(b.dataset.nav);
+      };
+    });
   }
   function doLogout() {
-    const u = store.currentUser();
+    var u = store.currentUser();
     store.logout();
     if (u) store.logActivity(u.email, "logout", "");
     toast(t("loggedOut"), "ok");
@@ -308,14 +465,9 @@
 
   /* ================= shell ================= */
   function renderShell(contentHTML) {
-    const user = store.currentUser();
-    const root = $("#root");
-    root.innerHTML =
-      '<div class="app" id="app-shell">' +
-      '<div class="sidebar" id="sidebar"></div>' +
-      topbarHTML(user) +
-      '<div class="main" id="main-area">' + contentHTML + "</div>" +
-      "</div>";
+    var user = store.currentUser();
+    var root = $("#root");
+    root.innerHTML = '<div class="app" id="app-shell">' + '<div class="sidebar" id="sidebar"></div>' + topbarHTML(user) + '<div class="main" id="main-area">' + contentHTML + "</div>" + "</div>";
     bindTopbar(user);
     OC.renderSidebar();
   }
@@ -326,174 +478,377 @@
     return '<div class="side-section">' + (icon || "") + t(key) + "</div>";
   }
   function groupConvs(list) {
-    const now = Date.now();
-    const groups = { pinned: [], fav: [], today: [], yest: [], d7: [], d30: [], older: [] };
-    const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
-    const t0 = startOfToday.getTime();
-    for (const c of list) {
-      if (c.pinned) { groups.pinned.push(c); continue; }
-      if (c.fav) { groups.fav.push(c); continue; }
-      const d = c.updatedAt || c.createdAt || now;
-      if (d >= t0) groups.today.push(c);
-      else if (d >= t0 - 864e5) groups.yest.push(c);
-      else if (d >= t0 - 7 * 864e5) groups.d7.push(c);
-      else if (d >= t0 - 30 * 864e5) groups.d30.push(c);
-      else groups.older.push(c);
+    var now = Date.now();
+    var groups = {
+      pinned: [],
+      fav: [],
+      today: [],
+      yest: [],
+      d7: [],
+      d30: [],
+      older: []
+    };
+    var startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    var t0 = startOfToday.getTime();
+    var _iterator4 = _createForOfIteratorHelper(list),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var c = _step4.value;
+        if (c.pinned) {
+          groups.pinned.push(c);
+          continue;
+        }
+        if (c.fav) {
+          groups.fav.push(c);
+          continue;
+        }
+        var d = c.updatedAt || c.createdAt || now;
+        if (d >= t0) groups.today.push(c);else if (d >= t0 - 864e5) groups.yest.push(c);else if (d >= t0 - 7 * 864e5) groups.d7.push(c);else if (d >= t0 - 30 * 864e5) groups.d30.push(c);else groups.older.push(c);
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
     }
-    for (const k of Object.keys(groups)) groups[k].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    for (var _i = 0, _Object$keys = Object.keys(groups); _i < _Object$keys.length; _i++) {
+      var k = _Object$keys[_i];
+      groups[k].sort(function (a, b) {
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
+    }
     return groups;
   }
-
   OC.renderSidebar = function () {
-    const sb = $("#sidebar");
+    var sb = $("#sidebar");
     if (!sb) return;
-    const user = store.currentUser();
-    if (!user) { sb.innerHTML = ""; return; }
-    const q = (OC._sideQuery || "").trim();
-    let convs = store.getConvs().filter(c => !c.archived && !c.trashed);
-    if (q) convs = convs.filter(c => (c.title || "").toLowerCase().includes(q.toLowerCase()) ||
-      c.messages && c.messages.some(m => (m.content || "").toLowerCase().includes(q.toLowerCase())));
-    const archCount = store.getConvs().filter(c => c.archived && !c.trashed).length;
-    const trashCount = store.getConvs().filter(c => c.trashed).length;
-    const g = groupConvs(convs);
-
-    const convItem = (c) => {
-      const active = (OC._currentConvId === c.id) ? " active" : "";
-      return '<div class="conv-item' + active + '" data-cid="' + c.id + '">' +
-        '<span class="c-ico">' + I.code + "</span>" +
-        '<span class="c-title">' + U.esc(c.title || t("newChat")) + "</span>" +
-        (c.model ? "" : "") +
-        '<button class="c-del" title="' + t("rename") + '" data-more="' + c.id + '">' + I.chevronDown + "</button>" +
-        "</div>";
+    var user = store.currentUser();
+    if (!user) {
+      sb.innerHTML = "";
+      return;
+    }
+    var q = (OC._sideQuery || "").trim();
+    var convs = store.getConvs().filter(function (c) {
+      return !c.archived && !c.trashed;
+    });
+    if (q) convs = convs.filter(function (c) {
+      return (c.title || "").toLowerCase().includes(q.toLowerCase()) || c.messages && c.messages.some(function (m) {
+        return (m.content || "").toLowerCase().includes(q.toLowerCase());
+      });
+    });
+    var archCount = store.getConvs().filter(function (c) {
+      return c.archived && !c.trashed;
+    }).length;
+    var trashCount = store.getConvs().filter(function (c) {
+      return c.trashed;
+    }).length;
+    var g = groupConvs(convs);
+    var convItem = function convItem(c) {
+      var active = OC._currentConvId === c.id ? " active" : "";
+      return '<div class="conv-item' + active + '" data-cid="' + c.id + '">' + '<span class="c-ico">' + I.code + "</span>" + '<span class="c-title">' + U.esc(c.title || t("newChat")) + "</span>" + (c.model ? "" : "") + '<button class="c-del" title="' + t("rename") + '" data-more="' + c.id + '">' + I.chevronDown + "</button>" + "</div>";
     };
-
-    let html =
-      '<div class="side-head"><button class="new-chat-btn" id="btn-new-chat">' + I.plus + "<span>" + t("newChat") + "</span></button></div>" +
-      '<div class="side-search"><input class="input" id="side-q" placeholder="' + t("searchChats") + '" value="' + U.esc(q) + '"></div>' +
-      '<div class="side-list" id="side-list">';
+    var html = '<div class="side-head"><button class="new-chat-btn" id="btn-new-chat">' + I.plus + "<span>" + t("newChat") + "</span></button></div>" + '<div class="side-search"><input class="input" id="side-q" placeholder="' + t("searchChats") + '" value="' + U.esc(q) + '"></div>' + '<div class="side-list" id="side-list">';
     if (q && !convs.length) html += '<div class="side-section">' + t("noChatFound") + "</div>";
-    if (g.pinned.length) { html += sectionLabel("pinned", I.pin) + g.pinned.map(convItem).join(""); }
-    if (g.fav.length) { html += sectionLabel("favorites", I.star) + g.fav.map(convItem).join(""); }
-    for (const k of ["today", "yest", "d7", "d30", "older"]) {
-      if (g[k].length) { html += sectionLabel(k) + g[k].map(convItem).join(""); }
+    if (g.pinned.length) {
+      html += sectionLabel("pinned", I.pin) + g.pinned.map(convItem).join("");
+    }
+    if (g.fav.length) {
+      html += sectionLabel("favorites", I.star) + g.fav.map(convItem).join("");
+    }
+    for (var _i2 = 0, _arr = ["today", "yest", "d7", "d30", "older"]; _i2 < _arr.length; _i2++) {
+      var k = _arr[_i2];
+      if (g[k].length) {
+        html += sectionLabel(k) + g[k].map(convItem).join("");
+      }
     }
     if (!q && !convs.length) html += '<div class="side-section muted">' + t("nothingHere") + "</div>";
-    html += "</div>" +
-      '<div class="side-foot">' +
-      (archCount ? '<button class="user-pill" data-arch="1"><span class="c-ico">' + I.archive + '</span><span class="u-name">' + t("archive") + ' <span class="badge">' + archCount + "</span></span></button>" : "") +
-      (trashCount ? '<button class="user-pill" data-trash="1"><span class="c-ico">' + I.trash + '</span><span class="u-name">' + t("trash") + ' <span class="badge">' + trashCount + "</span></span></button>" : "") +
-      '<button class="user-pill" id="pill-user">' + avatarHTML(user) + '<span style="min-width:0"><span class="u-name" style="display:block">' + U.esc(user.name + " " + (user.last || "")) + '</span><span class="u-mail" style="display:block">' + U.esc(user.email) + "</span></span></button>" +
-      "</div>";
-
+    html += "</div>" + '<div class="side-foot">' + (archCount ? '<button class="user-pill" data-arch="1"><span class="c-ico">' + I.archive + '</span><span class="u-name">' + t("archive") + ' <span class="badge">' + archCount + "</span></span></button>" : "") + (trashCount ? '<button class="user-pill" data-trash="1"><span class="c-ico">' + I.trash + '</span><span class="u-name">' + t("trash") + ' <span class="badge">' + trashCount + "</span></span></button>" : "") + '<button class="user-pill" id="pill-user">' + avatarHTML(user) + '<span style="min-width:0"><span class="u-name" style="display:block">' + U.esc(user.name + " " + (user.last || "")) + '</span><span class="u-mail" style="display:block">' + U.esc(user.email) + "</span></span></button>" + "</div>";
     sb.innerHTML = html;
     OC._sideQuery = q;
-
-    $("#btn-new-chat").onclick = () => { OC.newChat(); closeSidebar(); };
-    const qInp = $("#side-q");
-    qInp.addEventListener("input", U.debounce(() => { OC._sideQuery = qInp.value; OC.renderSidebar(); const nq = $("#side-q"); if (nq) { nq.focus(); nq.setSelectionRange(nq.value.length, nq.value.length); } }, 250));
-    $$(".conv-item", sb).forEach(item => {
-      const cid = item.dataset.cid;
-      item.onclick = (e) => {
+    $("#btn-new-chat").onclick = function () {
+      OC.newChat();
+      closeSidebar();
+    };
+    var qInp = $("#side-q");
+    qInp.addEventListener("input", U.debounce(function () {
+      OC._sideQuery = qInp.value;
+      OC.renderSidebar();
+      var nq = $("#side-q");
+      if (nq) {
+        nq.focus();
+        nq.setSelectionRange(nq.value.length, nq.value.length);
+      }
+    }, 250));
+    $$(".conv-item", sb).forEach(function (item) {
+      var cid = item.dataset.cid;
+      item.onclick = function (e) {
         if (e.target.closest("[data-more]")) return;
         navigate("/chat/" + cid);
         closeSidebar();
       };
-      item.oncontextmenu = (e) => { e.preventDefault(); convMenu(e.clientX, e.clientY, cid); };
-      const moreBtn = $("[data-more]", item);
-      if (moreBtn) moreBtn.onclick = (e) => {
-        const r = moreBtn.getBoundingClientRect();
+      item.oncontextmenu = function (e) {
+        e.preventDefault();
+        convMenu(e.clientX, e.clientY, cid);
+      };
+      var moreBtn = $("[data-more]", item);
+      if (moreBtn) moreBtn.onclick = function (e) {
+        var r = moreBtn.getBoundingClientRect();
         convMenu(r.left, r.bottom + 4, cid);
       };
     });
-    const arch = $("[data-arch]", sb);
-    if (arch) arch.onclick = () => { OC.showArchiveList(); };
-    const trashBtn = $("[data-trash]", sb);
-    if (trashBtn) trashBtn.onclick = () => { OC.showTrashList(); };
-    $("#pill-user").onclick = (e) => {
-      dropMenu(e.currentTarget, [
-        { icon: I.user, label: t("profile"), onClick: () => navigate("/profile") },
-        { icon: I.settings, label: t("settings"), onClick: () => navigate("/settings") },
-        { icon: I.logout, label: t("loggedOut").replace("شدید", "شدن"), onClick: doLogout },
-      ]);
+    var arch = $("[data-arch]", sb);
+    if (arch) arch.onclick = function () {
+      OC.showArchiveList();
+    };
+    var trashBtn = $("[data-trash]", sb);
+    if (trashBtn) trashBtn.onclick = function () {
+      OC.showTrashList();
+    };
+    $("#pill-user").onclick = function (e) {
+      dropMenu(e.currentTarget, [{
+        icon: I.user,
+        label: t("profile"),
+        onClick: function onClick() {
+          return navigate("/profile");
+        }
+      }, {
+        icon: I.settings,
+        label: t("settings"),
+        onClick: function onClick() {
+          return navigate("/settings");
+        }
+      }, {
+        icon: I.logout,
+        label: t("loggedOut").replace("شدید", "شدن"),
+        onClick: doLogout
+      }]);
     };
   };
-
   function convMenu(x, y, cid) {
-    const c = store.getConv(cid);
+    var c = store.getConv(cid);
     if (!c) return;
-    ctxMenu(x, y, [
-      { icon: I.edit, label: t("renameChat"), onClick: async () => {
-        const v = await OC.promptDialog({ title: t("renameChat"), label: t("newName"), value: c.title, okText: t("save") });
-        if (v) { c.title = v; store.putConv(c); OC.renderSidebar(); toast(t("chatRenamed"), "ok"); }
-      } },
-      c.pinned
-        ? { icon: I.pin, label: t("unpin"), onClick: () => { c.pinned = false; store.putConv(c); OC.renderSidebar(); toast(t("unpinDone")); } }
-        : { icon: I.pin, label: t("pin"), onClick: () => { c.pinned = true; store.putConv(c); OC.renderSidebar(); toast(t("pinnedTop"), "ok"); } },
-      c.fav
-        ? { icon: I.star, label: t("favoriteRemove"), onClick: () => { c.fav = false; store.putConv(c); OC.renderSidebar(); } }
-        : { icon: I.star, label: t("favoriteAdd"), onClick: () => { c.fav = true; store.putConv(c); OC.renderSidebar(); } },
-      "-",
-      { icon: I.archive, label: t("archive"), onClick: () => { c.archived = true; store.putConv(c); OC.renderSidebar(); toast(t("archived")); } },
-      { icon: I.trash, label: t("toTrash"), danger: true, onClick: async () => {
-        if (await OC.confirm({ title: t("toTrash"), message: t("toTrashMsg"), danger: true, okText: t("confirm") })) {
-          c.trashed = true; c.trashedAt = Date.now();
-          store.putConv(c);
-          if (OC._currentConvId === c.id) navigate("/chat");
-          OC.renderSidebar();
-          toast(t("trashed"));
+    ctxMenu(x, y, [{
+      icon: I.edit,
+      label: t("renameChat"),
+      onClick: function () {
+        var _onClick = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+          var v;
+          return _regenerator().w(function (_context) {
+            while (1) switch (_context.n) {
+              case 0:
+                _context.n = 1;
+                return OC.promptDialog({
+                  title: t("renameChat"),
+                  label: t("newName"),
+                  value: c.title,
+                  okText: t("save")
+                });
+              case 1:
+                v = _context.v;
+                if (v) {
+                  c.title = v;
+                  store.putConv(c);
+                  OC.renderSidebar();
+                  toast(t("chatRenamed"), "ok");
+                }
+              case 2:
+                return _context.a(2);
+            }
+          }, _callee);
+        }));
+        function onClick() {
+          return _onClick.apply(this, arguments);
         }
-      } },
-      "-",
-      { icon: I.download, label: t("export") + " (MD)", onClick: () => OC.exportChatMd(c) },
-      { icon: I.print, label: t("printView"), onClick: () => { navigate("/chat/" + c.id); setTimeout(() => window.print(), 400); } },
-    ]);
+        return onClick;
+      }()
+    }, c.pinned ? {
+      icon: I.pin,
+      label: t("unpin"),
+      onClick: function onClick() {
+        c.pinned = false;
+        store.putConv(c);
+        OC.renderSidebar();
+        toast(t("unpinDone"));
+      }
+    } : {
+      icon: I.pin,
+      label: t("pin"),
+      onClick: function onClick() {
+        c.pinned = true;
+        store.putConv(c);
+        OC.renderSidebar();
+        toast(t("pinnedTop"), "ok");
+      }
+    }, c.fav ? {
+      icon: I.star,
+      label: t("favoriteRemove"),
+      onClick: function onClick() {
+        c.fav = false;
+        store.putConv(c);
+        OC.renderSidebar();
+      }
+    } : {
+      icon: I.star,
+      label: t("favoriteAdd"),
+      onClick: function onClick() {
+        c.fav = true;
+        store.putConv(c);
+        OC.renderSidebar();
+      }
+    }, "-", {
+      icon: I.archive,
+      label: t("archive"),
+      onClick: function onClick() {
+        c.archived = true;
+        store.putConv(c);
+        OC.renderSidebar();
+        toast(t("archived"));
+      }
+    }, {
+      icon: I.trash,
+      label: t("toTrash"),
+      danger: true,
+      onClick: function () {
+        var _onClick2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.n) {
+              case 0:
+                _context2.n = 1;
+                return OC.confirm({
+                  title: t("toTrash"),
+                  message: t("toTrashMsg"),
+                  danger: true,
+                  okText: t("confirm")
+                });
+              case 1:
+                if (!_context2.v) {
+                  _context2.n = 2;
+                  break;
+                }
+                c.trashed = true;
+                c.trashedAt = Date.now();
+                store.putConv(c);
+                if (OC._currentConvId === c.id) navigate("/chat");
+                OC.renderSidebar();
+                toast(t("trashed"));
+              case 2:
+                return _context2.a(2);
+            }
+          }, _callee2);
+        }));
+        function onClick() {
+          return _onClick2.apply(this, arguments);
+        }
+        return onClick;
+      }()
+    }, "-", {
+      icon: I.download,
+      label: t("export") + " (MD)",
+      onClick: function onClick() {
+        return OC.exportChatMd(c);
+      }
+    }, {
+      icon: I.print,
+      label: t("printView"),
+      onClick: function onClick() {
+        navigate("/chat/" + c.id);
+        setTimeout(function () {
+          return window.print();
+        }, 400);
+      }
+    }]);
   }
   OC.convMenu = convMenu;
 
   /* ================= archive & trash lists ================= */
   OC.showArchiveList = function () {
-    const list = store.getConvs().filter(c => c.archived && !c.trashed);
-    const body = el('<div class="stack"></div>');
+    var list = store.getConvs().filter(function (c) {
+      return c.archived && !c.trashed;
+    });
+    var body = el('<div class="stack"></div>');
     if (!list.length) body.appendChild(el('<p class="muted small">' + t("nothingHere") + "</p>"));
-    list.forEach(c => {
-      const row = el('<div class="flex"><span class="c-ico">' + I.archive + '</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.esc(c.title) + '</span><button class="btn btn-sm">' + t("unarchived").replace("به فهرست ", "") + "</button></div>");
-      $("button", row).onclick = () => {
-        c.archived = false; store.putConv(c); OC.renderSidebar(); m.close(); toast(t("unarchived"), "ok");
+    list.forEach(function (c) {
+      var row = el('<div class="flex"><span class="c-ico">' + I.archive + '</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.esc(c.title) + '</span><button class="btn btn-sm">' + t("unarchived").replace("به فهرست ", "") + "</button></div>");
+      $("button", row).onclick = function () {
+        c.archived = false;
+        store.putConv(c);
+        OC.renderSidebar();
+        m.close();
+        toast(t("unarchived"), "ok");
       };
       body.appendChild(row);
     });
-    const m = modal({ title: t("archive"), body });
+    var m = modal({
+      title: t("archive"),
+      body: body
+    });
   };
-
   OC.showTrashList = function () {
-    const list = store.getConvs().filter(c => c.trashed);
-    const body = el('<div class="stack"></div>');
+    var list = store.getConvs().filter(function (c) {
+      return c.trashed;
+    });
+    var body = el('<div class="stack"></div>');
     if (!list.length) body.appendChild(el('<p class="muted small">' + t("emptyTrash") + "</p>"));
-    list.forEach(c => {
-      const days = Math.max(0, Math.ceil((c.trashedAt + store.sysSettings().trashDays * 864e5 - Date.now()) / 864e5));
-      const row = el('<div class="flex"><span class="c-ico">' + I.trash + '</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.esc(c.title) + '</span><span class="badge small">' + U.faNum(days) + " " + t("days7").replace("۷ ", "") + '</span><button class="btn btn-sm">' + t("restore") + '</button><button class="btn btn-sm btn-soft-danger">' + t("deleteForever") + "</button></div>");
-      const [bRestore, bDel] = $$("button", row);
-      bRestore.onclick = () => { c.trashed = false; delete c.trashedAt; store.putConv(c); OC.renderSidebar(); m.close(); toast(t("restored"), "ok"); };
-      bDel.onclick = async () => {
-        if (await OC.confirm({ title: t("deleteForever"), message: t("deleteForeverMsg"), danger: true })) {
-          const all = store.getConvs().filter(x => x.id !== c.id);
-          store.saveConvs(all);
-          OC.renderSidebar(); m.close(); toast(t("deletedForever"));
-        }
+    list.forEach(function (c) {
+      var days = Math.max(0, Math.ceil((c.trashedAt + store.sysSettings().trashDays * 864e5 - Date.now()) / 864e5));
+      var row = el('<div class="flex"><span class="c-ico">' + I.trash + '</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.esc(c.title) + '</span><span class="badge small">' + U.faNum(days) + " " + t("days7").replace("۷ ", "") + '</span><button class="btn btn-sm">' + t("restore") + '</button><button class="btn btn-sm btn-soft-danger">' + t("deleteForever") + "</button></div>");
+      var _$$ = $$("button", row),
+        _$$2 = _slicedToArray(_$$, 2),
+        bRestore = _$$2[0],
+        bDel = _$$2[1];
+      bRestore.onclick = function () {
+        c.trashed = false;
+        delete c.trashedAt;
+        store.putConv(c);
+        OC.renderSidebar();
+        m.close();
+        toast(t("restored"), "ok");
       };
+      bDel.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+        var all;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.n) {
+            case 0:
+              _context3.n = 1;
+              return OC.confirm({
+                title: t("deleteForever"),
+                message: t("deleteForeverMsg"),
+                danger: true
+              });
+            case 1:
+              if (!_context3.v) {
+                _context3.n = 2;
+                break;
+              }
+              all = store.getConvs().filter(function (x) {
+                return x.id !== c.id;
+              });
+              store.saveConvs(all);
+              OC.renderSidebar();
+              m.close();
+              toast(t("deletedForever"));
+            case 2:
+              return _context3.a(2);
+          }
+        }, _callee3);
+      }));
       body.appendChild(row);
     });
-    const m = modal({ title: t("trash"), body });
+    var m = modal({
+      title: t("trash"),
+      body: body
+    });
   };
 
   /* ================= export chat ================= */
   OC.exportChatMd = function (c) {
-    const md = [
-      "# " + (c.title || t("newChat")),
-      "",
-      ...c.messages.map(m => (m.role === "user" ? "## " + t("you") : "## " + t("assistantAvatar")) + "\n\n" + (m.content || "")),
-    ].join("\n\n");
-    U.download((c.title || "chat").replace(/[\\/:*?"<>|]+/g, "-") + ".md", new Blob([md], { type: "text/markdown" }));
+    var md = ["# " + (c.title || t("newChat")), ""].concat(_toConsumableArray(c.messages.map(function (m) {
+      return (m.role === "user" ? "## " + t("you") : "## " + t("assistantAvatar")) + "\n\n" + (m.content || "");
+    }))).join("\n\n");
+    U.download((c.title || "chat").replace(/[\\/:*?"<>|]+/g, "-") + ".md", new Blob([md], {
+      type: "text/markdown"
+    }));
     toast(t("downloaded"), "ok");
   };
 
@@ -506,51 +861,36 @@
 
   /* ================= AUTH VIEWS ================= */
   function authShell(cardHTML) {
-    $("#root").innerHTML =
-      '<div class="auth-wrap">' +
-      '<div class="auth-top">' +
-      '<div class="spacer"></div>' +
-      '<button class="icon-btn" id="top-theme">' + I.sun + '</button>' +
-      '<button class="icon-btn" id="top-lang">' + I.globe + "</button>" +
-      "</div>" +
-      '<div class="auth-card">' + cardHTML + "</div>" +
-      '<p class="auth-note">' + t("privacyNote") + "</p>" +
-      "</div>";
-    const themeBtn = $("#top-theme");
-    const applyIcon = () => themeBtn.innerHTML = document.documentElement.classList.contains("dark") ? I.moon : I.sun;
-    themeBtn.onclick = () => {
-      const dark = document.documentElement.classList.contains("dark");
+    $("#root").innerHTML = '<div class="auth-wrap">' + '<div class="auth-top">' + '<div class="spacer"></div>' + '<button class="icon-btn" id="top-theme">' + I.sun + '</button>' + '<button class="icon-btn" id="top-lang">' + I.globe + "</button>" + "</div>" + '<div class="auth-card">' + cardHTML + "</div>" + '<p class="auth-note">' + t("privacyNote") + "</p>" + "</div>";
+    var themeBtn = $("#top-theme");
+    var applyIcon = function applyIcon() {
+      return themeBtn.innerHTML = document.documentElement.classList.contains("dark") ? I.moon : I.sun;
+    };
+    themeBtn.onclick = function () {
+      var dark = document.documentElement.classList.contains("dark");
       document.documentElement.classList.toggle("dark", !dark);
       document.documentElement.style.colorScheme = !dark ? "dark" : "light";
       applyIcon();
     };
     applyIcon();
-    $("#top-lang").onclick = () => { OC.i18n.setLocale(OC.i18n.locale() === "fa" ? "en" : "fa"); renderRoute(); };
+    $("#top-lang").onclick = function () {
+      OC.i18n.setLocale(OC.i18n.locale() === "fa" ? "en" : "fa");
+      renderRoute();
+    };
   }
-
   routes["/login"] = function () {
-    const sys = store.sysSettings();
+    var sys = store.sysSettings();
     if (sys.maintenance) {
       authShell('<h1>' + t("maintenance") + '</h1><p class="sub">' + t("wait") + "</p>");
       return;
     }
-    authShell(
-      "<h1>" + t("welcomeBack") + "</h1>" +
-      '<p class="sub">' + t("connectOwnKey") + "</p>" +
-      '<form id="login-form">' +
-      '<div class="field"><label>' + t("email") + " / " + t("username") + '</label><input class="input" id="f-id" autocomplete="username" required></div>' +
-      '<div class="field"><label>' + t("password") + '</label><input class="input" type="password" id="f-pass" autocomplete="current-password" required></div>' +
-      '<div class="err-text hidden" id="f-err"></div>' +
-      '<button class="btn btn-primary btn-lg" type="submit">' + t("login") + "</button>" +
-      "</form>" +
-      '<p class="auth-alt">' + t("noAccount") + ' <a href="#/register">' + t("register") + "</a></p>"
-    );
-    $("#login-form").onsubmit = (e) => {
+    authShell("<h1>" + t("welcomeBack") + "</h1>" + '<p class="sub">' + t("connectOwnKey") + "</p>" + '<form id="login-form">' + '<div class="field"><label>' + t("email") + " / " + t("username") + '</label><input class="input" id="f-id" autocomplete="username" required></div>' + '<div class="field"><label>' + t("password") + '</label><input class="input" type="password" id="f-pass" autocomplete="current-password" required></div>' + '<div class="err-text hidden" id="f-err"></div>' + '<button class="btn btn-primary btn-lg" type="submit">' + t("login") + "</button>" + "</form>" + '<p class="auth-alt">' + t("noAccount") + ' <a href="#/register">' + t("register") + "</a></p>");
+    $("#login-form").onsubmit = function (e) {
       e.preventDefault();
-      const id = $("#f-id").value.trim();
-      const pass = $("#f-pass").value;
-      const err = $("#f-err");
-      const user = store.findUser(id);
+      var id = $("#f-id").value.trim();
+      var pass = $("#f-pass").value;
+      var err = $("#f-err");
+      var user = store.findUser(id);
       if (!user || user.passHash !== store.hashPass(pass, user.email)) {
         err.textContent = t("wrongCreds");
         err.classList.remove("hidden");
@@ -569,54 +909,52 @@
       renderRoute();
     };
   };
-
   routes["/register"] = function () {
-    const sys = store.sysSettings();
-    if (sys.maintenance) { routes["/login"](); return; }
-    if (!sys.signupOpen) {
-      authShell("<h1>" + t("signupClosed") + '</h1><p class="sub">' + t("wait") + "</p>" +
-        '<p class="auth-alt">' + t("haveAccount") + ' <a href="#/login">' + t("login") + "</a></p>");
+    var sys = store.sysSettings();
+    if (sys.maintenance) {
+      routes["/login"]();
       return;
     }
-    authShell(
-      "<h1>" + t("buildWorkspace") + "</h1>" +
-      '<p class="sub">' + t("connectOwnKey") + "</p>" +
-      '<form id="reg-form" class="stack">' +
-      '<div class="grid-2"><div class="field"><label>' + t("fullName") + '</label><input class="input" id="f-name" required></div>' +
-      '<div class="field"><label>' + t("lastName") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="f-last"></div></div>' +
-      '<div class="field"><label>' + t("email") + '</label><input class="input" id="f-email" type="email" required></div>' +
-      '<div class="field"><label>' + t("username") + '</label><input class="input" id="f-user" required></div>' +
-      '<div class="field"><label>' + t("phone") + ' <span class="muted">(' + t("iranianPhone") + ' ۰۹۱۲۱۲۳۴۵۶۷)</span></label><input class="input" id="f-phone" inputmode="tel" placeholder="09xxxxxxxxx"></div>' +
-      '<div class="field"><label>' + t("password") + '</label><input class="input" type="password" id="f-pass" required><span class="hint">' + t("minChars") + "</span></div>" +
-      '<div class="err-text hidden" id="f-err"></div>' +
-      '<button class="btn btn-primary btn-lg" type="submit">' + t("register") + "</button>" +
-      "</form>" +
-      '<p class="auth-alt">' + t("haveAccount") + ' <a href="#/login">' + t("login") + "</a></p>"
-    );
-    $("#reg-form").onsubmit = (e) => {
+    if (!sys.signupOpen) {
+      authShell("<h1>" + t("signupClosed") + '</h1><p class="sub">' + t("wait") + "</p>" + '<p class="auth-alt">' + t("haveAccount") + ' <a href="#/login">' + t("login") + "</a></p>");
+      return;
+    }
+    authShell("<h1>" + t("buildWorkspace") + "</h1>" + '<p class="sub">' + t("connectOwnKey") + "</p>" + '<form id="reg-form" class="stack">' + '<div class="grid-2"><div class="field"><label>' + t("fullName") + '</label><input class="input" id="f-name" required></div>' + '<div class="field"><label>' + t("lastName") + ' <span class="muted">(' + t("optional") + ')</span></label><input class="input" id="f-last"></div></div>' + '<div class="field"><label>' + t("email") + '</label><input class="input" id="f-email" type="email" required></div>' + '<div class="field"><label>' + t("username") + '</label><input class="input" id="f-user" required></div>' + '<div class="field"><label>' + t("phone") + ' <span class="muted">(' + t("iranianPhone") + ' ۰۹۱۲۱۲۳۴۵۶۷)</span></label><input class="input" id="f-phone" inputmode="tel" placeholder="09xxxxxxxxx"></div>' + '<div class="field"><label>' + t("password") + '</label><input class="input" type="password" id="f-pass" required><span class="hint">' + t("minChars") + "</span></div>" + '<div class="err-text hidden" id="f-err"></div>' + '<button class="btn btn-primary btn-lg" type="submit">' + t("register") + "</button>" + "</form>" + '<p class="auth-alt">' + t("haveAccount") + ' <a href="#/login">' + t("login") + "</a></p>");
+    $("#reg-form").onsubmit = function (e) {
       e.preventDefault();
-      const err = $("#f-err");
+      var err = $("#f-err");
       err.classList.add("hidden");
-      const name = $("#f-name").value.trim();
-      const last = $("#f-last").value.trim();
-      const email = $("#f-email").value.trim().toLowerCase();
-      const username = $("#f-user").value.trim().toLowerCase();
-      const phone = $("#f-phone").value.trim();
-      const pass = $("#f-pass").value;
-      let msg = "";
-      if (!name || !email || !username || !pass) msg = t("fillFields");
-      else if (!store.validEmail(email)) msg = t("invalidEmail");
-      else if (!store.passOk(pass)) msg = t("passWeak") + " — " + t("minChars");
-      else if (phone && !store.validPhone(phone)) msg = t("invalidPhone");
-      else if (store.getUsers().some(u => u.email.toLowerCase() === email)) msg = t("emailTaken");
-      else if (store.getUsers().some(u => (u.username || "").toLowerCase() === username)) msg = t("usernameTaken");
-      if (msg) { err.textContent = msg; err.classList.remove("hidden"); return; }
-      const user = {
-        id: U.uid(), email, username, name, last, phone,
+      var name = $("#f-name").value.trim();
+      var last = $("#f-last").value.trim();
+      var email = $("#f-email").value.trim().toLowerCase();
+      var username = $("#f-user").value.trim().toLowerCase();
+      var phone = $("#f-phone").value.trim();
+      var pass = $("#f-pass").value;
+      var msg = "";
+      if (!name || !email || !username || !pass) msg = t("fillFields");else if (!store.validEmail(email)) msg = t("invalidEmail");else if (!store.passOk(pass)) msg = t("passWeak") + " — " + t("minChars");else if (phone && !store.validPhone(phone)) msg = t("invalidPhone");else if (store.getUsers().some(function (u) {
+        return u.email.toLowerCase() === email;
+      })) msg = t("emailTaken");else if (store.getUsers().some(function (u) {
+        return (u.username || "").toLowerCase() === username;
+      })) msg = t("usernameTaken");
+      if (msg) {
+        err.textContent = msg;
+        err.classList.remove("hidden");
+        return;
+      }
+      var user = {
+        id: U.uid(),
+        email: email,
+        username: username,
+        name: name,
+        last: last,
+        phone: phone,
         passHash: store.hashPass(pass, email),
-        role: "user", avatar: "", createdAt: Date.now(), disabled: false,
+        role: "user",
+        avatar: "",
+        createdAt: Date.now(),
+        disabled: false
       };
-      const users = store.getUsers();
+      var users = store.getUsers();
       users.push(user);
       store.saveUsers(users);
       store.logActivity(email, "register", name + " " + last);
@@ -628,278 +966,344 @@
   };
 
   /* ================= CHAT VIEW ================= */
-  let streamHandle = null;
-  let pendingFiles = [];
-
+  var streamHandle = null;
+  var pendingFiles = [];
   routes["/chat"] = function (hash) {
-    const convId = hash.split("/")[2] || null;
+    var convId = hash.split("/")[2] || null;
     OC._currentConvId = convId;
     renderShell('<div class="chat-layout" id="chat-root"></div>');
     OC.renderSidebar();
     renderChat(convId);
     if (window.innerWidth <= 900) closeSidebar();
   };
-
   function currentConv() {
     return OC._currentConvId ? store.getConv(OC._currentConvId) : null;
   }
-
   function renderChat(convId) {
-    const root = $("#chat-root");
+    var root = $("#chat-root");
     if (!root) return;
-    const conv = convId ? currentConv() : null;
-    if (convId && !conv) { navigate("/chat"); return; }
-
-    const user = store.currentUser();
-    const provs = OC.providers.allProviders();
-    const sys = store.sysSettings();
-    const settings = store.getUserSettings();
+    var conv = convId ? currentConv() : null;
+    if (convId && !conv) {
+      navigate("/chat");
+      return;
+    }
+    var user = store.currentUser();
+    var provs = OC.providers.allProviders();
+    var sys = store.sysSettings();
+    var settings = store.getUserSettings();
 
     // model selector options
-    let selOptions = "";
-    const defP = OC.providers.defaultProvider();
-    for (const p of provs) {
-      for (const m of (p.models || [])) {
-        const sel = (conv && conv.model === p.id + "::" + m) ? " selected" : "";
-        selOptions += '<option value="' + U.esc(p.id + "::" + m) + '"' + sel + ">" + U.esc((p.name || p.type) + " · " + m) + "</option>";
+    var selOptions = "";
+    var defP = OC.providers.defaultProvider();
+    var _iterator5 = _createForOfIteratorHelper(provs),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var p = _step5.value;
+        var _iterator6 = _createForOfIteratorHelper(p.models || []),
+          _step6;
+        try {
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+            var m = _step6.value;
+            var sel = conv && conv.model === p.id + "::" + m ? " selected" : "";
+            selOptions += '<option value="' + U.esc(p.id + "::" + m) + '"' + sel + ">" + U.esc((p.name || p.type) + " · " + m) + "</option>";
+          }
+        } catch (err) {
+          _iterator6.e(err);
+        } finally {
+          _iterator6.f();
+        }
       }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
     }
-    const canSearch = sys.webSearchEnabled;
-    const searchOn = conv ? !!conv.webSearch : !!OC._pendingSearch;
-
-    root.innerHTML =
-      '<div class="chat-scroll" id="chat-scroll"><div class="chat-inner" id="chat-inner"></div></div>' +
-      '<div class="composer-wrap"><div class="composer" id="composer">' +
-      '<div class="pending-strip hidden" id="pending-strip"></div>' +
-      '<textarea id="composer-input" rows="1" placeholder="' + t("messagePlaceholder") + '"></textarea>' +
-      '<div class="composer-row">' +
-      '<button class="icon-btn" id="btn-attach" title="' + t("attach") + '">' + I.paperclip + "</button>" +
-      '<input type="file" id="file-input" multiple class="hidden">' +
-      (canSearch ? '<button class="icon-btn' + (searchOn ? " active" : "") + '" id="btn-websearch" title="' + (searchOn ? t("webSearchOn") : t("webSearchOff")) + '">' + I.globeSearch + "</button>" : "") +
-      '<button class="icon-btn" id="btn-deliver" title="' + t("projectDelivery") + '">' + I.package + "</button>" +
-      '<div class="spacer"></div>' +
-      (provs.length
-        ? '<div class="model-pick"><select id="model-select">' + (selOptions || '<option value="">' + t("defaultModel") + "</option>") + "</select></div>"
-        : '<span class="badge badge-warn">' + t("addProviderFirst") + "</span>") +
-      '<button class="send-btn" id="btn-send">' + I.send + "</button>" +
-      "</div></div></div>";
-
+    var canSearch = sys.webSearchEnabled;
+    var searchOn = conv ? !!conv.webSearch : !!OC._pendingSearch;
+    root.innerHTML = '<div class="chat-scroll" id="chat-scroll"><div class="chat-inner" id="chat-inner"></div></div>' + '<div class="composer-wrap"><div class="composer" id="composer">' + '<div class="pending-strip hidden" id="pending-strip"></div>' + '<textarea id="composer-input" rows="1" placeholder="' + t("messagePlaceholder") + '"></textarea>' + '<div class="composer-row">' + '<button class="icon-btn" id="btn-attach" title="' + t("attach") + '">' + I.paperclip + "</button>" + '<input type="file" id="file-input" multiple class="hidden">' + (canSearch ? '<button class="icon-btn' + (searchOn ? " active" : "") + '" id="btn-websearch" title="' + (searchOn ? t("webSearchOn") : t("webSearchOff")) + '">' + I.globeSearch + "</button>" : "") + '<button class="icon-btn" id="btn-deliver" title="' + t("projectDelivery") + '">' + I.package + "</button>" + '<div class="spacer"></div>' + (provs.length ? '<div class="model-pick"><select id="model-select">' + (selOptions || '<option value="">' + t("defaultModel") + "</option>") + "</select></div>" : '<span class="badge badge-warn">' + t("addProviderFirst") + "</span>") + '<button class="send-btn" id="btn-send">' + I.send + "</button>" + "</div></div></div>";
     renderMessages(conv);
-
-    const input = $("#composer-input");
-    input.addEventListener("input", () => {
+    var input = $("#composer-input");
+    input.addEventListener("input", function () {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 180) + "px";
     });
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendCurrent(); }
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendCurrent();
+      }
     });
     $("#btn-send").onclick = sendCurrent;
-    $("#btn-attach").onclick = () => $("#file-input").click();
+    $("#btn-attach").onclick = function () {
+      return $("#file-input").click();
+    };
     $("#file-input").onchange = onFilesPicked;
-    const wsBtn = $("#btn-websearch");
-    if (wsBtn) wsBtn.onclick = () => {
-      const c = currentConv() || {};
+    var wsBtn = $("#btn-websearch");
+    if (wsBtn) wsBtn.onclick = function () {
+      var c = currentConv() || {};
       c.webSearch = !searchOn;
-      if (c.id) store.putConv(c);
-      else OC._pendingSearch = c.webSearch;
+      if (c.id) store.putConv(c);else OC._pendingSearch = c.webSearch;
       wsBtn.classList.toggle("active", c.webSearch);
       wsBtn.title = c.webSearch ? t("webSearchOn") : t("webSearchOff");
       toast(c.webSearch ? t("webSearchOn") : t("webSearchOff"));
     };
-    const deliverBtn = $("#btn-deliver");
-    if (deliverBtn) deliverBtn.onclick = () => OC.deliverProject(currentConv());
-
+    var deliverBtn = $("#btn-deliver");
+    if (deliverBtn) deliverBtn.onclick = function () {
+      return OC.deliverProject(currentConv());
+    };
     if (window.innerWidth > 900) input.focus();
   }
-
   function onFilesPicked(e) {
-    const sys = store.sysSettings();
-    const files = Array.from(e.target.files || []);
+    var sys = store.sysSettings();
+    var files = Array.from(e.target.files || []);
     e.target.value = "";
-    const maxB = (sys.maxFileSizeMB || 10) * 1024 * 1024;
-    const exts = sys.allowedExtensions || [];
-    for (const f of files) {
-      const ext = (f.name.split(".").pop() || "").toLowerCase();
-      if (exts.length && !exts.includes(ext)) { toast(t("fileTypeUnsupported") + ": ." + ext, "err"); continue; }
-      if (f.size > maxB) { toast(t("fileTooBig") + " (" + f.name + ")", "err"); continue; }
-      if (pendingFiles.length >= 5) { toast(t("fileTooMany"), "err"); break; }
-      const item = { id: U.uid(), name: f.name, size: f.size, type: f.type, ext };
-      if (f.type.startsWith("image/")) {
-        const rd = new FileReader();
-        rd.onload = () => { item.dataUrl = rd.result; renderPending(); };
-        rd.readAsDataURL(f);
-      } else if (/\.(txt|md|json|csv|html|css|js|ts|py|xml|svg|yml|yaml)$/i.test(f.name)) {
-        const rd = new FileReader();
-        rd.onload = () => { item.text = String(rd.result || "").slice(0, 20000); renderPending(); };
-        rd.readAsText(f);
-      }
-      pendingFiles.push(item);
+    var maxB = (sys.maxFileSizeMB || 10) * 1024 * 1024;
+    var exts = sys.allowedExtensions || [];
+    var _loop3 = function _loop3() {
+        var f = _files[_i3];
+        var ext = (f.name.split(".").pop() || "").toLowerCase();
+        if (exts.length && !exts.includes(ext)) {
+          toast(t("fileTypeUnsupported") + ": ." + ext, "err");
+          return 0; // continue
+        }
+        if (f.size > maxB) {
+          toast(t("fileTooBig") + " (" + f.name + ")", "err");
+          return 0; // continue
+        }
+        if (pendingFiles.length >= 5) {
+          toast(t("fileTooMany"), "err");
+          return 1; // break
+        }
+        var item = {
+          id: U.uid(),
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          ext: ext
+        };
+        if (f.type.startsWith("image/")) {
+          var rd = new FileReader();
+          rd.onload = function () {
+            item.dataUrl = rd.result;
+            renderPending();
+          };
+          rd.readAsDataURL(f);
+        } else if (/\.(txt|md|json|csv|html|css|js|ts|py|xml|svg|yml|yaml)$/i.test(f.name)) {
+          var _rd = new FileReader();
+          _rd.onload = function () {
+            item.text = String(_rd.result || "").slice(0, 20000);
+            renderPending();
+          };
+          _rd.readAsText(f);
+        }
+        pendingFiles.push(item);
+      },
+      _ret;
+    for (var _i3 = 0, _files = files; _i3 < _files.length; _i3++) {
+      _ret = _loop3();
+      if (_ret === 0) continue;
+      if (_ret === 1) break;
     }
     renderPending();
   }
-
   function renderPending() {
-    const strip = $("#pending-strip");
+    var strip = $("#pending-strip");
     if (!strip) return;
-    if (!pendingFiles.length) { strip.classList.add("hidden"); strip.innerHTML = ""; return; }
+    if (!pendingFiles.length) {
+      strip.classList.add("hidden");
+      strip.innerHTML = "";
+      return;
+    }
     strip.classList.remove("hidden");
-    strip.innerHTML = pendingFiles.map(f =>
-      '<span class="attach-chip">' +
-      (f.dataUrl ? '<img src="' + f.dataUrl + '">' : I.file) +
-      '<span class="aname">' + U.esc(f.name) + "</span>" +
-      '<span class="muted small">' + U.fmtBytes(f.size) + "</span>" +
-      '<button class="icon-btn" style="width:24px;height:24px" data-rm="' + f.id + '">' + I.x + "</button></span>"
-    ).join("");
-    $$("[data-rm]", strip).forEach(b => {
-      b.onclick = () => { pendingFiles = pendingFiles.filter(f => f.id !== b.dataset.rm); renderPending(); };
+    strip.innerHTML = pendingFiles.map(function (f) {
+      return '<span class="attach-chip">' + (f.dataUrl ? '<img src="' + f.dataUrl + '">' : I.file) + '<span class="aname">' + U.esc(f.name) + "</span>" + '<span class="muted small">' + U.fmtBytes(f.size) + "</span>" + '<button class="icon-btn" style="width:24px;height:24px" data-rm="' + f.id + '">' + I.x + "</button></span>";
+    }).join("");
+    $$("[data-rm]", strip).forEach(function (b) {
+      b.onclick = function () {
+        pendingFiles = pendingFiles.filter(function (f) {
+          return f.id !== b.dataset.rm;
+        });
+        renderPending();
+      };
     });
   }
 
   /* ---------- message rendering ---------- */
   function renderMessages(conv) {
-    const inner = $("#chat-inner");
+    var inner = $("#chat-inner");
     if (!inner) return;
     if (!conv || !conv.messages.length) {
       inner.innerHTML = emptyStateHTML();
-      $$(".sugg", inner).forEach(b => {
-        b.onclick = () => {
-          const inp = $("#composer-input");
-          if (inp) { inp.value = b.dataset.q; inp.dispatchEvent(new Event("input")); inp.focus(); }
+      $$(".sugg", inner).forEach(function (b) {
+        b.onclick = function () {
+          var inp = $("#composer-input");
+          if (inp) {
+            inp.value = b.dataset.q;
+            inp.dispatchEvent(new Event("input"));
+            inp.focus();
+          }
         };
       });
       return;
     }
-    inner.innerHTML = conv.messages.map((m, i) => messageHTML(m, i)).join("");
-    const sc = $("#chat-scroll");
+    inner.innerHTML = conv.messages.map(function (m, i) {
+      return messageHTML(m, i);
+    }).join("");
+    var sc = $("#chat-scroll");
     sc.scrollTop = sc.scrollHeight;
     bindMessageActions(conv);
   }
-
   function emptyStateHTML() {
-    return (
-      '<div class="empty-state">' +
-      OC.brandLogo(72) +
-      "<h2>" + t("welcomeBack") + "</h2>" +
-      "<p>" + t("askAnything") + "</p>" +
-      '<div class="sugg-grid">' +
-      '<button class="sugg" data-q="' + U.esc(t("sugg1")) + '"><span class="s-ico">' + I.book + '</span><span class="s-title">' + t("sugg1t") + "</span><br>" + t("sugg1") + "</button>" +
-      '<button class="sugg" data-q="' + U.esc(t("sugg2")) + '"><span class="s-ico">' + I.chart + '</span><span class="s-title">' + t("sugg2t") + "</span><br>" + t("sugg2") + "</button>" +
-      '<button class="sugg" data-q="' + U.esc(t("sugg3")) + '"><span class="s-ico">' + I.edit + '</span><span class="s-title">' + t("sugg3t") + "</span><br>" + t("sugg3") + "</button>" +
-      '<button class="sugg" data-q="' + U.esc(t("sugg4")) + '"><span class="s-ico">' + I.file + '</span><span class="s-title">' + t("sugg4t") + "</span><br>" + t("sugg4") + "</button>" +
-      "</div>" +
-      (OC.providers.allProviders().length ? "" : '<p class="muted small" style="margin-top:18px">' + t("demoModeHint") + "</p>") +
-      "</div>"
-    );
+    return '<div class="empty-state">' + OC.brandLogo(72) + "<h2>" + t("welcomeBack") + "</h2>" + "<p>" + t("askAnything") + "</p>" + '<div class="sugg-grid">' + '<button class="sugg" data-q="' + U.esc(t("sugg1")) + '"><span class="s-ico">' + I.book + '</span><span class="s-title">' + t("sugg1t") + "</span><br>" + t("sugg1") + "</button>" + '<button class="sugg" data-q="' + U.esc(t("sugg2")) + '"><span class="s-ico">' + I.chart + '</span><span class="s-title">' + t("sugg2t") + "</span><br>" + t("sugg2") + "</button>" + '<button class="sugg" data-q="' + U.esc(t("sugg3")) + '"><span class="s-ico">' + I.edit + '</span><span class="s-title">' + t("sugg3t") + "</span><br>" + t("sugg3") + "</button>" + '<button class="sugg" data-q="' + U.esc(t("sugg4")) + '"><span class="s-ico">' + I.file + '</span><span class="s-title">' + t("sugg4t") + "</span><br>" + t("sugg4") + "</button>" + "</div>" + (OC.providers.allProviders().length ? "" : '<p class="muted small" style="margin-top:18px">' + t("demoModeHint") + "</p>") + "</div>";
   }
-
   function messageHTML(m, idx) {
-    const user = store.currentUser();
-    const isUser = m.role === "user";
-    const avatar = isUser ? avatarHTML(user, 34) : '<span class="avatar" style="width:34px;height:34px;background:linear-gradient(135deg,#4f46e5,#8a86ff);color:#fff">' + I.bolt + "</span>";
-    let attachHTML = "";
+    var user = store.currentUser();
+    var isUser = m.role === "user";
+    var avatar = isUser ? avatarHTML(user, 34) : '<span class="avatar" style="width:34px;height:34px;background:linear-gradient(135deg,#4f46e5,#8a86ff);color:#fff">' + I.bolt + "</span>";
+    var attachHTML = "";
     if (m.attachments && m.attachments.length) {
-      attachHTML = '<div class="attachments">' + m.attachments.map(a =>
-        '<span class="attach-chip">' + (a.dataUrl ? '<img src="' + a.dataUrl + '">' : I.file) + '<span class="aname">' + U.esc(a.name) + "</span></span>"
-      ).join("") + "</div>";
+      attachHTML = '<div class="attachments">' + m.attachments.map(function (a) {
+        return '<span class="attach-chip">' + (a.dataUrl ? '<img src="' + a.dataUrl + '">' : I.file) + '<span class="aname">' + U.esc(a.name) + "</span></span>";
+      }).join("") + "</div>";
     }
-    let metaHTML = "";
+    var metaHTML = "";
     if (!isUser && (m.usage || m.estimated || m.searched)) {
-      metaHTML = '<div class="meta-row">' +
-        (m.usage ? "<span>" + t("inputTokens") + ": " + U.faNum(m.usage.tin) + " · " + t("outputTokens") + ": " + U.faNum(m.usage.tout) + (m.estimated ? ' <span class="badge">' + t("estimated") + "</span>" : "") + "</span>" : "") +
-        (m.searched ? '<span class="badge badge-brand">' + t("webSearch") + "</span>" : "") +
-        "</div>";
+      metaHTML = '<div class="meta-row">' + (m.usage ? "<span>" + t("inputTokens") + ": " + U.faNum(m.usage.tin) + " · " + t("outputTokens") + ": " + U.faNum(m.usage.tout) + (m.estimated ? ' <span class="badge">' + t("estimated") + "</span>" : "") + "</span>" : "") + (m.searched ? '<span class="badge badge-brand">' + t("webSearch") + "</span>" : "") + "</div>";
       if (m.sources && m.sources.length) {
-        metaHTML += '<div class="meta-row"><span>' + t("sources") + ':</span>' + m.sources.slice(0, 5).map(s =>
-          '<a href="' + U.esc(s.url) + '" target="_blank" rel="noopener" class="small">' + U.esc(s.title || s.url) + "</a>").join(" · ") + "</div>";
+        metaHTML += '<div class="meta-row"><span>' + t("sources") + ':</span>' + m.sources.slice(0, 5).map(function (s) {
+          return '<a href="' + U.esc(s.url) + '" target="_blank" rel="noopener" class="small">' + U.esc(s.title || s.url) + "</a>";
+        }).join(" · ") + "</div>";
       }
     }
     if (m.error) metaHTML += '<div class="meta-row"><span class="badge badge-danger">' + U.esc(m.error) + "</span></div>";
-    const body = isUser
-      ? '<div class="bubble">' + U.esc(m.content).replace(/\n/g, "<br>") + "</div>"
-      : '<div class="bubble md" data-mi="' + idx + '">' + (OC.markdown.render(m.content || "").html || "<span class='muted'>…</span>") + "</div>";
-    const actions = isUser ? "" :
-      '<div class="msg-actions">' +
-      '<button class="icon-btn" data-act="copy" title="' + t("copyAnswer") + '">' + I.copy + "</button>" +
-      '<button class="icon-btn" data-act="regen" title="' + t("regenerate") + '">' + I.refresh + "</button>" +
-      '<button class="icon-btn" data-act="good" title="' + t("goodAnswer") + '">' + I.check + "</button>" +
-      '<button class="icon-btn" data-act="bad" title="' + t("badAnswer") + '">' + I.x + "</button>" +
-      '<button class="icon-btn" data-act="del" title="' + t("deleteMessage") + '">' + I.trash + "</button>" +
-      "</div>";
-    return '<div class="msg ' + (isUser ? "user" : "assistant") + '" data-idx="' + idx + '">' +
-      avatar + '<div class="msg-body">' + body + attachHTML + metaHTML + actions + "</div></div>";
+    var body = isUser ? '<div class="bubble">' + U.esc(m.content).replace(/\n/g, "<br>") + "</div>" : '<div class="bubble md" data-mi="' + idx + '">' + (OC.markdown.render(m.content || "").html || "<span class='muted'>…</span>") + "</div>";
+    var actions = isUser ? "" : '<div class="msg-actions">' + '<button class="icon-btn" data-act="copy" title="' + t("copyAnswer") + '">' + I.copy + "</button>" + '<button class="icon-btn" data-act="regen" title="' + t("regenerate") + '">' + I.refresh + "</button>" + '<button class="icon-btn" data-act="good" title="' + t("goodAnswer") + '">' + I.check + "</button>" + '<button class="icon-btn" data-act="bad" title="' + t("badAnswer") + '">' + I.x + "</button>" + '<button class="icon-btn" data-act="del" title="' + t("deleteMessage") + '">' + I.trash + "</button>" + "</div>";
+    return '<div class="msg ' + (isUser ? "user" : "assistant") + '" data-idx="' + idx + '">' + avatar + '<div class="msg-body">' + body + attachHTML + metaHTML + actions + "</div></div>";
   }
-
   function bindMessageActions(conv) {
-    $$("#chat-inner .msg").forEach(msgEl => {
-      const idx = +msgEl.dataset.idx;
-      const m = conv.messages[idx];
-      $$("[data-act]", msgEl).forEach(b => {
-        const act = b.dataset.act;
+    $$("#chat-inner .msg").forEach(function (msgEl) {
+      var idx = +msgEl.dataset.idx;
+      var m = conv.messages[idx];
+      $$("[data-act]", msgEl).forEach(function (b) {
+        var act = b.dataset.act;
         if (act === "copy-code") {
-          b.onclick = () => { U.copy(conv._lastBlocks ? conv._lastBlocks[+b.dataset.cb].code : ""); toast(t("copied"), "ok"); };
+          b.onclick = function () {
+            U.copy(conv._lastBlocks ? conv._lastBlocks[+b.dataset.cb].code : "");
+            toast(t("copied"), "ok");
+          };
           return;
         }
-        b.onclick = async () => {
-          if (act === "copy") { await U.copy(m.content); toast(t("copied"), "ok"); }
-          else if (act === "regen") { regenerate(idx); }
-          else if (act === "good" || act === "bad") {
-            m.rating = act;
-            store.putConv(conv);
-            toast(act === "good" ? t("goodAnswer") : t("badAnswer"), act === "good" ? "ok" : "");
-          }
-          else if (act === "del") {
-            if (await OC.confirm({ title: t("deleteMessage"), message: t("deleteMessage") + "؟", danger: true })) {
-              conv.messages.splice(idx, 1);
-              store.putConv(conv);
-              renderMessages(conv);
-              OC.renderSidebar();
+        b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+          return _regenerator().w(function (_context4) {
+            while (1) switch (_context4.n) {
+              case 0:
+                if (!(act === "copy")) {
+                  _context4.n = 2;
+                  break;
+                }
+                _context4.n = 1;
+                return U.copy(m.content);
+              case 1:
+                toast(t("copied"), "ok");
+                _context4.n = 6;
+                break;
+              case 2:
+                if (!(act === "regen")) {
+                  _context4.n = 3;
+                  break;
+                }
+                regenerate(idx);
+                _context4.n = 6;
+                break;
+              case 3:
+                if (!(act === "good" || act === "bad")) {
+                  _context4.n = 4;
+                  break;
+                }
+                m.rating = act;
+                store.putConv(conv);
+                toast(act === "good" ? t("goodAnswer") : t("badAnswer"), act === "good" ? "ok" : "");
+                _context4.n = 6;
+                break;
+              case 4:
+                if (!(act === "del")) {
+                  _context4.n = 6;
+                  break;
+                }
+                _context4.n = 5;
+                return OC.confirm({
+                  title: t("deleteMessage"),
+                  message: t("deleteMessage") + "؟",
+                  danger: true
+                });
+              case 5:
+                if (!_context4.v) {
+                  _context4.n = 6;
+                  break;
+                }
+                conv.messages.splice(idx, 1);
+                store.putConv(conv);
+                renderMessages(conv);
+                OC.renderSidebar();
+              case 6:
+                return _context4.a(2);
             }
-          }
-        };
+          }, _callee4);
+        }));
       });
       // copy-code buttons inside markdown bubbles
-      $$("[data-act='copy-code']", msgEl).forEach(b => {
-        b.onclick = () => {
-          const blocks = OC.markdown.render(m.content || "").codeBlocks;
-          const cb = blocks[+b.dataset.cb];
-          if (cb) { U.copy(cb.code); toast(t("copied"), "ok"); }
+      $$("[data-act='copy-code']", msgEl).forEach(function (b) {
+        b.onclick = function () {
+          var blocks = OC.markdown.render(m.content || "").codeBlocks;
+          var cb = blocks[+b.dataset.cb];
+          if (cb) {
+            U.copy(cb.code);
+            toast(t("copied"), "ok");
+          }
         };
       });
     });
-    $("#chat-inner").addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-act='copy-code']");
+    $("#chat-inner").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-act='copy-code']");
       if (!btn) return;
     });
   }
 
   /* ---------- send ---------- */
   function pickModel() {
-    const sel = $("#model-select");
-    let pick = sel && sel.value;
+    var sel = $("#model-select");
+    var pick = sel && sel.value;
     if (!pick) {
-      const p = OC.providers.defaultProvider();
-      if (!p) return null;
-      pick = p.id + "::" + ((p.models && p.models[0]) || "gpt-4o-mini");
+      var _p = OC.providers.defaultProvider();
+      if (!_p) return null;
+      pick = _p.id + "::" + (_p.models && _p.models[0] || "gpt-4o-mini");
     }
-    const [pid, model] = pick.split("::");
-    const p = OC.providers.getProvider(pid);
-    return p ? { provider: p, model: model || "gpt-4o-mini" } : null;
+    var _pick$split = pick.split("::"),
+      _pick$split2 = _slicedToArray(_pick$split, 2),
+      pid = _pick$split2[0],
+      model = _pick$split2[1];
+    var p = OC.providers.getProvider(pid);
+    return p ? {
+      provider: p,
+      model: model || "gpt-4o-mini"
+    } : null;
   }
-
   function sendCurrent() {
-    const conv = currentConv();
-    const input = $("#composer-input");
-    const text = input.value.trim();
+    var conv = currentConv();
+    var input = $("#composer-input");
+    var text = input.value.trim();
     if (!text || streamHandle) return;
-    const files = pendingFiles.slice();
-
-    let c = conv;
+    var files = pendingFiles.slice();
+    var c = conv;
     if (!c) {
       c = {
-        id: U.uid(), title: text.slice(0, 40), messages: [],
-        createdAt: Date.now(), updatedAt: Date.now(),
-        webSearch: !!OC._pendingSearch,
+        id: U.uid(),
+        title: text.slice(0, 40),
+        messages: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        webSearch: !!OC._pendingSearch
       };
       OC._pendingSearch = false;
       if (OC._pendingPrompt) {
@@ -907,14 +1311,19 @@
         OC._pendingPrompt = null;
         toast(t("useInChat") + " ✓", "ok");
       }
-      const list = store.getConvs();
+      var list = store.getConvs();
       list.unshift(c);
       store.saveConvs(list);
       OC._currentConvId = c.id;
       // update hash without full rerender
       history.replaceState(null, "", "#/chat/" + c.id);
     }
-    const msg = { id: U.uid(), role: "user", content: text, ts: Date.now() };
+    var msg = {
+      id: U.uid(),
+      role: "user",
+      content: text,
+      ts: Date.now()
+    };
     if (files.length) msg.attachments = files;
     c.messages.push(msg);
     store.putConv(c);
@@ -924,154 +1333,243 @@
     renderPending();
 
     // inline text-file contents into context
-    let contextText = text;
-    for (const f of files) {
-      if (f.text) contextText += "\n\n[" + f.name + "]\n" + f.text.slice(0, 8000);
-      else if (f.dataUrl) contextText += "\n\n[" + (OC.i18n.locale() === "fa" ? "تصویر پیوست" : "attached image") + ": " + f.name + "]";
+    var contextText = text;
+    var _iterator7 = _createForOfIteratorHelper(files),
+      _step7;
+    try {
+      for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+        var f = _step7.value;
+        if (f.text) contextText += "\n\n[" + f.name + "]\n" + f.text.slice(0, 8000);else if (f.dataUrl) contextText += "\n\n[" + (OC.i18n.locale() === "fa" ? "تصویر پیوست" : "attached image") + ": " + f.name + "]";
+      }
+    } catch (err) {
+      _iterator7.e(err);
+    } finally {
+      _iterator7.f();
     }
-
     respond(c, contextText, files);
   }
-
   function regenerate(idx) {
-    const conv = currentConv();
+    var conv = currentConv();
     if (!conv || streamHandle) return;
     // find preceding user message
-    let userIdx = -1;
-    for (let i = idx - 1; i >= 0; i--) if (conv.messages[i].role === "user") { userIdx = i; break; }
+    var userIdx = -1;
+    for (var i = idx - 1; i >= 0; i--) if (conv.messages[i].role === "user") {
+      userIdx = i;
+      break;
+    }
     if (userIdx < 0) return;
-    const u = conv.messages[userIdx];
+    var u = conv.messages[userIdx];
     // remove messages after user message
     conv.messages = conv.messages.slice(0, userIdx + 1);
     store.putConv(conv);
     renderMessages(conv);
-    let contextText = u.content;
-    for (const f of (u.attachments || [])) {
-      if (f.text) contextText += "\n\n[" + f.name + "]\n" + f.text.slice(0, 8000);
+    var contextText = u.content;
+    var _iterator8 = _createForOfIteratorHelper(u.attachments || []),
+      _step8;
+    try {
+      for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+        var f = _step8.value;
+        if (f.text) contextText += "\n\n[" + f.name + "]\n" + f.text.slice(0, 8000);
+      }
+    } catch (err) {
+      _iterator8.e(err);
+    } finally {
+      _iterator8.f();
     }
     respond(conv, contextText, u.attachments || []);
   }
-
-  async function respond(conv, userText, files) {
-    const inner = $("#chat-inner");
-    const user = store.currentUser();
-
-    // build placeholder assistant message (streaming)
-    const aMsg = { id: U.uid(), role: "assistant", content: "", ts: Date.now(), model: "", searched: false };
-    const streamingEl = el('<div class="msg assistant"><span class="avatar" style="background:linear-gradient(135deg,#4f46e5,#8a86ff);color:#fff">' + I.bolt + '</span><div class="msg-body"><div class="bubble md" id="stream-bubble"><span class="typing"><i></i><i></i><i></i></span></div></div></div>');
-    inner.appendChild(streamingEl);
-    const sc = $("#chat-scroll");
-    sc.scrollTop = sc.scrollHeight;
-    if (window.innerWidth <= 900) closeSidebar();
-
-    // no provider → demo mode
-    const pick = pickModel();
-    if (!pick) {
-      demoRespond(conv, aMsg, streamingEl, userText);
-      return;
-    }
-    aMsg.model = pick.model;
-
-    // web search
-    let sources = null;
-    if (conv.webSearch) {
-      try {
-        const rs = await OC.providers.webSearch(userText);
-        sources = rs;
-        aMsg.searched = true;
-        userText += OC.providers.searchContextBlock(rs);
-      } catch (e) {
-        toast(e.message || t("webSearchOff"), "err");
-      }
-    }
-
-    // build messages with system prompt
-    const settings = store.getUserSettings();
-    const msgs = [];
-    const defPrompt = conv.promptId
-      ? (store.getPrompts().find(x => x.id === conv.promptId) || null)
-      : OC.promptsDef();
-    if (defPrompt) msgs.push({ role: "system", content: defPrompt.text });
-    // context window: last N messages
-    const maxCtx = settings.contextWindow || 8192;
-    let used = 0;
-    const hist = [];
-    for (let i = conv.messages.length - 1; i >= 0; i--) {
-      const m = conv.messages[i];
-      if (m.role === "assistant" && m === aMsg) continue;
-      const len = (m.content || "").length;
-      if (used + len > maxCtx * 3 && hist.length) break;
-      used += len;
-      hist.unshift({ role: m.role, content: m.content });
-    }
-    msgs.push(...hist.slice(0, -1)); // exclude the just-pushed user message dup
-    msgs.push({ role: "user", content: userText });
-
-    const bubble = $("#stream-bubble", streamingEl);
-    let raw = "";
-    let lastPaint = 0;
-    const settingsAnim = store.getUserSettings().animation;
-
-    streamHandle = OC.providers.streamChat({
-      provider: pick.provider,
-      model: pick.model,
-      messages: msgs,
-      temperature: settings.temperature,
-      maxTokens: settings.maxOutputTokens,
-      onDelta(full, piece) {
-        raw = full;
-        const now = Date.now();
-        if (now - lastPaint > 90) {
-          lastPaint = now;
-          if (bubble) bubble.innerHTML = U.esc(raw).replace(/\n/g, "<br>") + '<span class="cursor-blink"></span>';
-          if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
-        }
-      },
-      onDone({ usage, estimated, tin, tout }) {
-        streamHandle = null;
-        aMsg.content = raw;
-        aMsg.usage = { tin: tin || 0, tout: tout || 0 };
-        aMsg.estimated = !!estimated;
-        aMsg.sources = sources;
-        conv.messages.push(aMsg);
-        store.putConv(conv);
-        store.recordUsage({ tin: tin || 0, tout: tout || 0, estimated, provider: pick.provider.id, model: pick.model });
-        store.logActivity(user.email, "chat", pick.model);
-        finishStream(conv, streamingEl, aMsg);
-      },
-      onError(e) {
-        streamHandle = null;
-        aMsg.content = raw;
-        aMsg.error = e.message;
-        conv.messages.push(aMsg);
-        store.putConv(conv);
-        store.recordUsage({ fail: true });
-        finishStream(conv, streamingEl, aMsg);
-        toast(e.message || t("errorOccurred"), "err");
-      },
-      onAbort(partial) {
-        streamHandle = null;
-        aMsg.content = partial || raw;
-        if (partial) {
-          conv.messages.push(aMsg);
-          store.putConv(conv);
-        }
-        finishStream(conv, streamingEl, aMsg);
-        toast(t("stopped"));
-      },
-    });
-
-    // swap send button to stop
-    const sendBtn = $("#btn-send");
-    if (sendBtn) {
-      sendBtn.classList.add("stop");
-      sendBtn.innerHTML = I.stop;
-      sendBtn.onclick = () => { if (streamHandle) streamHandle.stop(); };
-    }
+  function respond(_x, _x2, _x3) {
+    return _respond.apply(this, arguments);
   }
+  function _respond() {
+    _respond = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(conv, userText, files) {
+      var inner, user, aMsg, streamingEl, sc, pick, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, sendBtn, _t2;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
+          case 0:
+            inner = $("#chat-inner");
+            user = store.currentUser(); // build placeholder assistant message (streaming)
+            aMsg = {
+              id: U.uid(),
+              role: "assistant",
+              content: "",
+              ts: Date.now(),
+              model: "",
+              searched: false
+            };
+            streamingEl = el('<div class="msg assistant"><span class="avatar" style="background:linear-gradient(135deg,#4f46e5,#8a86ff);color:#fff">' + I.bolt + '</span><div class="msg-body"><div class="bubble md" id="stream-bubble"><span class="typing"><i></i><i></i><i></i></span></div></div></div>');
+            inner.appendChild(streamingEl);
+            sc = $("#chat-scroll");
+            sc.scrollTop = sc.scrollHeight;
+            if (window.innerWidth <= 900) closeSidebar();
 
+            // no provider → demo mode
+            pick = pickModel();
+            if (pick) {
+              _context6.n = 1;
+              break;
+            }
+            demoRespond(conv, aMsg, streamingEl, userText);
+            return _context6.a(2);
+          case 1:
+            aMsg.model = pick.model;
+
+            // web search
+            sources = null;
+            if (!conv.webSearch) {
+              _context6.n = 5;
+              break;
+            }
+            _context6.p = 2;
+            _context6.n = 3;
+            return OC.providers.webSearch(userText);
+          case 3:
+            rs = _context6.v;
+            sources = rs;
+            aMsg.searched = true;
+            userText += OC.providers.searchContextBlock(rs);
+            _context6.n = 5;
+            break;
+          case 4:
+            _context6.p = 4;
+            _t2 = _context6.v;
+            toast(_t2.message || t("webSearchOff"), "err");
+          case 5:
+            // build messages with system prompt
+            settings = store.getUserSettings();
+            msgs = [];
+            defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
+              return x.id === conv.promptId;
+            }) || null : OC.promptsDef();
+            if (defPrompt) msgs.push({
+              role: "system",
+              content: defPrompt.text
+            });
+            // context window: last N messages
+            maxCtx = settings.contextWindow || 8192;
+            used = 0;
+            hist = [];
+            i = conv.messages.length - 1;
+          case 6:
+            if (!(i >= 0)) {
+              _context6.n = 10;
+              break;
+            }
+            m = conv.messages[i];
+            if (!(m.role === "assistant" && m === aMsg)) {
+              _context6.n = 7;
+              break;
+            }
+            return _context6.a(3, 9);
+          case 7:
+            len = (m.content || "").length;
+            if (!(used + len > maxCtx * 3 && hist.length)) {
+              _context6.n = 8;
+              break;
+            }
+            return _context6.a(3, 10);
+          case 8:
+            used += len;
+            hist.unshift({
+              role: m.role,
+              content: m.content
+            });
+          case 9:
+            i--;
+            _context6.n = 6;
+            break;
+          case 10:
+            msgs.push.apply(msgs, _toConsumableArray(hist.slice(0, -1))); // exclude the just-pushed user message dup
+            msgs.push({
+              role: "user",
+              content: userText
+            });
+            bubble = $("#stream-bubble", streamingEl);
+            raw = "";
+            lastPaint = 0;
+            settingsAnim = store.getUserSettings().animation;
+            streamHandle = OC.providers.streamChat({
+              provider: pick.provider,
+              model: pick.model,
+              messages: msgs,
+              temperature: settings.temperature,
+              maxTokens: settings.maxOutputTokens,
+              onDelta: function onDelta(full, piece) {
+                raw = full;
+                var now = Date.now();
+                if (now - lastPaint > 90) {
+                  lastPaint = now;
+                  if (bubble) bubble.innerHTML = U.esc(raw).replace(/\n/g, "<br>") + '<span class="cursor-blink"></span>';
+                  if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
+                }
+              },
+              onDone: function onDone(_ref7) {
+                var usage = _ref7.usage,
+                  estimated = _ref7.estimated,
+                  tin = _ref7.tin,
+                  tout = _ref7.tout;
+                streamHandle = null;
+                aMsg.content = raw;
+                aMsg.usage = {
+                  tin: tin || 0,
+                  tout: tout || 0
+                };
+                aMsg.estimated = !!estimated;
+                aMsg.sources = sources;
+                conv.messages.push(aMsg);
+                store.putConv(conv);
+                store.recordUsage({
+                  tin: tin || 0,
+                  tout: tout || 0,
+                  estimated: estimated,
+                  provider: pick.provider.id,
+                  model: pick.model
+                });
+                store.logActivity(user.email, "chat", pick.model);
+                finishStream(conv, streamingEl, aMsg);
+              },
+              onError: function onError(e) {
+                streamHandle = null;
+                aMsg.content = raw;
+                aMsg.error = e.message;
+                conv.messages.push(aMsg);
+                store.putConv(conv);
+                store.recordUsage({
+                  fail: true
+                });
+                finishStream(conv, streamingEl, aMsg);
+                toast(e.message || t("errorOccurred"), "err");
+              },
+              onAbort: function onAbort(partial) {
+                streamHandle = null;
+                aMsg.content = partial || raw;
+                if (partial) {
+                  conv.messages.push(aMsg);
+                  store.putConv(conv);
+                }
+                finishStream(conv, streamingEl, aMsg);
+                toast(t("stopped"));
+              }
+            });
+
+            // swap send button to stop
+            sendBtn = $("#btn-send");
+            if (sendBtn) {
+              sendBtn.classList.add("stop");
+              sendBtn.innerHTML = I.stop;
+              sendBtn.onclick = function () {
+                if (streamHandle) streamHandle.stop();
+              };
+            }
+          case 11:
+            return _context6.a(2);
+        }
+      }, _callee6, null, [[2, 4]]);
+    }));
+    return _respond.apply(this, arguments);
+  }
   function finishStream(conv, streamingEl, aMsg) {
-    const sendBtn = $("#btn-send");
+    var sendBtn = $("#btn-send");
     if (sendBtn) {
       sendBtn.classList.remove("stop");
       sendBtn.innerHTML = I.send;
@@ -1083,24 +1581,20 @@
 
   /* ---------- demo mode ---------- */
   function demoRespond(conv, aMsg, streamingEl, userText) {
-    const bubble = $("#stream-bubble", streamingEl);
-    const isFa = OC.i18n.locale() === "fa";
-    let reply;
+    var bubble = $("#stream-bubble", streamingEl);
+    var isFa = OC.i18n.locale() === "fa";
+    var reply;
     if (/کد|code|function|برنامه|اسکریپت|script/i.test(userText)) {
-      reply = (isFa
-        ? "در حالت نمایشی هستم، اما نمونه‌ی کد زیر را می‌بینید:\n\n```js\n// نمونه: جمع اعداد آرایه\nfunction sum(numbers) {\n  return numbers.reduce((a, b) => a + b, 0);\n}\n\nconsole.log(sum([1, 2, 3])); // 6\n```\n\nبرای پاسخ واقعی، یک سرویس‌دهنده و کلید API اضافه کنید."
-        : "This is demo mode. A sample code block:\n\n```js\nfunction sum(numbers) {\n  return numbers.reduce((a, b) => a + b, 0);\n}\nconsole.log(sum([1, 2, 3])); // 6\n```\n\nAdd a provider with an API key for real answers.");
+      reply = isFa ? "در حالت نمایشی هستم، اما نمونه‌ی کد زیر را می‌بینید:\n\n```js\n// نمونه: جمع اعداد آرایه\nfunction sum(numbers) {\n  return numbers.reduce((a, b) => a + b, 0);\n}\n\nconsole.log(sum([1, 2, 3])); // 6\n```\n\nبرای پاسخ واقعی، یک سرویس‌دهنده و کلید API اضافه کنید." : "This is demo mode. A sample code block:\n\n```js\nfunction sum(numbers) {\n  return numbers.reduce((a, b) => a + b, 0);\n}\nconsole.log(sum([1, 2, 3])); // 6\n```\n\nAdd a provider with an API key for real answers.";
     } else {
-      reply = (isFa
-        ? "پیام شما دریافت شد:\n\n> " + userText.slice(0, 200) + "\n\nدر **حالت نمایشی** هستم؛ پاسخ‌ها شبیه‌سازی می‌شوند.\n\n| قدم | کار |\n| --- | --- |\n| ۱ | افزودن سرویس‌دهنده از تنظیمات |\n| ۲ | وارد کردن کلید API |\n| ۳ | انتخاب مدل و شروع گفت‌وگو |\n\nپس از افزودن سرویس‌دهنده، همین گفت‌وگو با مدل واقعی ادامه پیدا می‌کند."
-        : "Message received:\n\n> " + userText.slice(0, 200) + "\n\nYou are in **demo mode**; answers are simulated.\n\n| Step | Action |\n| --- | --- |\n| 1 | Add a provider in settings |\n| 2 | Enter the API key |\n| 3 | Pick a model and start chatting |");
+      reply = isFa ? "پیام شما دریافت شد:\n\n> " + userText.slice(0, 200) + "\n\nدر **حالت نمایشی** هستم؛ پاسخ‌ها شبیه‌سازی می‌شوند.\n\n| قدم | کار |\n| --- | --- |\n| ۱ | افزودن سرویس‌دهنده از تنظیمات |\n| ۲ | وارد کردن کلید API |\n| ۳ | انتخاب مدل و شروع گفت‌وگو |\n\nپس از افزودن سرویس‌دهنده، همین گفت‌وگو با مدل واقعی ادامه پیدا می‌کند." : "Message received:\n\n> " + userText.slice(0, 200) + "\n\nYou are in **demo mode**; answers are simulated.\n\n| Step | Action |\n| --- | --- |\n| 1 | Add a provider in settings |\n| 2 | Enter the API key |\n| 3 | Pick a model and start chatting |";
     }
-    const words = reply.split(/(\s+)/);
-    let i = 0;
-    const sc = $("#chat-scroll");
-    const timer = setInterval(() => {
+    var words = reply.split(/(\s+)/);
+    var i = 0;
+    var sc = $("#chat-scroll");
+    var timer = setInterval(function () {
       i += 2;
-      const partial = words.slice(0, i).join("");
+      var partial = words.slice(0, i).join("");
       if (bubble) bubble.innerHTML = U.esc(partial) + '<span class="cursor-blink"></span>';
       if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
       if (i >= words.length) {
@@ -1108,87 +1602,183 @@
         streamHandle = null;
         aMsg.content = reply;
         aMsg.estimated = true;
-        aMsg.usage = { tin: OC.providers.estTokens([{ content: userText }]), tout: OC.providers.estTokens([{ content: reply }]) };
+        aMsg.usage = {
+          tin: OC.providers.estTokens([{
+            content: userText
+          }]),
+          tout: OC.providers.estTokens([{
+            content: reply
+          }])
+        };
         conv.messages.push(aMsg);
         store.putConv(conv);
-        store.recordUsage({ tin: aMsg.usage.tin, tout: aMsg.usage.tout, estimated: true });
+        store.recordUsage({
+          tin: aMsg.usage.tin,
+          tout: aMsg.usage.tout,
+          estimated: true
+        });
         finishStream(conv, streamingEl, aMsg);
       }
     }, 40);
-    const sendBtn = $("#btn-send");
+    var sendBtn = $("#btn-send");
     if (sendBtn) {
       sendBtn.classList.add("stop");
       sendBtn.innerHTML = I.stop;
-      sendBtn.onclick = () => { clearInterval(timer); streamHandle = null; sendBtn.classList.remove("stop"); sendBtn.innerHTML = I.send; sendBtn.onclick = sendCurrent; toast(t("stopped")); };
+      sendBtn.onclick = function () {
+        clearInterval(timer);
+        streamHandle = null;
+        sendBtn.classList.remove("stop");
+        sendBtn.innerHTML = I.send;
+        sendBtn.onclick = sendCurrent;
+        toast(t("stopped"));
+      };
     }
   }
 
   /* ---------- project delivery ---------- */
-  OC.deliverProject = async function (conv) {
-    if (!conv || !conv.messages.length) { toast(t("noCodeBlocks"), "err"); return; }
-    const blocks = [];
-    for (const m of conv.messages) {
-      if (m.role !== "assistant") continue;
-      blocks.push(...OC.markdown.render(m.content || "").codeBlocks);
-    }
-    if (!blocks.length) {
-      const m = OC.modal({ title: t("projectDelivery"), body: "<p class='muted'>" + t("noCodeBlocksDesc") + "</p>" });
-      return;
-    }
-    const { blob, safeTitle, manifest } = OC.exporter.buildProjectZip({
-      title: conv.title, messages: conv.messages, codeBlocks: blocks,
-    });
-    U.download(safeTitle + ".zip", blob);
-    store.logActivity(store.currentUser().email, "export-project", manifest.length + " files");
-    const m = OC.modal({
-      title: t("packageReady"),
-      body: '<p class="muted small" style="margin:0">' + t("filesCount") + ": " + U.faNum(manifest.length) + "</p>" +
-        '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>' + t("files") + '</th><th>KB</th></tr></thead><tbody>' +
-        manifest.map((f, i) => "<tr><td>" + U.faNum(i + 1) + "</td><td style='direction:ltr;text-align:start'>" + U.esc(f.file) + "</td><td>" + U.faNum(Math.round(f.bytes / 102.4) / 10) + "</td></tr>").join("") +
-        "</tbody></table></div>",
-      foot: [el('<button class="btn btn-primary">' + t("downloaded") + " ✓</button>")],
-    });
-    toast(t("packageDownloaded"), "ok");
-  };
+  OC.deliverProject = /*#__PURE__*/function () {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(conv) {
+      var blocks, _iterator9, _step9, _m2, _m, _OC$exporter$buildPro, blob, safeTitle, manifest, m, _t;
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
+          case 0:
+            if (!(!conv || !conv.messages.length)) {
+              _context5.n = 1;
+              break;
+            }
+            toast(t("noCodeBlocks"), "err");
+            return _context5.a(2);
+          case 1:
+            blocks = [];
+            _iterator9 = _createForOfIteratorHelper(conv.messages);
+            _context5.p = 2;
+            _iterator9.s();
+          case 3:
+            if ((_step9 = _iterator9.n()).done) {
+              _context5.n = 6;
+              break;
+            }
+            _m2 = _step9.value;
+            if (!(_m2.role !== "assistant")) {
+              _context5.n = 4;
+              break;
+            }
+            return _context5.a(3, 5);
+          case 4:
+            blocks.push.apply(blocks, _toConsumableArray(OC.markdown.render(_m2.content || "").codeBlocks));
+          case 5:
+            _context5.n = 3;
+            break;
+          case 6:
+            _context5.n = 8;
+            break;
+          case 7:
+            _context5.p = 7;
+            _t = _context5.v;
+            _iterator9.e(_t);
+          case 8:
+            _context5.p = 8;
+            _iterator9.f();
+            return _context5.f(8);
+          case 9:
+            if (blocks.length) {
+              _context5.n = 10;
+              break;
+            }
+            _m = OC.modal({
+              title: t("projectDelivery"),
+              body: "<p class='muted'>" + t("noCodeBlocksDesc") + "</p>"
+            });
+            return _context5.a(2);
+          case 10:
+            _OC$exporter$buildPro = OC.exporter.buildProjectZip({
+              title: conv.title,
+              messages: conv.messages,
+              codeBlocks: blocks
+            }), blob = _OC$exporter$buildPro.blob, safeTitle = _OC$exporter$buildPro.safeTitle, manifest = _OC$exporter$buildPro.manifest;
+            U.download(safeTitle + ".zip", blob);
+            store.logActivity(store.currentUser().email, "export-project", manifest.length + " files");
+            m = OC.modal({
+              title: t("packageReady"),
+              body: '<p class="muted small" style="margin:0">' + t("filesCount") + ": " + U.faNum(manifest.length) + "</p>" + '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>' + t("files") + '</th><th>KB</th></tr></thead><tbody>' + manifest.map(function (f, i) {
+                return "<tr><td>" + U.faNum(i + 1) + "</td><td style='direction:ltr;text-align:start'>" + U.esc(f.file) + "</td><td>" + U.faNum(Math.round(f.bytes / 102.4) / 10) + "</td></tr>";
+              }).join("") + "</tbody></table></div>",
+              foot: [el('<button class="btn btn-primary">' + t("downloaded") + " ✓</button>")]
+            });
+            toast(t("packageDownloaded"), "ok");
+          case 11:
+            return _context5.a(2);
+        }
+      }, _callee5, null, [[2, 7, 8, 9]]);
+    }));
+    return function (_x4) {
+      return _ref6.apply(this, arguments);
+    };
+  }();
 
   /* ================= prompts defaults bridge ================= */
   OC.promptsDef = function () {
-    const list = store.getPrompts();
-    return list.find(p => p.default) || null;
+    var list = store.getPrompts();
+    return list.find(function (p) {
+      return p.default;
+    }) || null;
   };
 
   /* ================= keyboard shortcuts ================= */
-  document.addEventListener("keydown", (e) => {
-    const tag = (e.target.tagName || "").toLowerCase();
-    const typing = tag === "input" || tag === "textarea" || e.target.isContentEditable;
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); const q = $("#side-q"); if (q) { openSidebar(); q.focus(); } }
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "o") { e.preventDefault(); OC.newChat(); }
-    if ((e.ctrlKey || e.metaKey) && e.key === ",") { e.preventDefault(); navigate("/settings"); }
-    if ((e.ctrlKey || e.metaKey) && e.key === "/") { e.preventDefault(); showShortcuts(); }
-    if (e.key === "Escape") { $$(".modal-back").forEach(m => m.remove()); $$(".ctx").forEach(m => m.remove()); $$(".menu-pop").forEach(m => m.remove()); }
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target.tagName || "").toLowerCase();
+    var typing = tag === "input" || tag === "textarea" || e.target.isContentEditable;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      var q = $("#side-q");
+      if (q) {
+        openSidebar();
+        q.focus();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "o") {
+      e.preventDefault();
+      OC.newChat();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === ",") {
+      e.preventDefault();
+      navigate("/settings");
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+      e.preventDefault();
+      showShortcuts();
+    }
+    if (e.key === "Escape") {
+      $$(".modal-back").forEach(function (m) {
+        return m.remove();
+      });
+      $$(".ctx").forEach(function (m) {
+        return m.remove();
+      });
+      $$(".menu-pop").forEach(function (m) {
+        return m.remove();
+      });
+    }
   });
-
   function showShortcuts() {
-    const row = (k, d) => '<tr><td><kbd>' + k + '</kbd></td><td>' + d + "</td></tr>";
+    var row = function row(k, d) {
+      return '<tr><td><kbd>' + k + '</kbd></td><td>' + d + "</td></tr>";
+    };
     OC.modal({
       title: t("keyboardShortcuts"),
-      body: '<div class="tbl-wrap"><table class="tbl"><tbody>' +
-        row("Ctrl/⌘ + K", t("scSearch")) +
-        row("Ctrl/⌘ + Shift + O", t("scNewChat")) +
-        row("Ctrl/⌘ + ,", t("scSettings")) +
-        row("Ctrl/⌘ + /", t("scShortcuts")) +
-        row("Enter", t("scSend")) +
-        row("Esc", t("close")) +
-        "</tbody></table></div>",
+      body: '<div class="tbl-wrap"><table class="tbl"><tbody>' + row("Ctrl/⌘ + K", t("scSearch")) + row("Ctrl/⌘ + Shift + O", t("scNewChat")) + row("Ctrl/⌘ + ,", t("scSettings")) + row("Ctrl/⌘ + /", t("scShortcuts")) + row("Enter", t("scSend")) + row("Esc", t("close")) + "</tbody></table></div>"
     });
   }
   OC.showShortcuts = showShortcuts;
 
   /* ================= offline banner ================= */
   function updateOnline() {
-    let b = $(".offline-bar");
+    var b = $(".offline-bar");
     if (!navigator.onLine) {
-      if (!b) { b = el('<div class="offline-bar">' + t("networkDown") + "</div>"); document.body.appendChild(b); }
+      if (!b) {
+        b = el('<div class="offline-bar">' + t("networkDown") + "</div>");
+        document.body.appendChild(b);
+      }
     } else if (b) b.remove();
   }
   window.addEventListener("online", updateOnline);
@@ -1204,24 +1794,28 @@
       document.documentElement.dir = OC.i18n.isRTL() ? "rtl" : "ltr";
     }
     // theme pre-paint handled in index.html; sync from user settings when logged in
-    const user = store.currentUser();
-    if (user) applyTheme(store.getUserSettings().theme);
-    else {
+    var user = store.currentUser();
+    if (user) applyTheme(store.getUserSettings().theme);else {
       try {
-        const raw = localStorage.getItem("oc-theme");
+        var raw = localStorage.getItem("oc-theme");
         applyTheme(raw === "dark" || raw === "light" ? raw : "system");
-      } catch (e) { applyTheme("system"); }
+      } catch (e) {
+        applyTheme("system");
+      }
     }
     OC.panels.registerRoutes();
     updateOnline();
     renderRoute();
     // remember theme choice for pre-paint
-    setInterval(() => {
-      const dark = document.documentElement.classList.contains("dark");
-      try { localStorage.setItem("oc-theme", dark ? "dark" : "light"); } catch (e) {}
+    setInterval(function () {
+      var dark = document.documentElement.classList.contains("dark");
+      try {
+        localStorage.setItem("oc-theme", dark ? "dark" : "light");
+      } catch (e) {}
     }, 1500);
   };
-
   OC.brandLogo = logoSVG;
-  OC.applyThemeOnLogin = () => applyTheme(store.getUserSettings().theme);
+  OC.applyThemeOnLogin = function () {
+    return applyTheme(store.getUserSettings().theme);
+  };
 })();
