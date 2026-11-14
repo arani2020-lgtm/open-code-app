@@ -354,9 +354,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             cfg = cfgOf(conn);
             base = wpBase(cfg.url);
             H = {
-              Authorization: "Basic " + btoa(cfg.user + ":" + cfg.appPass.replace(/\s+/g, "")),
               "Content-Type": "application/json"
             };
+            if (cfg.user && cfg.appPass) H.Authorization = "Basic " + btoa(cfg.user + ":" + cfg.appPass.replace(/\s+/g, ""));
             if (!(a.t === "wp_list")) {
               _context4.n = 2;
               break;
