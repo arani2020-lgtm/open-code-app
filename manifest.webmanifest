@@ -1,0 +1,22 @@
+{
+  "name": "Open Code — فضای کاری هوش مصنوعی",
+  "short_name": "Open Code",
+  "description": "گفت‌وگوی هوش مصنوعی با چند سرویس‌دهنده، پیش‌نمایش کد و تحویل پروژه. طراح: عباس صدیق",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0c12",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "گفت‌وگوی جدید", "url": "./#/chat", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "تنظیمات", "url": "./#/settings", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
