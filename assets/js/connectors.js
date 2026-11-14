@@ -42,7 +42,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   function _fetchJSON() {
     _fetchJSON = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url, opts, timeoutMs) {
-      var ctl, tm, r, txt, j, msg;
+      var ctl, tm, r, txt, j, msg, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -58,9 +58,24 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             }));
           case 2:
             r = _context.v;
-            _context.n = 3;
-            return r.text();
+            _context.n = 5;
+            break;
           case 3:
+            _context.p = 3;
+            _t = _context.v;
+            clearTimeout(tm);
+            if (!(_t && _t.name === "AbortError")) {
+              _context.n = 4;
+              break;
+            }
+            throw new Error(t("connTimeout"));
+          case 4:
+            throw new Error(t("connNetFail"));
+          case 5:
+            _context.p = 5;
+            _context.n = 6;
+            return r.text();
+          case 6:
             txt = _context.v;
             j = null;
             try {
@@ -69,22 +84,22 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               j = null;
             }
             if (r.ok) {
-              _context.n = 4;
+              _context.n = 7;
               break;
             }
             msg = "";
             if (j && j.message) msg = j.message;else if (j && j.description) msg = j.description;else if (j && j.error) msg = j.error;else if (j && j.result === false && j.error_code) msg = "HTTP " + j.error_code;else msg = "HTTP " + r.status;
             throw new Error(msg);
-          case 4:
+          case 7:
             return _context.a(2, j);
-          case 5:
-            _context.p = 5;
+          case 8:
+            _context.p = 8;
             clearTimeout(tm);
-            return _context.f(5);
-          case 6:
+            return _context.f(8);
+          case 9:
             return _context.a(2);
         }
-      }, _callee, null, [[1,, 5, 6]]);
+      }, _callee, null, [[5,, 8, 9], [1, 3]]);
     }));
     return _fetchJSON.apply(this, arguments);
   }
@@ -830,7 +845,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   /* ---------- bridge PHP source ---------- */
   function _runActions() {
     _runActions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(conn, actions) {
-      var results, _iterator2, _step2, a, _t, _t2, _t3, _t4, _t5;
+      var results, _iterator2, _step2, a, _t2, _t3, _t4, _t5, _t6;
       return _regenerator().w(function (_context0) {
         while (1) switch (_context0.p = _context0.n) {
           case 0:
@@ -845,24 +860,24 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             }
             a = _step2.value;
             _context0.p = 3;
-            _t = results;
-            _t2 = _t.push;
+            _t2 = results;
+            _t3 = _t2.push;
             _context0.n = 4;
             return exec(conn, a);
           case 4:
-            _t3 = _context0.v;
-            _t2.call(_t, {
+            _t4 = _context0.v;
+            _t3.call(_t2, {
               ok: true,
-              text: _t3
+              text: _t4
             });
             _context0.n = 6;
             break;
           case 5:
             _context0.p = 5;
-            _t4 = _context0.v;
+            _t5 = _context0.v;
             results.push({
               ok: false,
-              text: "[ERROR] " + (_t4.message || t("connError"))
+              text: "[ERROR] " + (_t5.message || t("connError"))
             });
           case 6:
             _context0.n = 2;
@@ -872,8 +887,8 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             break;
           case 8:
             _context0.p = 8;
-            _t5 = _context0.v;
-            _iterator2.e(_t5);
+            _t6 = _context0.v;
+            _iterator2.e(_t6);
           case 9:
             _context0.p = 9;
             _iterator2.f();
