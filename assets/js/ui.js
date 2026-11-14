@@ -349,9 +349,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       location.hash = "/chat";
     }
     // match longest prefix
-    var path = hash.split("?")[0];
+    var path = (hash || "").split("?")[0];
     var fn = routes[path];
-    while (!fn && path.includes("/")) {
+    while (!fn && typeof path === "string" && path.includes("/")) {
       path = path.slice(0, path.lastIndexOf("/"));
       fn = routes[path];
     }

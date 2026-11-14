@@ -44,7 +44,10 @@
   }
 
   if (!A.prototype.includes) {
-    A.prototype.includes = function (x) { return this.indexOf(x) !== -1; };
+    A.prototype.includes = function (x) {
+      if (this == null) return false;
+      return A.prototype.indexOf.call(this, x) !== -1;
+    };
   }
 
   if (!A.prototype.flat) {
@@ -61,7 +64,10 @@
   }
 
   if (!S.prototype.includes) {
-    S.prototype.includes = function (s) { return this.indexOf(String(s)) !== -1; };
+    S.prototype.includes = function (s) {
+      if (this == null) return false;
+      return S.prototype.indexOf.call(this, String(s)) !== -1;
+    };
   }
 
   if (!S.prototype.padStart || !S.prototype.padEnd) {
