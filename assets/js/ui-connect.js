@@ -19,6 +19,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   function esc(s) {
     return U.esc(s);
   }
+  function markOf(type) {
+    return type === "wordpress" ? "wp" : type;
+  }
 
   /* brand marks (inline, no external assets) */
   var MARKS = {
@@ -57,7 +60,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       var on = st.connected;
       return '<div class="conn-type-card' + (on ? " live" : "") + '">' + '<div class="ctc-mark gh">' + MARKS.gh + "</div>" + '<b>' + T.name + "</b>" + '<p>' + t(T.desc) + "</p>" + '<div class="ctc-foot"><span class="conn-dot ' + (on ? "ok" : "unknown") + '"></span>' + '<span class="small muted">' + (on ? st.user && st.user.login ? st.user.login : "connected" : t("connNotLinked")) + "</span>" + '<button class="btn btn-sm" id="ctc-github">' + t("connManage") + "</button></div></div>";
     }
-    return '<div class="conn-type-card">' + '<div class="ctc-mark ' + key + '">' + MARKS[key] + "</div>" + "<b>" + T.name + "</b>" + "<p>" + t(T.desc) + "</p>" + '<div class="ctc-foot"><span class="small muted">' + (n ? U.faNum(String(n)) + " " + t("connCount") : "") + "</span>" + '<button class="btn btn-sm btn-primary" data-add="' + key + '">' + I.plus + t("connAdd") + "</button></div></div>";
+    return '<div class="conn-type-card">' + '<div class="ctc-mark ' + markOf(key) + '">' + MARKS[markOf(key)] + "</div>" + "<b>" + T.name + "</b>" + "<p>" + t(T.desc) + "</p>" + '<div class="ctc-foot"><span class="small muted">' + (n ? U.faNum(String(n)) + " " + t("connCount") : "") + "</span>" + '<button class="btn btn-sm btn-primary" data-add="' + key + '">' + I.plus + t("connAdd") + "</button></div></div>";
   }
 
   /* ================= saved connection card ================= */
@@ -71,7 +74,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     var T = OC.connectors.TYPES[c.type];
     var at = OC.connectors.attached();
     var isAt = at && at.id === c.id;
-    return '<div class="conn-card">' + '<div class="cc-head"><span class="cc-mark ' + c.type + '">' + (MARKS[c.type] || "") + "</span>" + '<div class="cc-title"><b>' + esc(c.name) + "</b><span class='small muted' style='direction:ltr'>" + (meta || T.name) + "</span></div>" + '<span class="conn-pill ' + st.cls + '">' + t(st.label) + "</span></div>" + (info.user ? '<div class="small muted">' + esc(info.user) + (info.php ? " · PHP " + esc(info.php) : "") + "</div>" : "") + '<div class="cc-actions">' + '<button class="btn btn-sm" data-test="' + c.id + '">' + I.refresh + t("connTest") + "</button>" + '<button class="btn btn-sm btn-primary" data-attachc="' + c.id + '">' + I.bolt + (isAt ? t("connAttached") : t("connAttachAI")) + "</button>" + '<button class="btn btn-sm" data-edit="' + c.id + '">' + I.edit + t("edit") + "</button>" + '<button class="btn btn-sm btn-danger-ghost" data-del="' + c.id + '">' + I.trash + "</button>" + "</div></div>";
+    return '<div class="conn-card">' + '<div class="cc-head"><span class="cc-mark ' + markOf(c.type) + '">' + (MARKS[markOf(c.type)] || "") + "</span>" + '<div class="cc-title"><b>' + esc(c.name) + "</b><span class='small muted' style='direction:ltr'>" + (meta || T.name) + "</span></div>" + '<span class="conn-pill ' + st.cls + '">' + t(st.label) + "</span></div>" + (info.user ? '<div class="small muted">' + esc(info.user) + (info.php ? " · PHP " + esc(info.php) : "") + "</div>" : "") + '<div class="cc-actions">' + '<button class="btn btn-sm" data-test="' + c.id + '">' + I.refresh + t("connTest") + "</button>" + '<button class="btn btn-sm btn-primary" data-attachc="' + c.id + '">' + I.bolt + (isAt ? t("connAttached") : t("connAttachAI")) + "</button>" + '<button class="btn btn-sm" data-edit="' + c.id + '">' + I.edit + t("edit") + "</button>" + '<button class="btn btn-sm btn-danger-ghost" data-del="' + c.id + '">' + I.trash + "</button>" + "</div></div>";
   }
 
   /* ================= page ================= */
@@ -223,7 +226,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     }
     var m = OC.modal({
       title: (existing ? t("connEditTitle") : t("connAddTitle")) + " — " + T.name,
-      body: '<div class="stack">' + '<div class="ce-head ' + type + '">' + MARKS[type] + "<b>" + T.name + "</b></div>" + bodyHTML + '<div class="hint">' + helpHTML + "</div>" + '<div class="flex" id="ce-result"></div>' + "</div>",
+      body: '<div class="stack">' + '<div class="ce-head ' + markOf(type) + '">' + MARKS[markOf(type)] + "<b>" + T.name + "</b></div>" + bodyHTML + '<div class="hint">' + helpHTML + "</div>" + '<div class="flex" id="ce-result"></div>' + "</div>",
       foot: [function () {
         var testB = OC.el('<button class="btn" id="ce-test">' + I.plug + t("connTestAndSave") + "</button>");
         testB.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
