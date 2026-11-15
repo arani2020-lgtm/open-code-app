@@ -832,3 +832,69 @@ mark { background: rgb(var(--accent) / .35); border-radius: 3px; padding: 0 2px;
 .wr-model { font-size: 17px; }
 .wr-why { margin: 0; padding-inline-start: 18px; color: rgb(var(--muted)); font-size: 13px; line-height: 1.8; }
 .wr-alts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* ================= v1.3.0 — pipeline + format fixes ================= */
+.gh-user-row { align-items: center; gap: 10px; flex-wrap: wrap; row-gap: 8px; }
+.gh-user-row > button { white-space: nowrap; }
+
+/* build pipeline modal */
+.bp-wrap { display: flex; flex-direction: column; gap: 14px; }
+.bp-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bp-head b { font-size: 15px; direction: ltr; }
+.bp-status { margin-inline-start: auto; }
+.bp-mid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bp-ring {
+  --p: 0%; width: 92px; height: 92px; border-radius: 50%; flex: 0 0 auto;
+  background: conic-gradient(rgb(var(--pri)) var(--p), rgb(var(--line)) 0);
+  display: flex; align-items: center; justify-content: center; position: relative;
+  transition: background .4s ease;
+}
+.bp-ring::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: rgb(var(--card)); }
+.bp-ring::before {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%; z-index: -1; opacity: .55;
+  background: conic-gradient(from 0deg, transparent, rgb(var(--pri)), transparent 70%);
+  animation: bp-spin 2.4s linear infinite;
+}
+.bp-ring.done::before { animation: none; opacity: 0; }
+@keyframes bp-spin { to { transform: rotate(360deg); } }
+.bp-pct { position: relative; z-index: 1; font-size: 19px; font-weight: 800; color: rgb(var(--pri)); }
+.bp-phases { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 7px; }
+.bp-phase { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgb(var(--muted)); transition: color .25s; }
+.bp-phase .ph-dot {
+  width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgb(var(--line)); background: rgb(var(--card)); font-size: 11px; color: transparent; transition: all .25s;
+}
+.bp-phase.active { color: rgb(var(--txt)); font-weight: 700; }
+.bp-phase.active .ph-dot { border-color: rgb(var(--pri)); animation: ph-pulse 1.2s ease infinite; }
+.bp-phase.done { color: rgb(var(--ok)); }
+.bp-phase.done .ph-dot { border-color: rgb(var(--ok)); background: rgb(var(--ok-soft)); color: rgb(var(--ok)); }
+@keyframes ph-pulse { 0%,100% { box-shadow: 0 0 0 0 rgb(var(--pri) / .35); } 50% { box-shadow: 0 0 0 6px rgb(var(--pri) / 0); } }
+.bp-log {
+  max-height: 130px; overflow-y: auto; font-size: 11.5px; line-height: 1.9; direction: ltr; text-align: left;
+  background: rgb(var(--soft)); border: 1px solid rgb(var(--line)); border-radius: 10px; padding: 8px 10px; color: rgb(var(--muted));
+}
+.bp-log b { color: rgb(var(--pri)); }
+.bp-elapsed { font-variant-numeric: tabular-nums; }
+.bp-result { display: none; flex-direction: column; gap: 9px; border-top: 1px dashed rgb(var(--line)); padding-top: 12px; }
+.bp-result.show { display: flex; }
+.bp-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bp-link {
+  display: flex; align-items: center; gap: 8px; border: 1px solid rgb(var(--line)); border-radius: 11px;
+  padding: 9px 11px; background: rgb(var(--soft)); font-size: 12.5px; cursor: pointer; color: rgb(var(--txt)); font-family: inherit;
+}
+.bp-link:hover { border-color: rgb(var(--pri)); }
+.bp-link svg { color: rgb(var(--pri)); flex: 0 0 auto; }
+.bp-link .lp { direction: ltr; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: left; }
+.bp-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.bp-stat { background: rgb(var(--soft)); border: 1px solid rgb(var(--line)); border-radius: 10px; padding: 7px 12px; font-size: 12px; }
+.bp-stat b { color: rgb(var(--pri)); }
+
+/* format chooser (delivery) */
+.fmt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.fmt-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+  border: 1px solid rgb(var(--line)); border-radius: 12px; padding: 13px 8px; background: rgb(var(--card));
+  color: rgb(var(--txt)); font-family: inherit; font-size: 12px; font-weight: 700; transition: border-color .15s, background .15s;
+}
+.fmt-chip:hover { border-color: rgb(var(--pri)); background: rgb(var(--soft)); }
+.fmt-chip .fx { color: rgb(var(--pri)); font-size: 11px; font-weight: 500; opacity: .8; direction: ltr; }

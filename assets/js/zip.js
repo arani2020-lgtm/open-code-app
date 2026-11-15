@@ -195,6 +195,156 @@ function _toPrimitive(t, e) { if ("object" != _typeof(t) || !t) return t; var r;
       manifest: manifest
     };
   }
+
+  /* ---- single-document builders for all export formats ---- */
+  function buildDoc(_ref2) {
+    var title = _ref2.title,
+      messages = _ref2.messages,
+      codeBlocks = _ref2.codeBlocks,
+      format = _ref2.format;
+    var isFa = OC.i18n.locale() === "fa";
+    var fm = isFa ? "کاربر" : "User";
+    var ta = isFa ? "دستیار" : "Assistant";
+    var T = String(title || "Open Code Project");
+    var fmt = String(format || "md").toLowerCase();
+    if (fmt === "md") {
+      var out = ["# " + T, "", "> " + OC.i18n.t("projectDelivery") + " — Open Code · " + new Date().toLocaleString(isFa ? "fa-IR" : "en-US"), ""];
+      var _iterator2 = _createForOfIteratorHelper(codeBlocks),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var cb = _step2.value;
+          out.push("## " + (cb.filename || cb.lang || "code"), "", "```" + (cb.lang || "") + "\n" + cb.code + "\n```", "");
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      out.push("---", "", "## " + (isFa ? "گفت‌وگو" : "Conversation"), "");
+      var _iterator3 = _createForOfIteratorHelper(messages),
+        _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var m = _step3.value;
+          out.push("**" + (m.role === "user" ? fm : ta) + ":**", "", String(m.content || "").slice(0, 4000), "");
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      return {
+        filename: safeFilename(T, 0, "md"),
+        mime: "text/markdown;charset=utf-8",
+        content: out.join("\n")
+      };
+    }
+    if (fmt === "txt") {
+      var _out = [T, "=".repeat(Math.min(60, T.length + 4)), ""];
+      var _iterator4 = _createForOfIteratorHelper(codeBlocks),
+        _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var _cb = _step4.value;
+          _out.push("-- " + (_cb.filename || _cb.lang || "code") + " --", _cb.code, "");
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      _out.push("", "---- " + (isFa ? "گفت‌وگو" : "Conversation") + " ----", "");
+      var _iterator5 = _createForOfIteratorHelper(messages),
+        _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var _m = _step5.value;
+          _out.push((_m.role === "user" ? fm : ta) + ":", String(_m.content || "").slice(0, 4000), "");
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      return {
+        filename: safeFilename(T, 0, "txt"),
+        mime: "text/plain;charset=utf-8",
+        content: _out.join("\n")
+      };
+    }
+    if (fmt === "json") {
+      var payload = {
+        title: T,
+        app: "Open Code",
+        designer: "Abbas Sedigh",
+        exportedAt: new Date().toISOString(),
+        files: codeBlocks.map(function (cb) {
+          return {
+            filename: cb.filename || null,
+            lang: cb.lang || "text",
+            bytes: new Blob([cb.code]).size,
+            code: cb.code
+          };
+        }),
+        messages: messages.map(function (m) {
+          return {
+            role: m.role,
+            content: String(m.content || "").slice(0, 8000),
+            ts: m.ts || null
+          };
+        })
+      };
+      return {
+        filename: safeFilename(T, 0, "json"),
+        mime: "application/json;charset=utf-8",
+        content: JSON.stringify(payload, null, 2)
+      };
+    }
+    if (fmt === "html" || fmt === "pdf") {
+      var escHtml = function escHtml(s) {
+        return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      };
+      var body = [];
+      body.push("<h1>" + escHtml(T) + "</h1>", '<div class="meta">Open Code · ' + new Date().toLocaleString(isFa ? "fa-IR" : "en-US") + "</div>");
+      if (codeBlocks.length) {
+        body.push("<h2>" + escHtml(isFa ? "فایل‌ها (" + codeBlocks.length + ")" : "Files (" + codeBlocks.length + ")") + "</h2>");
+        var _iterator6 = _createForOfIteratorHelper(codeBlocks),
+          _step6;
+        try {
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+            var _cb2 = _step6.value;
+            body.push('<h3 class="fname">' + escHtml(_cb2.filename || _cb2.lang || "code") + "</h3>", '<pre><code>' + escHtml(_cb2.code) + "</code></pre>");
+          }
+        } catch (err) {
+          _iterator6.e(err);
+        } finally {
+          _iterator6.f();
+        }
+      }
+      body.push("<h2>" + escHtml(isFa ? "گفت‌وگو" : "Conversation") + "</h2>");
+      var _iterator7 = _createForOfIteratorHelper(messages),
+        _step7;
+      try {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+          var _m2 = _step7.value;
+          body.push('<div class="msg ' + (_m2.role === "user" ? "u" : "a") + '"><b>' + escHtml(_m2.role === "user" ? fm : ta) + "</b><p>" + escHtml(String(_m2.content || "").slice(0, 4000)) + "</p></div>");
+        }
+      } catch (err) {
+        _iterator7.e(err);
+      } finally {
+        _iterator7.f();
+      }
+      var html = "<!doctype html><html dir=\"" + (isFa ? "rtl" : "ltr") + "\" lang=\"" + (isFa ? "fa" : "en") + "\"><head><meta charset=\"utf-8\"><title>" + escHtml(T) + "</title><style>" + "body{font-family:" + (isFa ? "'Vazirmatn','Segoe UI',Tahoma" : "'Segoe UI',Arial") + ",sans-serif;margin:36px auto;max-width:860px;color:#1c2333;line-height:1.8;padding:0 20px}" + "h1{margin-bottom:2px}h2{margin-top:30px;border-bottom:2px solid #e7e9f2;padding-bottom:6px}h3.fname{margin:22px 0 6px;direction:ltr;text-align:left;font-family:Consolas,monospace;font-size:14px;color:#4f46e5}" + ".meta{color:#8a90a6;font-size:13px;margin-bottom:18px}" + "pre{background:#f5f6fb;border:1px solid #e7e9f2;border-radius:10px;padding:14px;overflow:auto;direction:ltr;text-align:left;font-family:Consolas,Menlo,monospace;font-size:12.5px;line-height:1.6}" + ".msg{border:1px solid #e7e9f2;border-radius:10px;padding:10px 14px;margin:10px 0}.msg.u{background:#f7f7ff}.msg b{color:#4f46e5}" + "@media print{body{margin:12mm}pre{page-break-inside:avoid}}" + "</style></head><body>" + body.join("\n") + "</body></html>";
+      return {
+        filename: safeFilename(T, 0, "html"),
+        mime: "text/html;charset=utf-8",
+        content: html,
+        printable: true
+      };
+    }
+    return null;
+  }
   window.OC = window.OC || {};
   window.OC.zip = {
     ZipWriter: ZipWriter,
@@ -203,6 +353,7 @@ function _toPrimitive(t, e) { if ("object" != _typeof(t) || !t) return t; var r;
   window.OC.exporter = {
     toCSV: toCSV,
     buildProjectZip: buildProjectZip,
+    buildDoc: buildDoc,
     langExt: langExt,
     safeFilename: safeFilename
   };

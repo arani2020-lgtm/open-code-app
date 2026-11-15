@@ -15,6 +15,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   function esc(s) {
     return U.esc(s);
   }
+  function toast(msg, kind) {
+    if (OC.toast) return OC.toast(msg, kind);
+  }
 
   /* ---------- model traits (routing heuristics, 0–5; cost 5 = cheapest) ---------- */
   var MODEL_TRAITS = [{

@@ -41,7 +41,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       return '<div class="panel"><h3>' + t("ghConnect") + "</h3><p class='p-desc'>" + t("ghConnectDesc") + "</p>" + '<div class="stack">' + '<div class="field"><label>' + t("ghTokenLabel") + "</label>" + '<input class="input" id="gh-token" type="password" placeholder="ghp_… / github_pat_…" style="direction:ltr" autocomplete="off"></div>' + '<div class="hint">' + t("ghTokenHint") + "</div>" + '<div class="flex"><button class="btn btn-primary" id="gh-connect">' + I.key + t("ghConnectBtn") + "</button>" + '<a class="btn" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">' + t("ghNewToken") + "</a></div>" + "</div></div>";
     }
     var u = st.user;
-    return '<div class="panel"><h3>' + t("ghAccount") + "</h3><p class='p-desc'>" + t("ghConnectedAs") + "</p>" + '<div class="flex" style="align-items:center;gap:12px">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" style="width:44px;height:44px;border-radius:12px">' : "") + '<div><b>' + esc(u.name) + '</b><div class="muted small" style="direction:ltr">@' + esc(u.login) + "</div></div>" + '<span style="flex:1"></span>' + '<button class="btn" id="gh-repos-btn">' + I.book + t("ghMyRepos") + "</button>" + '<button class="btn btn-danger-ghost" id="gh-disconnect">' + I.logout + t("ghDisconnect") + "</button>" + "</div></div>";
+    return '<div class="panel"><h3>' + t("ghAccount") + "</h3><p class='p-desc'>" + t("ghConnectedAs") + "</p>" + '<div class="flex gh-user-row">' + (u.avatar ? '<img src="' + esc(u.avatar) + '" alt="" style="width:44px;height:44px;border-radius:12px">' : "") + '<div><b>' + esc(u.name) + '</b><div class="muted small" style="direction:ltr">@' + esc(u.login) + "</div></div>" + '<span style="flex:1"></span>' + '<button class="btn" id="gh-repos-btn">' + I.book + t("ghMyRepos") + "</button>" + '<button class="btn btn-danger-ghost" id="gh-disconnect">' + I.logout + t("ghDisconnect") + "</button>" + "</div></div>";
   }
   function bindConnCard() {
     var btn = $("#gh-connect");
@@ -253,7 +253,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   function repoCard(r) {
     var lc = LANG_COLORS[r.lang] || "#8b949e";
-    return '<div class="repo-card" data-open="' + esc(r.full) + '" title="' + esc(r.full) + '">' + '<div class="rc-head">' + '<img class="rc-avatar" src="' + avatarURL(r.owner) + '" alt="" loading="lazy">' + '<div class="rc-title"><span class="rc-owner">' + esc(r.owner) + '</span><b class="rc-name">' + esc(r.name) + "</b></div>" + '<span class="rc-vis' + (r.priv ? " priv" : "") + '">' + (r.priv ? t("ghPrivate") : t("ghPublic")) + "</span>" + "</div>" + '<p class="rc-desc">' + (r.desc ? esc(r.desc.slice(0, 110)) : '<span class="muted">' + t("ghNoDesc") + "</span>") + "</p>" + '<div class="rc-meta">' + (r.lang ? '<span class="rc-lang"><i style="background:' + lc + '"></i>' + esc(r.lang) + "</span>" : '<span class="rc-lang"><i style="background:#8b949e"></i>—</span>') + '<span class="rc-stars">' + I.star + U.faNum(String(r.stars || 0)) + "</span>" + '<span class="rc-upd">' + I.refresh + relTime(r.updated) + "</span>" + "</div>" + '<div class="rc-actions">' + '<button class="btn btn-sm" data-open="' + esc(r.full) + '">' + I.file + t("ghBrowse") + "</button>" + '<button class="btn btn-sm btn-primary" data-agent="' + esc(r.full) + '">' + I.bolt + t("ghReviewWithAI") + "</button>" + '<button class="btn btn-sm" data-zip="' + esc(r.full) + '" data-defbranch="' + esc(r.defaultBranch) + '">' + I.download + "ZIP</button>" + "</div></div>";
+    return '<div class="repo-card" data-open="' + esc(r.full) + '" title="' + esc(r.full) + '">' + '<div class="rc-head">' + '<img class="rc-avatar" src="' + avatarURL(r.owner) + '" alt="" loading="lazy">' + '<div class="rc-title"><span class="rc-owner">' + esc(r.owner) + '</span><b class="rc-name">' + esc(r.name) + "</b></div>" + '<span class="rc-vis' + (r.priv ? " priv" : "") + '">' + (r.priv ? t("ghPrivate") : t("ghPublic")) + "</span>" + "</div>" + '<p class="rc-desc">' + (r.desc ? esc(r.desc.slice(0, 110)) : '<span class="muted">' + t("ghNoDesc") + "</span>") + "</p>" + '<div class="rc-meta">' + (r.lang ? '<span class="rc-lang"><i style="background:' + lc + '"></i>' + esc(r.lang) + "</span>" : '<span class="rc-lang"><i style="background:#8b949e"></i>—</span>') + '<span class="rc-stars">' + I.star + U.faNum(String(r.stars || 0)) + "</span>" + '<span class="rc-upd">' + I.refresh + relTime(r.updated) + "</span>" + "</div>" + '<div class="rc-actions">' + '<button class="btn btn-sm" data-open="' + esc(r.full) + '">' + I.file + t("ghBrowse") + "</button>" + '<button class="btn btn-sm btn-primary" data-agent="' + esc(r.full) + '">' + I.bolt + t("ghReviewWithAI") + "</button>" + '<button class="btn btn-sm" data-build="' + esc(r.full) + '">' + I.package + t("bpTitle") + "</button>" + '<button class="btn btn-sm" data-zip="' + esc(r.full) + '" data-defbranch="' + esc(r.defaultBranch) + '">' + I.download + "ZIP</button>" + "</div></div>";
   }
   function skeletonCards() {
     var h = '<div class="repo-grid">';
@@ -344,6 +344,12 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       b.onclick = function (e) {
         e.stopPropagation();
         attachAndGo(b.dataset.agent, null);
+      };
+    });
+    $$("[data-build]", listEl).forEach(function (b) {
+      b.onclick = function (e) {
+        e.stopPropagation();
+        OC.openBuildPipeline(b.dataset.build, null);
       };
     });
     $$("[data-zip]", listEl).forEach(function (b) {

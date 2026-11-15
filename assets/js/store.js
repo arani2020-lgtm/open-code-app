@@ -256,7 +256,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     dailyRequestLimit: 0,
     // 0 = unlimited
     maxFileSizeMB: 10,
-    allowedExtensions: ["txt", "md", "json", "csv", "pdf", "png", "jpg", "jpeg", "gif", "webp", "svg", "html", "css", "js", "ts", "py", "zip"],
+    allowedExtensions: [],
+    // [] or ["*"] = ALL formats accepted; whitelist only if admin sets it
     webSearchEnabled: true,
     webSearchProvider: "tavily",
     webSearchKeyEnc: "",
