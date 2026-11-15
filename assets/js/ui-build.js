@@ -340,6 +340,50 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       usedModels[modelName(c)] = true;
       return c;
     }
+    /* v1.4.1 — one model attempt: request errors become tryable failures; only cancellation propagates */
+    function tryModel(_x, _x2, _x3) {
+      return _tryModel.apply(this, arguments);
+    }
+    function _tryModel() {
+      _tryModel = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(cand, prompt, onChunk) {
+        var res, _t7;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.p = _context4.n) {
+            case 0:
+              _context4.p = 0;
+              _context4.n = 1;
+              return runAI(cand, [{
+                role: "user",
+                content: OC.github.contextBlock() + "\n\n" + prompt
+              }], onChunk);
+            case 1:
+              res = _context4.v;
+              return _context4.a(2, {
+                ok: true,
+                res: res
+              });
+            case 2:
+              _context4.p = 2;
+              _t7 = _context4.v;
+              if (!(cancel || String(_t7 && _t7.message || _t7) === "__cancelled__")) {
+                _context4.n = 3;
+                break;
+              }
+              throw _t7;
+            case 3:
+              return _context4.a(2, {
+                ok: false,
+                err: String(_t7 && _t7.message || _t7)
+              });
+          }
+        }, _callee2, null, [[0, 2]]);
+      }));
+      return _tryModel.apply(this, arguments);
+    }
+    function failLog(cand, err) {
+      var net = /failed to fetch|networkerror|load failed|timed?\s?out/i.test(err);
+      log(modelName(cand) + " → " + t("bpCallFail") + " (" + err.slice(0, 90) + (net ? " · " + t("bpNetHint") : "") + ")");
+    }
     function setPct(v) {
       pct = Math.max(0, Math.min(100, Math.round(v)));
       ring.style.setProperty("--p", pct + "%");
@@ -403,7 +447,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       store.logActivity(store.currentUser().email, "build-pipeline", repoFull + "@" + (r.branch || branchHint || "main"));
     };
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var bs, branch, st, rev, revPick, tried, order, _iterator5, _step5, _loop3, _iterator6, _step6, _cand2, revRes, revJ, plan, round, stagedTotal, done, mpick, res, j, mp2, res2, ra, from, to, fpick, r4, j4, ra4, finalScore, finalIssues, extra, stagedNow0, vres, vp, vcands, _iterator7, _step7, _loop2, _i2, _vcands, cand, r, mp, r2, j2, _mp, ra2, v2, vp2, _iterator8, _step8, _cand, rr, stagedNow, zipBlob, commitUrl, commitSha, newBranch, result_pr, zw, _iterator9, _step9, s, commitMsg, cr, pr, repoUrl, links, _t, _t2, _t3, _t4, _t5, _t6, _t7;
+      var bs, branch, st, rev, revPick, tried, lastErr, order, _iterator5, _step5, _loop3, _iterator6, _step6, _cand2, _att3, revJ, next, plan, round, stagedTotal, done, mpick, ep, att, j, mp2, att2, ra, from, to, fpick, att4, j4, ra4, finalScore, finalIssues, extra, stagedNow0, vres, vp, vcands, _iterator7, _step7, _loop2, _i2, _vcands, cand, _att, mp, ep2, attE, j2, _mp, attE2, ra2, v2, vp2, _iterator8, _step8, _cand, _att2, stagedNow, zipBlob, commitUrl, commitSha, newBranch, result_pr, zw, _iterator9, _step9, s, commitMsg, cr, pr, repoUrl, links, _t, _t2, _t3, _t4, _t5, _t6;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -431,7 +475,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             /* phase 2 — professional review (multi-model cascade) */
             setPhase(1);
             setState(t("bpPh2"), "badge-warn");
-            rev = null, revPick = null, tried = [];
+            rev = null, revPick = null, tried = [], lastErr = "";
             order = [pick];
             _iterator5 = _createForOfIteratorHelper(chain);
             _context3.p = 3;
@@ -441,7 +485,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                 while (1) switch (_context2.n) {
                   case 0:
                     c = _step5.value;
-                    if (!(order.length >= 5)) {
+                    if (!(order.length >= 6)) {
                       _context2.n = 1;
                       break;
                     }
@@ -488,7 +532,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _iterator6.s();
           case 12:
             if ((_step6 = _iterator6.n()).done) {
-              _context3.n = 17;
+              _context3.n = 18;
               break;
             }
             _cand2 = _step6.value;
@@ -501,48 +545,56 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             usedModels[modelName(_cand2)] = true;
             setState(t("bpPh2") + " · " + modelName(_cand2), "badge-warn");
             _context3.n = 14;
-            return runAI(_cand2, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + reviewPrompt(st.stack)
-            }], function (piece, fullLen) {
+            return tryModel(_cand2, reviewPrompt(st.stack), function (piece, fullLen) {
               accChars = fullLen;
               setPct(8 + Math.min(20, accChars / 500));
             });
           case 14:
-            revRes = _context3.v;
-            setPct(30);
-            revJ = extractJson(revRes);
-            if (!validReview(revJ)) {
+            _att3 = _context3.v;
+            if (_att3.ok) {
               _context3.n = 15;
+              break;
+            }
+            lastErr = _att3.err;
+            tried.push(modelName(_cand2));
+            failLog(_cand2, _att3.err);
+            return _context3.a(3, 17);
+          case 15:
+            setPct(30);
+            revJ = extractJson(_att3.res);
+            if (!validReview(revJ)) {
+              _context3.n = 16;
               break;
             }
             rev = revJ.review;
             revPick = _cand2;
-            return _context3.a(3, 17);
-          case 15:
-            tried.push(modelName(_cand2));
-            if (useAll() && order[tried.length]) log(t("bpTryNext") + " " + modelName(order[tried.length]));else if (!useAll()) log(t("bpTryNext") + " …");
+            return _context3.a(3, 18);
           case 16:
+            lastErr = _att3.res ? String(_att3.res).slice(0, 120) : "";
+            tried.push(modelName(_cand2));
+            next = useAll() && order[tried.length] ? order[tried.length] : null;
+            log(t("bpTryNext") + " " + (next ? modelName(next) : "…"));
+          case 17:
             _context3.n = 12;
             break;
-          case 17:
-            _context3.n = 19;
-            break;
           case 18:
-            _context3.p = 18;
-            _t2 = _context3.v;
-            _iterator6.e(_t2);
+            _context3.n = 20;
+            break;
           case 19:
             _context3.p = 19;
-            _iterator6.f();
-            return _context3.f(19);
+            _t2 = _context3.v;
+            _iterator6.e(_t2);
           case 20:
+            _context3.p = 20;
+            _iterator6.f();
+            return _context3.f(20);
+          case 21:
             if (rev) {
-              _context3.n = 21;
+              _context3.n = 22;
               break;
             }
-            throw new Error(t("bpNoValidReview") + (tried.length ? " — " + tried.join(", ") : ""));
-          case 21:
+            throw new Error(t("bpNoValidReview") + (tried.length ? " — " + tried.join(", ") : "") + (lastErr ? " · " + lastErr : ""));
+          case 22:
             log("review score: " + rev.score + "/100 · issues: " + (rev.issues || []).length + " · model: " + modelName(revPick || pick));
             $("[data-pph=" + PHASES[1] + "]", body).textContent = fa(rev.score) + "/100";
 
@@ -553,47 +605,44 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               return i.fix || i.desc;
             })).filter(Boolean) || [];
             round = 0, stagedTotal = 0, done = false;
-          case 22:
+          case 23:
             if (!(!done && round < 6 && !cancel)) {
-              _context3.n = 29;
+              _context3.n = 30;
               break;
             }
             round++;
             mpick = useAll() ? nextModel() : pick;
             if (useAll() && chain.length > 1) log(t("bpRoundModel") + " " + modelName(mpick));
-            _context3.n = 23;
-            return runAI(mpick, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + executePrompt(plan.length ? plan : [t("bpImproveAll")], round)
-            }]);
-          case 23:
-            res = _context3.v;
-            j = extractJson(res);
+            ep = executePrompt(plan.length ? plan : [t("bpImproveAll")], round);
+            _context3.n = 24;
+            return tryModel(mpick, ep);
+          case 24:
+            att = _context3.v;
+            j = att.ok ? extractJson(att.res) : null;
+            if (!att.ok) failLog(mpick, att.err);
             if (!(!j && useAll())) {
-              _context3.n = 25;
+              _context3.n = 26;
               break;
             }
             mp2 = nextModel();
             log(t("bpTryNext") + " " + modelName(mp2));
-            _context3.n = 24;
-            return runAI(mp2, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + executePrompt(plan.length ? plan : [t("bpImproveAll")], round)
-            }]);
-          case 24:
-            res2 = _context3.v;
-            j = extractJson(res2);
+            _context3.n = 25;
+            return tryModel(mp2, ep);
           case 25:
+            att2 = _context3.v;
+            j = att2.ok ? extractJson(att2.res) : null;
+            if (!att2.ok) failLog(mp2, att2.err);
+          case 26:
             if (j) {
-              _context3.n = 26;
+              _context3.n = 27;
               break;
             }
-            log("round " + round + ": unparsable reply, retrying");
-            return _context3.a(3, 22);
-          case 26:
-            _context3.n = 27;
-            return OC.github.runActions(j.actions || []);
+            log("round " + round + ": " + (isFa() ? "پاسخ نامعتبر — تلاش دوباره" : "unparsable reply, retrying"));
+            return _context3.a(3, 23);
           case 27:
+            _context3.n = 28;
+            return OC.github.runActions(j.actions || []);
+          case 28:
             ra = _context3.v;
             stagedTotal += ra.staged;
             log("round " + round + ": +" + ra.staged + " " + (isFa() ? "فایل پله‌شده" : "staged") + (ra.done ? " · done" : ""));
@@ -601,56 +650,54 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             setPct(from + (to - from) * (round / 6));
             $("[data-pph=" + PHASES[2] + "]", body).textContent = fa(stagedTotal) + " " + t("filesUnit");
             if (!ra.done) {
-              _context3.n = 28;
+              _context3.n = 29;
               break;
             }
-            return _context3.a(3, 29);
-          case 28:
-            _context3.n = 22;
-            break;
+            return _context3.a(3, 30);
           case 29:
+            _context3.n = 23;
+            break;
+          case 30:
             if (!cancel) {
-              _context3.n = 30;
+              _context3.n = 31;
               break;
             }
             throw new Error("__cancelled__");
-          case 30:
+          case 31:
             /* phase 4 — build readiness + verification (v1.4.0) */
             setPhase(3);
             setState(t("bpPh4"), "badge-warn");
             fpick = useAll() ? nextModel() : pick;
-            _context3.n = 31;
-            return runAI(fpick, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + buildReadyPrompt(rev.say || rev.summary)
-            }]);
-          case 31:
-            r4 = _context3.v;
-            j4 = extractJson(r4);
+            _context3.n = 32;
+            return tryModel(fpick, buildReadyPrompt(rev.say || rev.summary));
+          case 32:
+            att4 = _context3.v;
+            j4 = att4.ok ? extractJson(att4.res) : null;
+            if (!att4.ok) failLog(fpick, att4.err);
             if (!(j4 && j4.actions && j4.actions.length)) {
-              _context3.n = 33;
+              _context3.n = 34;
               break;
             }
-            _context3.n = 32;
+            _context3.n = 33;
             return OC.github.runActions(j4.actions);
-          case 32:
+          case 33:
             ra4 = _context3.v;
             stagedTotal += ra4.staged;
             log("finalize: +" + ra4.staged + " staged");
-          case 33:
+          case 34:
             setPct(76);
 
             /* smart verification loop — keep fixing across models until build-ready */
             finalScore = rev.score, finalIssues = (rev.issues || []).length, extra = 0;
             stagedNow0 = OC.github.getStage();
             if (!(useAll() && stagedNow0.length && !cancel)) {
-              _context3.n = 64;
+              _context3.n = 65;
               break;
             }
             vres = null, vp = null;
             vcands = [nextModel()];
             _iterator7 = _createForOfIteratorHelper(chain);
-            _context3.p = 34;
+            _context3.p = 35;
             _loop2 = /*#__PURE__*/_regenerator().m(function _loop2() {
               var c;
               return _regenerator().w(function (_context) {
@@ -672,172 +719,165 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               }, _loop2);
             });
             _iterator7.s();
-          case 35:
+          case 36:
             if ((_step7 = _iterator7.n()).done) {
+              _context3.n = 39;
+              break;
+            }
+            return _context3.d(_regeneratorValues(_loop2()), 37);
+          case 37:
+            if (!_context3.v) {
               _context3.n = 38;
               break;
             }
-            return _context3.d(_regeneratorValues(_loop2()), 36);
-          case 36:
-            if (!_context3.v) {
-              _context3.n = 37;
-              break;
-            }
-            return _context3.a(3, 38);
-          case 37:
-            _context3.n = 35;
-            break;
+            return _context3.a(3, 39);
           case 38:
-            _context3.n = 40;
+            _context3.n = 36;
             break;
           case 39:
-            _context3.p = 39;
-            _t3 = _context3.v;
-            _iterator7.e(_t3);
+            _context3.n = 41;
+            break;
           case 40:
             _context3.p = 40;
-            _iterator7.f();
-            return _context3.f(40);
+            _t3 = _context3.v;
+            _iterator7.e(_t3);
           case 41:
+            _context3.p = 41;
+            _iterator7.f();
+            return _context3.f(41);
+          case 42:
             setState(t("bpVerify"), "badge-warn");
             _i2 = 0, _vcands = vcands;
-          case 42:
+          case 43:
             if (!(_i2 < _vcands.length)) {
-              _context3.n = 46;
+              _context3.n = 47;
               break;
             }
             cand = _vcands[_i2];
-            _context3.n = 43;
-            return runAI(cand, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + verifyPrompt()
-            }]);
-          case 43:
-            r = _context3.v;
-            vres = extractJson(r);
+            _context3.n = 44;
+            return tryModel(cand, verifyPrompt());
+          case 44:
+            _att = _context3.v;
+            vres = _att.ok ? extractJson(_att.res) : null;
+            if (!_att.ok) failLog(cand, _att.err);
             if (!validReview(vres)) {
-              _context3.n = 44;
+              _context3.n = 45;
               break;
             }
             vp = cand;
-            return _context3.a(3, 46);
-          case 44:
-            if (vcands.indexOf(cand) < vcands.length - 1) log(t("bpTryNext") + " " + modelName(vcands[vcands.indexOf(cand) + 1]));
+            return _context3.a(3, 47);
           case 45:
-            _i2++;
-            _context3.n = 42;
-            break;
+            if (vcands.indexOf(cand) < vcands.length - 1 && _att.ok) log(t("bpTryNext") + " " + modelName(vcands[vcands.indexOf(cand) + 1]));
           case 46:
+            _i2++;
+            _context3.n = 43;
+            break;
+          case 47:
             if (!validReview(vres)) {
-              _context3.n = 63;
+              _context3.n = 64;
               break;
             }
             finalScore = vres.review.score;
             finalIssues = (vres.review.issues || []).length;
             log("verify: score " + finalScore + "/100 · issues: " + finalIssues + " · model: " + modelName(vp));
-          case 47:
+          case 48:
             if (!(finalScore < 55 && extra < 2 && !cancel)) {
-              _context3.n = 62;
+              _context3.n = 63;
               break;
             }
             extra++;
             mp = nextModel();
             log(t("bpExtraRound") + " " + modelName(mp));
             setState(t("bpPh3") + " · " + modelName(mp), "badge-warn");
-            _context3.n = 48;
-            return runAI(mp, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + executePrompt(plan.length ? plan : [t("bpImproveAll")], "extra-" + extra)
-            }]);
-          case 48:
-            r2 = _context3.v;
-            j2 = extractJson(r2);
+            ep2 = executePrompt(plan.length ? plan : [t("bpImproveAll")], "extra-" + extra);
+            _context3.n = 49;
+            return tryModel(mp, ep2);
+          case 49:
+            attE = _context3.v;
+            j2 = attE.ok ? extractJson(attE.res) : null;
+            if (!attE.ok) failLog(mp, attE.err);
             if (!(!j2 && useAll())) {
-              _context3.n = 50;
+              _context3.n = 51;
               break;
             }
             _mp = nextModel();
             log(t("bpTryNext") + " " + modelName(_mp));
-            _t4 = extractJson;
-            _context3.n = 49;
-            return runAI(_mp, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + executePrompt(plan.length ? plan : [t("bpImproveAll")], "extra-" + extra)
-            }]);
-          case 49:
-            j2 = _t4(_context3.v);
+            _context3.n = 50;
+            return tryModel(_mp, ep2);
           case 50:
+            attE2 = _context3.v;
+            j2 = attE2.ok ? extractJson(attE2.res) : null;
+            if (!attE2.ok) failLog(_mp, attE2.err);
+          case 51:
             if (j2) {
-              _context3.n = 51;
+              _context3.n = 52;
               break;
             }
             log("extra round: unparsable — stopping verification");
-            return _context3.a(3, 62);
-          case 51:
-            _context3.n = 52;
-            return OC.github.runActions(j2.actions || []);
+            return _context3.a(3, 63);
           case 52:
+            _context3.n = 53;
+            return OC.github.runActions(j2.actions || []);
+          case 53:
             ra2 = _context3.v;
             stagedTotal += ra2.staged;
             log("extra round " + extra + ": +" + ra2.staged + " " + (isFa() ? "فایل پله‌شده" : "staged"));
             if (!(!ra2.staged && !ra2.done)) {
-              _context3.n = 53;
+              _context3.n = 54;
               break;
             }
-            return _context3.a(3, 62);
-          case 53:
+            return _context3.a(3, 63);
+          case 54:
             v2 = null, vp2 = null;
             _iterator8 = _createForOfIteratorHelper(vcands);
-            _context3.p = 54;
+            _context3.p = 55;
             _iterator8.s();
-          case 55:
+          case 56:
             if ((_step8 = _iterator8.n()).done) {
-              _context3.n = 58;
+              _context3.n = 59;
               break;
             }
             _cand = _step8.value;
-            _context3.n = 56;
-            return runAI(_cand, [{
-              role: "user",
-              content: OC.github.contextBlock() + "\n\n" + verifyPrompt()
-            }]);
-          case 56:
-            rr = _context3.v;
-            v2 = extractJson(rr);
+            _context3.n = 57;
+            return tryModel(_cand, verifyPrompt());
+          case 57:
+            _att2 = _context3.v;
+            v2 = _att2.ok ? extractJson(_att2.res) : null;
+            if (!_att2.ok) failLog(_cand, _att2.err);
             if (!validReview(v2)) {
-              _context3.n = 57;
+              _context3.n = 58;
               break;
             }
             vp2 = _cand;
-            return _context3.a(3, 58);
-          case 57:
-            _context3.n = 55;
-            break;
+            return _context3.a(3, 59);
           case 58:
-            _context3.n = 60;
+            _context3.n = 56;
             break;
           case 59:
-            _context3.p = 59;
-            _t5 = _context3.v;
-            _iterator8.e(_t5);
+            _context3.n = 61;
+            break;
           case 60:
             _context3.p = 60;
-            _iterator8.f();
-            return _context3.f(60);
+            _t4 = _context3.v;
+            _iterator8.e(_t4);
           case 61:
+            _context3.p = 61;
+            _iterator8.f();
+            return _context3.f(61);
+          case 62:
             if (validReview(v2)) {
               finalScore = v2.review.score;
               finalIssues = (v2.review.issues || []).length;
               log("verify: score " + finalScore + "/100 · model: " + modelName(vp2));
             }
-            _context3.n = 47;
-            break;
-          case 62:
-            _context3.n = 64;
+            _context3.n = 48;
             break;
           case 63:
-            log("verify: unparsable — keeping review score");
+            _context3.n = 65;
+            break;
           case 64:
+            log("verify: unparsable — keeping review score");
+          case 65:
             setPct(82);
 
             /* phase 5 — commit & PR */
@@ -849,7 +889,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
             zipBlob = null, commitUrl = "", commitSha = "", newBranch = "", result_pr = "";
             if (!stagedNow.length) {
-              _context3.n = 69;
+              _context3.n = 70;
               break;
             }
             zw = new OC.zip.ZipWriter();
@@ -866,21 +906,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             }
             zipBlob = zw.finish();
             commitMsg = "Open Code — " + t("bpCommitMsg") + " (score " + rev.score + "/100)";
-            _context3.n = 65;
+            _context3.n = 66;
             return OC.github.commit({
               repo: repoFull,
               branch: branch,
               newBranch: "opencode/build-" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, ""),
               message: commitMsg
             });
-          case 65:
+          case 66:
             cr = _context3.v;
             commitUrl = cr.html;
             commitSha = cr.sha;
             newBranch = cr.branch;
             log("commit " + cr.sha.slice(0, 7) + " → " + cr.branch + " (" + cr.files + " files)");
-            _context3.p = 66;
-            _context3.n = 67;
+            _context3.p = 67;
+            _context3.n = 68;
             return OC.github.api("/repos/" + repoFull + "/pulls", {
               method: "POST",
               body: {
@@ -894,19 +934,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                 }).join("\n")
               }
             });
-          case 67:
+          case 68:
             pr = _context3.v;
             if (pr && pr.html_url) {
               result_pr = pr.html_url;
               log("PR: " + pr.number);
             }
-            _context3.n = 69;
+            _context3.n = 70;
             break;
-          case 68:
-            _context3.p = 68;
-            _t6 = _context3.v;
-            log("PR skipped (" + (_t6.message || "").slice(0, 80) + ")");
           case 69:
+            _context3.p = 69;
+            _t5 = _context3.v;
+            log("PR skipped (" + (_t5.message || "").slice(0, 80) + ")");
+          case 70:
             setPct(94);
 
             /* phase 6 — output links */
@@ -947,14 +987,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               files: stagedNow.length
             });
             toast(t("bpDoneToast"), "ok");
-            _context3.n = 71;
+            _context3.n = 72;
             break;
-          case 70:
-            _context3.p = 70;
-            _t7 = _context3.v;
+          case 71:
+            _context3.p = 71;
+            _t6 = _context3.v;
             clearInterval(tickTimer);
             running = null;
-            if (cancel || String(_t7.message) === "__cancelled__") {
+            if (cancel || String(_t6.message) === "__cancelled__") {
               setState(t("bpStopped"), "badge-warn");
               log(t("bpStoppedLog"));
               $("#bp-result", body).classList.add("show");
@@ -972,21 +1012,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               };
             } else {
               setState(t("bpFailed"), "badge-err");
-              log("error: " + (_t7.message || _t7));
+              log("error: " + (_t6.message || _t6));
               $("#bp-acts", body).innerHTML = '<button class="btn btn-primary" id="bp-close3">' + t("close") + "</button>";
               $("#bp-close3", body).onclick = function () {
                 return m.close();
               };
-              toast(_t7.message || t("bpFailed"), "err");
+              toast(_t6.message || t("bpFailed"), "err");
             }
             return _context3.a(2);
-          case 71:
+          case 72:
             clearInterval(tickTimer);
             running = null;
-          case 72:
+          case 73:
             return _context3.a(2);
         }
-      }, _callee, null, [[66, 68], [54, 59, 60, 61], [34, 39, 40, 41], [11, 18, 19, 20], [3, 8, 9, 10], [0, 70]]);
+      }, _callee, null, [[67, 69], [55, 60, 61, 62], [35, 40, 41, 42], [11, 19, 20, 21], [3, 8, 9, 10], [0, 71]]);
     }))();
   }
   window.OC = window.OC || {};
