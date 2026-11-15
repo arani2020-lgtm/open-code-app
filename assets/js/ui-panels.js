@@ -332,6 +332,22 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
       return addHeaderRow("", "");
     };
 
+    /* Z.ai preset: prefill base + seed current GLM models */
+    $("#pe-type", body).onchange = function () {
+      var tp = OC.providers.TYPES.find(function (x) {
+        return x.id === $("#pe-type", body).value;
+      });
+      if (tp && tp.id === "zai") {
+        if (!$("#pe-base", body).value.trim()) $("#pe-base", body).value = tp.base || "";
+        if (!(p.models || []).length) {
+          p.models = OC.providers.ZAI_MODELS.slice();
+          renderModels();
+          $("#pe-mcount", body).textContent = U.faNum(p.models.length);
+          toast(t("zaiSeeded") + " (" + U.faNum(p.models.length) + ")", "ok");
+        }
+      }
+    };
+
     /* key pool */
     var poolBox = $("#pe-pool", body);
     function maskKey(keyEnc) {

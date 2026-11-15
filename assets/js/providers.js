@@ -17,6 +17,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     base: "https://api.openai.com/v1",
     needsKey: true
   }, {
+    id: "zai",
+    label: "Z.ai — chat.z.ai (GLM)",
+    base: "https://api.z.ai/api/paas/v4",
+    needsKey: true
+  }, {
     id: "openai-compatible",
     label: "OpenAI-compatible (سازگار با OpenAI)",
     base: "",
@@ -42,6 +47,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     base: "",
     needsKey: false
   }];
+  var ZAI_MODELS = ["glm-5.3", "glm-5.3-flash", "glm-5.2", "glm-4.7", "glm-4.6"];
   function allProviders() {
     // system providers from admin + user providers
     var sys = store.sysSettings().systemProviders || [];
@@ -775,6 +781,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   window.OC = window.OC || {};
   window.OC.providers = {
     TYPES: TYPES,
+    ZAI_MODELS: ZAI_MODELS,
     allProviders: allProviders,
     getProvider: getProvider,
     baseUrl: baseUrl,
