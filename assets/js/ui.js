@@ -554,7 +554,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var g = groupConvs(convs);
     var convItem = function convItem(c) {
       var active = OC._currentConvId === c.id ? " active" : "";
-      return '<div class="conv-item' + active + '" data-cid="' + c.id + '">' + '<span class="c-ico">' + I.code + "</span>" + '<span class="c-title">' + U.esc(c.title || t("newChat")) + "</span>" + (c.model ? "" : "") + '<button class="c-del" title="' + t("rename") + '" data-more="' + c.id + '">' + I.chevronDown + "</button>" + "</div>";
+      return '<div class="conv-item' + active + '" data-cid="' + c.id + '">' + '<span class="c-ico">' + I.code + "</span>" + '<span class="c-title">' + U.esc(c.title || t("newChat")) + "</span>" + (c.gh && c.gh.on ? '<span class="c-gh" style="display:inline-flex;opacity:.6;margin-inline-start:4px" title="GitHub">' + I.book + "</span>" : "") + '<button class="c-del" title="' + t("rename") + '" data-more="' + c.id + '">' + I.chevronDown + "</button>" + "</div>";
     };
     var html = '<div class="side-head"><button class="new-chat-btn" id="btn-new-chat">' + I.plus + "<span>" + t("newChat") + "</span></button>" + '<button class="icon-btn" id="btn-new-wizard" title="' + t("wizTitle") + '">' + I.bolt + "</button></div>" + '<div class="side-search"><input class="input" id="side-q" placeholder="' + t("searchChats") + '" value="' + U.esc(q) + '"></div>' + '<div class="side-list" id="side-list">';
     if (q && !convs.length) html += '<div class="side-section">' + t("noChatFound") + "</div>";
@@ -987,6 +987,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     renderShell('<div class="chat-layout" id="chat-root"></div>');
     OC.renderSidebar();
     renderChat(convId);
+    if (OC.github && OC.github.syncChat) {
+      OC.github.syncChat().then(function () {
+        if (OC.renderGhChip) OC.renderGhChip();
+      });
+    }
     if (window.innerWidth <= 900) closeSidebar();
   };
   function currentConv() {
@@ -1034,7 +1039,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     var canSearch = sys.webSearchEnabled;
     var searchOn = conv ? !!conv.webSearch : !!OC._pendingSearch;
-    root.innerHTML = '<div class="chat-scroll" id="chat-scroll"><div class="chat-inner" id="chat-inner"></div></div>' + '<div class="composer-wrap"><div class="composer" id="composer">' + '<div class="pending-strip hidden" id="pending-strip"></div>' + '<textarea id="composer-input" rows="1" placeholder="' + t("messagePlaceholder") + '"></textarea>' + '<div class="composer-row">' + '<button class="icon-btn" id="btn-attach" title="' + t("attach") + '">' + I.paperclip + "</button>" + '<input type="file" id="file-input" multiple class="hidden">' + (canSearch ? '<button class="icon-btn' + (searchOn ? " active" : "") + '" id="btn-websearch" title="' + (searchOn ? t("webSearchOn") : t("webSearchOff")) + '">' + I.globeSearch + "</button>" : "") + '<button class="icon-btn" id="btn-deliver" title="' + t("projectDelivery") + '">' + I.package + "</button>" + '<div class="spacer"></div>' + (provs.length ? '<div class="model-pick"><select id="model-select">' + (selOptions || '<option value="">' + t("defaultModel") + "</option>") + "</select></div>" : '<span class="badge badge-warn">' + t("addProviderFirst") + "</span>") + '<button class="send-btn" id="btn-send">' + I.send + "</button>" + "</div></div></div>";
+    root.innerHTML = '<div class="chat-scroll" id="chat-scroll"><div class="chat-inner" id="chat-inner"></div></div>' + '<div class="composer-wrap"><div class="composer" id="composer">' + '<div class="pending-strip hidden" id="pending-strip"></div>' + '<textarea id="composer-input" rows="1" placeholder="' + t("messagePlaceholder") + '"></textarea>' + '<div class="composer-row">' + '<button class="icon-btn" id="btn-attach" title="' + t("attach") + '">' + I.paperclip + "</button>" + '<button class="icon-btn" id="btn-gh" title="' + t("ghChatBtn") + '">' + I.book + "</button>" + '<input type="file" id="file-input" multiple class="hidden">' + (canSearch ? '<button class="icon-btn' + (searchOn ? " active" : "") + '" id="btn-websearch" title="' + (searchOn ? t("webSearchOn") : t("webSearchOff")) + '">' + I.globeSearch + "</button>" : "") + '<button class="icon-btn" id="btn-deliver" title="' + t("projectDelivery") + '">' + I.package + "</button>" + '<div class="spacer"></div>' + (provs.length ? '<div class="model-pick"><select id="model-select">' + (selOptions || '<option value="">' + t("defaultModel") + "</option>") + "</select></div>" : '<span class="badge badge-warn">' + t("addProviderFirst") + "</span>") + '<button class="send-btn" id="btn-send">' + I.send + "</button>" + "</div></div></div>";
     renderMessages(conv);
     var input = $("#composer-input");
     input.addEventListener("input", function () {
@@ -1050,6 +1055,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     $("#btn-send").onclick = sendCurrent;
     $("#btn-attach").onclick = function () {
       return $("#file-input").click();
+    };
+    var ghBtn = $("#btn-gh");
+    if (ghBtn) ghBtn.onclick = function () {
+      if (OC.showChatGithub) OC.showChatGithub();else location.hash = "/github";
     };
     $("#file-input").onchange = onFilesPicked;
     var wsBtn = $("#btn-websearch");
@@ -1160,8 +1169,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var strip = $("#pending-strip");
     if (!strip) return;
     var ghAt = OC.github && OC.github.attached() ? OC.github.attached() : null;
+    var ghGranted = OC.github && OC.github.chatGh ? !!(OC.github.chatGh() && OC.github.chatGh().on) : false;
+    var ghPending = ghGranted && !ghAt;
     var connAt = OC.connectors && OC.connectors.attached() ? OC.connectors.attached() : null;
-    if (!pendingFiles.length && !ghAt && !connAt) {
+    if (!pendingFiles.length && !ghAt && !ghPending && !connAt) {
       strip.classList.add("hidden");
       strip.innerHTML = "";
       return;
@@ -1172,6 +1183,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }).join("");
     if (ghAt) {
       html += '<span class="attach-chip gh-chip">' + I.book + '<span class="aname" style="direction:ltr">' + U.esc(ghAt.repo + " @" + ghAt.branch) + "</span>" + '<span class="muted small">Git</span>' + '<button class="icon-btn" style="width:24px;height:24px" id="gh-detach-btn">' + I.x + "</button></span>";
+    } else if (ghPending) {
+      html += '<span class="attach-chip gh-chip">' + I.book + '<span class="aname">' + t("ghChatNoRepo") + "</span>" + '<button class="icon-btn" style="width:24px;height:24px" id="gh-pick-btn" title="' + t("ghChatPickRepo") + '">' + I.chevronDown + "</button></span>";
     }
     if (connAt) {
       var connNames = {
@@ -1195,6 +1208,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (det) det.onclick = function () {
       if (OC.github) OC.github.detach();
       renderPending();
+    };
+    var pick = $("#gh-pick-btn", strip);
+    if (pick) pick.onclick = function () {
+      if (OC.showChatGithub) OC.showChatGithub();
     };
     var cdet = $("#conn-detach-btn", strip);
     if (cdet) cdet.onclick = function () {
@@ -1389,6 +1406,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       list.unshift(c);
       store.saveConvs(list);
       OC._currentConvId = c.id;
+      if (OC.github && OC.github.bindConv) OC.github.bindConv(c);
       // update hash without full rerender
       history.replaceState(null, "", "#/chat/" + c.id);
     }

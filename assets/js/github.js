@@ -603,8 +603,21 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return stage.length;
   }
 
-  /* ================= attached repo (chat agent mode) ================= */
-  var attach = null; // {repo, branch, tree, truncated, ts}
+  /* ================= attached repo (per-chat agent mode, v1.4.2) ================= */
+  var attach = null; // {repo, branch, tree, truncated, ts} — belongs to the CURRENT chat only
+  function curConv() {
+    try {
+      if (!OC.store || !OC._currentConvId) return null;
+      return OC.store.getConv(OC._currentConvId);
+    } catch (e) {
+      return null;
+    }
+  }
+  function persistGh(conv, gh) {
+    if (!conv) return;
+    if (gh) conv.gh = gh;else delete conv.gh;
+    OC.store.putConv(conv);
+  }
   function attachRepo(_x13, _x14) {
     return _attachRepo.apply(this, arguments);
   }
@@ -625,6 +638,15 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               truncated: tr.truncated,
               ts: Date.now()
             };
+            persistGh(curConv(), {
+              on: true,
+              repo: repo,
+              branch: branch
+            });
+            try {
+              if (OC.renderGhChip) OC.renderGhChip();
+              if (OC.renderSidebar) OC.renderSidebar();
+            } catch (e) {}
             return _context9.a(2, attach);
         }
       }, _callee9);
@@ -633,9 +655,91 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   function detach() {
     attach = null;
+    persistGh(curConv(), null);
+    try {
+      if (OC.renderGhChip) OC.renderGhChip();
+      if (OC.renderSidebar) OC.renderSidebar();
+    } catch (e) {}
   }
   function attached() {
     return attach;
+  }
+  /* per-chat grant state: {on, repo, branch} of the current chat */
+  function chatGh() {
+    var c = curConv();
+    return c && c.gh ? c.gh : null;
+  }
+  function setChatGh(on) {
+    var c = curConv();
+    if (!c) return null;
+    if (on) {
+      var keep = c.gh && c.gh.repo ? c.gh : null;
+      c.gh = keep ? {
+        on: true,
+        repo: keep.repo,
+        branch: keep.branch
+      } : {
+        on: true,
+        repo: null,
+        branch: null
+      };
+      OC.store.putConv(c);
+      if (keep && (!attach || attach.repo !== keep.repo || attach.branch !== keep.branch)) {
+        return attachRepo(keep.repo, keep.branch);
+      }
+    } else {
+      attach = null;
+      persistGh(c, null);
+    }
+    return Promise.resolve(attach);
+  }
+  /* chat switched / new chat: restore THIS chat's GitHub state */
+  function syncChat() {
+    return _syncChat.apply(this, arguments);
+  }
+  /* bind in-memory attach to a freshly created conv (first message of a new chat) */
+  function _syncChat() {
+    _syncChat = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
+      var gh, _t7;
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.p = _context0.n) {
+          case 0:
+            gh = chatGh();
+            if (!(gh && gh.on && gh.repo)) {
+              _context0.n = 4;
+              break;
+            }
+            if (!(attach && attach.repo === gh.repo && attach.branch === gh.branch)) {
+              _context0.n = 1;
+              break;
+            }
+            return _context0.a(2, attach);
+          case 1:
+            _context0.p = 1;
+            _context0.n = 2;
+            return attachRepo(gh.repo, gh.branch);
+          case 2:
+            return _context0.a(2, _context0.v);
+          case 3:
+            _context0.p = 3;
+            _t7 = _context0.v;
+            attach = null;
+            return _context0.a(2, null);
+          case 4:
+            attach = null;
+            return _context0.a(2, null);
+        }
+      }, _callee0, null, [[1, 3]]);
+    }));
+    return _syncChat.apply(this, arguments);
+  }
+  function bindConv(conv) {
+    if (conv && attach && !conv.gh) persistGh(conv, {
+      on: true,
+      repo: attach.repo,
+      branch: attach.branch
+    });
+    return conv;
   }
 
   /* ================= agent protocol ================= */
@@ -694,16 +798,16 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _runActions.apply(this, arguments);
   }
   function _runActions() {
-    _runActions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(actions) {
-      var results, staged, done, say, _iterator3, _step3, _loop, _t8;
-      return _regenerator().w(function (_context1) {
-        while (1) switch (_context1.p = _context1.n) {
+    _runActions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(actions) {
+      var results, staged, done, say, _iterator3, _step3, _loop, _t9;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.p = _context10.n) {
           case 0:
             if (attach) {
-              _context1.n = 1;
+              _context10.n = 1;
               break;
             }
-            return _context1.a(2, {
+            return _context10.a(2, {
               results: [],
               staged: 0,
               done: false,
@@ -713,24 +817,24 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             results = [];
             staged = 0, done = false, say = "";
             _iterator3 = _createForOfIteratorHelper((actions || []).slice(0, 3));
-            _context1.p = 2;
+            _context10.p = 2;
             _loop = /*#__PURE__*/_regenerator().m(function _loop() {
-              var a, type, p, c, trimmed, dir, kids, _t7;
-              return _regenerator().w(function (_context0) {
-                while (1) switch (_context0.p = _context0.n) {
+              var a, type, p, c, trimmed, dir, kids, _t8;
+              return _regenerator().w(function (_context1) {
+                while (1) switch (_context1.p = _context1.n) {
                   case 0:
                     a = _step3.value;
                     type = String(a.t || a.action || "").toLowerCase();
                     p = String(a.p || a.path || "");
-                    _context0.p = 1;
+                    _context1.p = 1;
                     if (!(type === "read" && p)) {
-                      _context0.n = 3;
+                      _context1.n = 3;
                       break;
                     }
-                    _context0.n = 2;
+                    _context1.n = 2;
                     return readFile(attach.repo, attach.branch, p);
                   case 2:
-                    c = _context0.v;
+                    c = _context1.v;
                     trimmed = c.length > MAX_FILE_CONTEXT ? c.slice(0, MAX_FILE_CONTEXT) + "\n... [TRUNCATED]" : c;
                     results.push({
                       ok: true,
@@ -738,7 +842,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                       path: p,
                       text: "[FILE " + p + "]\n" + trimmed
                     });
-                    _context0.n = 4;
+                    _context1.n = 4;
                     break;
                   case 3:
                     if (type === "write" && p && typeof a.c === "string") {
@@ -775,52 +879,52 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                       });
                     }
                   case 4:
-                    _context0.n = 6;
+                    _context1.n = 6;
                     break;
                   case 5:
-                    _context0.p = 5;
-                    _t7 = _context0.v;
+                    _context1.p = 5;
+                    _t8 = _context1.v;
                     results.push({
                       ok: false,
                       type: type,
                       path: p,
-                      text: "[ERROR " + p + "] " + (_t7.message || String(_t7))
+                      text: "[ERROR " + p + "] " + (_t8.message || String(_t8))
                     });
                   case 6:
-                    return _context0.a(2);
+                    return _context1.a(2);
                 }
               }, _loop, null, [[1, 5]]);
             });
             _iterator3.s();
           case 3:
             if ((_step3 = _iterator3.n()).done) {
-              _context1.n = 5;
+              _context10.n = 5;
               break;
             }
-            return _context1.d(_regeneratorValues(_loop()), 4);
+            return _context10.d(_regeneratorValues(_loop()), 4);
           case 4:
-            _context1.n = 3;
+            _context10.n = 3;
             break;
           case 5:
-            _context1.n = 7;
+            _context10.n = 7;
             break;
           case 6:
-            _context1.p = 6;
-            _t8 = _context1.v;
-            _iterator3.e(_t8);
+            _context10.p = 6;
+            _t9 = _context10.v;
+            _iterator3.e(_t9);
           case 7:
-            _context1.p = 7;
+            _context10.p = 7;
             _iterator3.f();
-            return _context1.f(7);
+            return _context10.f(7);
           case 8:
-            return _context1.a(2, {
+            return _context10.a(2, {
               results: results,
               staged: staged,
               done: done,
               say: say
             });
         }
-      }, _callee0, null, [[2, 6, 7, 8]]);
+      }, _callee1, null, [[2, 6, 7, 8]]);
     }));
     return _runActions.apply(this, arguments);
   }
@@ -846,6 +950,10 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     attachRepo: attachRepo,
     detach: detach,
     attached: attached,
+    chatGh: chatGh,
+    setChatGh: setChatGh,
+    syncChat: syncChat,
+    bindConv: bindConv,
     contextBlock: contextBlock,
     parseActions: parseActions,
     runActions: runActions

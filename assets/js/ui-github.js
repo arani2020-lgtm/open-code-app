@@ -264,42 +264,42 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _loadRepos.apply(this, arguments);
   }
   function _loadRepos() {
-    _loadRepos = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(reset) {
-      var listEl, got, hasMore, _t9;
-      return _regenerator().w(function (_context1) {
-        while (1) switch (_context1.p = _context1.n) {
+    _loadRepos = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(reset) {
+      var listEl, got, hasMore, _t1;
+      return _regenerator().w(function (_context12) {
+        while (1) switch (_context12.p = _context12.n) {
           case 0:
             listEl = $("#gh-repo-list");
             if (listEl) {
-              _context1.n = 1;
+              _context12.n = 1;
               break;
             }
-            return _context1.a(2);
+            return _context12.a(2);
           case 1:
             if (reset) {
               repos = [];
               repoPage = 1;
             }
             if (!repos.length) listEl.innerHTML = skeletonCards();
-            _context1.p = 2;
-            _context1.n = 3;
+            _context12.p = 2;
+            _context12.n = 3;
             return OC.github.listRepos(repoPage);
           case 3:
-            got = _context1.v;
+            got = _context12.v;
             repos = repos.concat(got);
             hasMore = got.length === 30;
             renderRepoList(hasMore);
             repoPage++;
-            _context1.n = 5;
+            _context12.n = 5;
             break;
           case 4:
-            _context1.p = 4;
-            _t9 = _context1.v;
-            listEl.innerHTML = '<div class="empty-state">' + I.book + "<p style=\"color:rgb(var(--danger))\">" + esc(_t9.message || t("ghError")) + "</p></div>";
+            _context12.p = 4;
+            _t1 = _context12.v;
+            listEl.innerHTML = '<div class="empty-state">' + I.book + "<p style=\"color:rgb(var(--danger))\">" + esc(_t1.message || t("ghError")) + "</p></div>";
           case 5:
-            return _context1.a(2);
+            return _context12.a(2);
         }
-      }, _callee1, null, [[2, 4]]);
+      }, _callee12, null, [[2, 4]]);
     }));
     return _loadRepos.apply(this, arguments);
   }
@@ -394,38 +394,38 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _openRepo.apply(this, arguments);
   }
   function _openRepo() {
-    _openRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(full, branch) {
-      var bs, _t0;
-      return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.p = _context10.n) {
+    _openRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(full, branch) {
+      var bs, _t10;
+      return _regenerator().w(function (_context13) {
+        while (1) switch (_context13.p = _context13.n) {
           case 0:
             currentRepo = {
               full: full
             };
-            _context10.p = 1;
-            _context10.n = 2;
+            _context13.p = 1;
+            _context13.n = 2;
             return OC.github.branches(full);
           case 2:
-            bs = _context10.v;
+            bs = _context13.v;
             currentRepo.branches = bs;
             currentBranch = branch || (bs.find(function (b) {
               return b.name === "main";
             }) || bs[0] || {}).name || "main";
             currentRepo.canPush = true;
-            _context10.n = 3;
+            _context13.n = 3;
             return loadTree();
           case 3:
             render();
-            _context10.n = 5;
+            _context13.n = 5;
             break;
           case 4:
-            _context10.p = 4;
-            _t0 = _context10.v;
-            toast(_t0.message || t("ghError"), "err");
+            _context13.p = 4;
+            _t10 = _context13.v;
+            toast(_t10.message || t("ghError"), "err");
           case 5:
-            return _context10.a(2);
+            return _context13.a(2);
         }
-      }, _callee10, null, [[1, 4]]);
+      }, _callee13, null, [[1, 4]]);
     }));
     return _openRepo.apply(this, arguments);
   }
@@ -433,21 +433,21 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _loadTree.apply(this, arguments);
   }
   function _loadTree() {
-    _loadTree = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
+    _loadTree = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14() {
       var tr;
-      return _regenerator().w(function (_context11) {
-        while (1) switch (_context11.n) {
+      return _regenerator().w(function (_context14) {
+        while (1) switch (_context14.n) {
           case 0:
-            _context11.n = 1;
+            _context14.n = 1;
             return OC.github.tree(currentRepo.full, currentBranch);
           case 1:
-            tr = _context11.v;
+            tr = _context14.v;
             treeFiles = tr.files;
             currentRepo.truncated = tr.truncated;
           case 2:
-            return _context11.a(2);
+            return _context14.a(2);
         }
-      }, _callee11);
+      }, _callee14);
     }));
     return _loadTree.apply(this, arguments);
   }
@@ -577,26 +577,26 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   /* ================= main render ================= */
   function _attachAndGo() {
-    _attachAndGo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(repoFull, branch) {
-      var br, bs, _t1;
-      return _regenerator().w(function (_context12) {
-        while (1) switch (_context12.p = _context12.n) {
+    _attachAndGo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15(repoFull, branch) {
+      var br, bs, _t11;
+      return _regenerator().w(function (_context15) {
+        while (1) switch (_context15.p = _context15.n) {
           case 0:
-            _context12.p = 0;
+            _context15.p = 0;
             br = branch;
             if (br) {
-              _context12.n = 2;
+              _context15.n = 2;
               break;
             }
-            _context12.n = 1;
+            _context15.n = 1;
             return OC.github.branches(repoFull);
           case 1:
-            bs = _context12.v;
+            bs = _context15.v;
             br = (bs.find(function (b) {
               return b.name === "main";
             }) || bs[0] || {}).name || "main";
           case 2:
-            _context12.n = 3;
+            _context15.n = 3;
             return OC.github.attachRepo(repoFull, br);
           case 3:
             OC._pendingGhAgent = true;
@@ -605,16 +605,16 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             setTimeout(function () {
               if (OC.renderGhChip) OC.renderGhChip();
             }, 350);
-            _context12.n = 5;
+            _context15.n = 5;
             break;
           case 4:
-            _context12.p = 4;
-            _t1 = _context12.v;
-            toast(_t1.message || t("ghError"), "err");
+            _context15.p = 4;
+            _t11 = _context15.v;
+            toast(_t11.message || t("ghError"), "err");
           case 5:
-            return _context12.a(2);
+            return _context15.a(2);
         }
-      }, _callee12, null, [[0, 4]]);
+      }, _callee15, null, [[0, 4]]);
     }));
     return _attachAndGo.apply(this, arguments);
   }
@@ -737,6 +737,136 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     if (!user) return;
     currentRepo = null;
     render();
+  };
+
+  /* ================= per-chat GitHub modal (v1.4.2) ================= */
+  function chatGhHTML() {
+    var st = OC.github.state();
+    var gh = OC.github.chatGh();
+    var at = OC.github.attached();
+    var on = !!(gh && gh.on);
+    var acc;
+    if (!st.connected) {
+      acc = '<div class="field"><label>' + t("ghTokenLabel") + "</label>" + '<input class="input" id="cgh-token" type="password" placeholder="ghp_… / github_pat_…" style="direction:ltr" autocomplete="off"></div>' + '<div class="hint">' + t("ghTokenHint") + "</div>" + '<div class="flex" style="margin-top:8px"><button class="btn btn-primary" id="cgh-connect">' + I.key + t("ghConnectBtn") + "</button>" + '<a class="btn" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">' + t("ghNewToken") + "</a></div>";
+    } else {
+      acc = '<div class="flex gh-user-row">' + (st.user.avatar ? '<img src="' + esc(st.user.avatar) + '" alt="" style="width:36px;height:36px;border-radius:10px">' : "") + '<div><b>' + esc(st.user.name) + '</b><div class="muted small" style="direction:ltr">@' + esc(st.user.login) + "</div></div>" + '<span style="flex:1"></span>' + '<button class="btn btn-danger-ghost" id="cgh-disconnect">' + I.logout + t("ghDisconnect") + "</button></div>";
+    }
+    var repoRow;
+    if (at) {
+      repoRow = '<div class="flex" style="gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">' + '<span class="attach-chip gh-chip">' + I.book + '<span class="aname" style="direction:ltr">' + esc(at.repo + " @" + at.branch) + "</span></span>" + '<button class="btn" id="cgh-repick">' + t("ghChatChange") + "</button>" + '<button class="btn btn-danger-ghost" id="cgh-detach">' + I.x + t("ghChatRevoke") + "</button></div>";
+    } else if (on) {
+      repoRow = '<div class="hint" style="margin-top:8px">' + t("ghChatNoRepo") + "</div>" + '<div class="flex" style="margin-top:8px"><button class="btn btn-primary" id="cgh-repick">' + I.book + t("ghChatPickRepo") + "</button></div>";
+    } else {
+      repoRow = '<div class="hint" style="margin-top:8px">' + t("ghChatOff") + "</div>";
+    }
+    return '<p class="p-desc">' + t("ghChatDesc") + "</p>" + '<div class="panel" style="margin:10px 0"><h3 style="font-size:15px">' + t("ghAccount") + "</h3>" + acc + "</div>" + '<div class="panel" style="margin:10px 0"><h3 style="font-size:15px">' + t("ghChatGrant") + "</h3>" + '<label class="check-row" style="margin:6px 0"><input type="checkbox" id="cgh-toggle"' + (on ? " checked" : "") + "><span>" + t("ghChatToggle") + "</span></label>" + repoRow + "</div>" + '<div class="hint">' + t("ghChatTip") + "</div>";
+  }
+  OC.showChatGithub = function () {
+    if (!store.currentUser() || !OC.github) return;
+    var m = OC.modal({
+      title: t("ghChatTitle"),
+      body: chatGhHTML(),
+      foot: []
+    });
+    var rerender = function rerender() {
+      m.body.innerHTML = chatGhHTML();
+      bind();
+    };
+    function bind() {
+      var conn = $("#cgh-connect", m.body);
+      if (conn) conn.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1() {
+        var tok, _t9;
+        return _regenerator().w(function (_context1) {
+          while (1) switch (_context1.p = _context1.n) {
+            case 0:
+              tok = $("#cgh-token", m.body).value.trim();
+              conn.disabled = true;
+              _context1.p = 1;
+              _context1.n = 2;
+              return OC.github.connect(tok);
+            case 2:
+              toast(t("ghConnectedOk"), "ok");
+              rerender();
+              if (OC.renderGhChip) OC.renderGhChip();
+              _context1.n = 4;
+              break;
+            case 3:
+              _context1.p = 3;
+              _t9 = _context1.v;
+              toast(_t9.message || t("ghError"), "err");
+              conn.disabled = false;
+            case 4:
+              return _context1.a(2);
+          }
+        }, _callee1, null, [[1, 3]]);
+      }));
+      var disc = $("#cgh-disconnect", m.body);
+      if (disc) disc.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10() {
+        return _regenerator().w(function (_context10) {
+          while (1) switch (_context10.n) {
+            case 0:
+              _context10.n = 1;
+              return OC.confirmDialog({
+                title: t("ghDisconnect"),
+                message: t("ghDisconnectConfirm")
+              });
+            case 1:
+              if (_context10.v) {
+                _context10.n = 2;
+                break;
+              }
+              return _context10.a(2);
+            case 2:
+              OC.github.disconnect();
+              toast(t("ghDisconnected"), "ok");
+              rerender();
+              if (OC.renderGhChip) OC.renderGhChip();
+            case 3:
+              return _context10.a(2);
+          }
+        }, _callee10);
+      }));
+      var tog = $("#cgh-toggle", m.body);
+      if (tog) tog.onchange = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
+        var _t0;
+        return _regenerator().w(function (_context11) {
+          while (1) switch (_context11.p = _context11.n) {
+            case 0:
+              tog.disabled = true;
+              _context11.p = 1;
+              _context11.n = 2;
+              return OC.github.setChatGh(tog.checked);
+            case 2:
+              _context11.n = 4;
+              break;
+            case 3:
+              _context11.p = 3;
+              _t0 = _context11.v;
+              toast(_t0.message || t("ghError"), "err");
+            case 4:
+              tog.disabled = false;
+              toast(tog.checked ? t("ghChatOnToast") : t("ghChatOffToast"), "ok");
+              rerender();
+              if (OC.renderGhChip) OC.renderGhChip();
+            case 5:
+              return _context11.a(2);
+          }
+        }, _callee11, null, [[1, 3]]);
+      }));
+      var rep = $("#cgh-repick", m.body);
+      if (rep) rep.onclick = function () {
+        m.close();
+        OC.showGithub();
+      };
+      var det = $("#cgh-detach", m.body);
+      if (det) det.onclick = function () {
+        OC.github.detach();
+        toast(t("ghDetachedToast"), "ok");
+        rerender();
+        if (OC.renderGhChip) OC.renderGhChip();
+      };
+    }
+    bind();
   };
   window.OC = window.OC || {};
   OC.showGithub = function () {
