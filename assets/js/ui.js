@@ -1470,16 +1470,146 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     respond(conv, contextText, u.attachments || []);
   }
+
+  /* v1.5.0 — auto model fallback candidates: prefer providers with live keys, then other providers, then same provider's other models */
+  function fbCandidates(pick) {
+    var provs = OC.providers.allProviders();
+    var out = [];
+    var _iterator9 = _createForOfIteratorHelper(provs),
+      _step9;
+    try {
+      for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+        var p = _step9.value;
+        if (!p.models || !p.models.length) continue;
+        var act = OC.providers.activeKeys ? OC.providers.activeKeys(p) : [{
+          id: "x"
+        }];
+        var ok = act.length > 0;
+        var diff = p.id !== pick.provider.id;
+        var _iterator0 = _createForOfIteratorHelper(p.models),
+          _step0;
+        try {
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+            var m = _step0.value;
+            if (p.id === pick.provider.id && m === pick.model) continue;
+            out.push({
+              provider: p,
+              model: m,
+              ok: ok,
+              diff: diff
+            });
+          }
+        } catch (err) {
+          _iterator0.e(err);
+        } finally {
+          _iterator0.f();
+        }
+      }
+    } catch (err) {
+      _iterator9.e(err);
+    } finally {
+      _iterator9.f();
+    }
+    out.sort(function (a, b) {
+      return (b.ok ? 1 : 0) - (a.ok ? 1 : 0) || (b.diff ? 1 : 0) - (a.diff ? 1 : 0);
+    });
+    return out.slice(0, 4);
+  }
+  OC._chatFallback = fbCandidates;
   function respond(_x, _x2, _x3) {
     return _respond.apply(this, arguments);
   }
   /* ---------- Connector agent loop (WordPress / Telegram / Rubika / Host) ---------- */
   function _respond() {
-    _respond = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(conv, userText, files) {
-      var inner, user, aMsg, streamingEl, sc, pick, connAt, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, sendBtn, _t3;
-      return _regenerator().w(function (_context7) {
-        while (1) switch (_context7.p = _context7.n) {
+    _respond = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(conv, userText, files) {
+      var inner, user, aMsg, streamingEl, sc, pick, connAt, sources, rs, settings, msgs, defPrompt, maxCtx, used, hist, i, m, len, bubble, raw, lastPaint, settingsAnim, startStream, _t5;
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.p = _context8.n) {
           case 0:
+            startStream = function _startStream(p2, fb) {
+              streamHandle = OC.providers.streamChat({
+                provider: p2.provider,
+                model: p2.model,
+                messages: msgs,
+                temperature: settings.temperature,
+                maxTokens: settings.maxOutputTokens,
+                onDelta: function onDelta(full, piece) {
+                  raw = full;
+                  var now = Date.now();
+                  if (now - lastPaint > 90) {
+                    lastPaint = now;
+                    if (bubble) bubble.innerHTML = U.esc(raw).replace(/\n/g, "<br>") + '<span class="cursor-blink"></span>';
+                    if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
+                  }
+                },
+                onDone: function onDone(_ref9) {
+                  var usage = _ref9.usage,
+                    estimated = _ref9.estimated,
+                    tin = _ref9.tin,
+                    tout = _ref9.tout;
+                  streamHandle = null;
+                  aMsg.content = raw;
+                  aMsg.model = p2.model;
+                  aMsg.usage = {
+                    tin: tin || 0,
+                    tout: tout || 0
+                  };
+                  aMsg.estimated = !!estimated;
+                  aMsg.sources = sources;
+                  conv.messages.push(aMsg);
+                  store.putConv(conv);
+                  store.recordUsage({
+                    tin: tin || 0,
+                    tout: tout || 0,
+                    estimated: estimated,
+                    provider: p2.provider.id,
+                    model: p2.model
+                  });
+                  store.logActivity(user.email, "chat", p2.model);
+                  finishStream(conv, streamingEl, aMsg);
+                },
+                onError: function onError(e) {
+                  streamHandle = null;
+                  /* auto-switch: key dead / quota / rate-limit / empty provider, nothing streamed yet → next model */
+                  if (!raw && fb.length) {
+                    var nx = fb[0];
+                    toast(t("autoSwitchModel") + " · " + nx.model, "ok");
+                    aMsg.model = nx.model;
+                    if (bubble) bubble.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+                    startStream(nx, fb.slice(1));
+                    return;
+                  }
+                  aMsg.content = raw;
+                  aMsg.error = e.message;
+                  conv.messages.push(aMsg);
+                  store.putConv(conv);
+                  store.recordUsage({
+                    fail: true
+                  });
+                  finishStream(conv, streamingEl, aMsg);
+                  toast(e.message || t("errorOccurred"), "err");
+                },
+                onAbort: function onAbort(partial) {
+                  streamHandle = null;
+                  aMsg.content = partial || raw;
+                  if (partial) {
+                    conv.messages.push(aMsg);
+                    store.putConv(conv);
+                  }
+                  finishStream(conv, streamingEl, aMsg);
+                  toast(t("stopped"));
+                }
+              });
+              // swap send button to stop
+              var sendBtn = $("#btn-send");
+              if (sendBtn) {
+                sendBtn.classList.add("stop");
+                sendBtn.innerHTML = I.stop;
+                sendBtn.onclick = function () {
+                  if (streamHandle) streamHandle.stop();
+                };
+              }
+            };
             inner = $("#chat-inner");
             user = store.currentUser(); // build placeholder assistant message (streaming)
             aMsg = {
@@ -1499,48 +1629,48 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             // no provider → demo mode
             pick = pickModel();
             if (pick) {
-              _context7.n = 1;
+              _context8.n = 1;
               break;
             }
             demoRespond(conv, aMsg, streamingEl, userText);
-            return _context7.a(2);
+            return _context8.a(2);
           case 1:
             aMsg.model = pick.model;
 
             // Connector agent mode: a WordPress / Telegram / Rubika / Host link is attached
             connAt = OC.connectors && OC.connectors.attached() ? OC.connectors.attached() : null;
             if (!connAt) {
-              _context7.n = 2;
+              _context8.n = 2;
               break;
             }
-            return _context7.a(2, respondWithConn(conv, userText, aMsg, streamingEl, pick, connAt));
+            return _context8.a(2, respondWithConn(conv, userText, aMsg, streamingEl, pick, connAt));
           case 2:
             if (!(OC.github && OC.github.attached())) {
-              _context7.n = 3;
+              _context8.n = 3;
               break;
             }
-            return _context7.a(2, respondWithRepo(conv, userText, aMsg, streamingEl, pick));
+            return _context8.a(2, respondWithRepo(conv, userText, aMsg, streamingEl, pick));
           case 3:
             // web search
             sources = null;
             if (!conv.webSearch) {
-              _context7.n = 7;
+              _context8.n = 7;
               break;
             }
-            _context7.p = 4;
-            _context7.n = 5;
+            _context8.p = 4;
+            _context8.n = 5;
             return OC.providers.webSearch(userText);
           case 5:
-            rs = _context7.v;
+            rs = _context8.v;
             sources = rs;
             aMsg.searched = true;
             userText += OC.providers.searchContextBlock(rs);
-            _context7.n = 7;
+            _context8.n = 7;
             break;
           case 6:
-            _context7.p = 6;
-            _t3 = _context7.v;
-            toast(_t3.message || t("webSearchOff"), "err");
+            _context8.p = 6;
+            _t5 = _context8.v;
+            toast(_t5.message || t("webSearchOff"), "err");
           case 7:
             // build messages with system prompt
             settings = store.getUserSettings();
@@ -1559,22 +1689,22 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             i = conv.messages.length - 1;
           case 8:
             if (!(i >= 0)) {
-              _context7.n = 12;
+              _context8.n = 12;
               break;
             }
             m = conv.messages[i];
             if (!(m.role === "assistant" && m === aMsg)) {
-              _context7.n = 9;
+              _context8.n = 9;
               break;
             }
-            return _context7.a(3, 11);
+            return _context8.a(3, 11);
           case 9:
             len = (m.content || "").length;
             if (!(used + len > maxCtx * 3 && hist.length)) {
-              _context7.n = 10;
+              _context8.n = 10;
               break;
             }
-            return _context7.a(3, 12);
+            return _context8.a(3, 12);
           case 10:
             used += len;
             hist.unshift({
@@ -1583,7 +1713,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             });
           case 11:
             i--;
-            _context7.n = 8;
+            _context8.n = 8;
             break;
           case 12:
             msgs.push.apply(msgs, _toConsumableArray(hist.slice(0, -1))); // exclude the just-pushed user message dup
@@ -1595,83 +1725,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             raw = "";
             lastPaint = 0;
             settingsAnim = store.getUserSettings().animation;
-            streamHandle = OC.providers.streamChat({
-              provider: pick.provider,
-              model: pick.model,
-              messages: msgs,
-              temperature: settings.temperature,
-              maxTokens: settings.maxOutputTokens,
-              onDelta: function onDelta(full, piece) {
-                raw = full;
-                var now = Date.now();
-                if (now - lastPaint > 90) {
-                  lastPaint = now;
-                  if (bubble) bubble.innerHTML = U.esc(raw).replace(/\n/g, "<br>") + '<span class="cursor-blink"></span>';
-                  if (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 160) sc.scrollTop = sc.scrollHeight;
-                }
-              },
-              onDone: function onDone(_ref8) {
-                var usage = _ref8.usage,
-                  estimated = _ref8.estimated,
-                  tin = _ref8.tin,
-                  tout = _ref8.tout;
-                streamHandle = null;
-                aMsg.content = raw;
-                aMsg.usage = {
-                  tin: tin || 0,
-                  tout: tout || 0
-                };
-                aMsg.estimated = !!estimated;
-                aMsg.sources = sources;
-                conv.messages.push(aMsg);
-                store.putConv(conv);
-                store.recordUsage({
-                  tin: tin || 0,
-                  tout: tout || 0,
-                  estimated: estimated,
-                  provider: pick.provider.id,
-                  model: pick.model
-                });
-                store.logActivity(user.email, "chat", pick.model);
-                finishStream(conv, streamingEl, aMsg);
-              },
-              onError: function onError(e) {
-                streamHandle = null;
-                aMsg.content = raw;
-                aMsg.error = e.message;
-                conv.messages.push(aMsg);
-                store.putConv(conv);
-                store.recordUsage({
-                  fail: true
-                });
-                finishStream(conv, streamingEl, aMsg);
-                toast(e.message || t("errorOccurred"), "err");
-              },
-              onAbort: function onAbort(partial) {
-                streamHandle = null;
-                aMsg.content = partial || raw;
-                if (partial) {
-                  conv.messages.push(aMsg);
-                  store.putConv(conv);
-                }
-                finishStream(conv, streamingEl, aMsg);
-                toast(t("stopped"));
-              }
-            });
-
-            // swap send button to stop
-            sendBtn = $("#btn-send");
-            if (sendBtn) {
-              sendBtn.classList.add("stop");
-              sendBtn.innerHTML = I.stop;
-              sendBtn.onclick = function () {
-                if (streamHandle) streamHandle.stop();
-              };
-            }
+            /* v1.5.0 — stream with automatic model/token fallback until work completes */
+            startStream(pick, fbCandidates(pick));
           case 13:
-            return _context7.a(2);
+            return _context8.a(2);
         }
-      }, _callee7, null, [[4, 6]]);
+      }, _callee8, null, [[4, 6]]);
     }));
     return _respond.apply(this, arguments);
   }
@@ -1681,10 +1740,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   /* ---------- GitHub repo agent loop (JSON tool protocol) ---------- */
   function _respondWithConn() {
-    _respondWithConn = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(conv, userText, aMsg, streamingEl, pick, a) {
+    _respondWithConn = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(conv, userText, aMsg, streamingEl, pick, a) {
       var bubble, sc, conn, isFa, msgs, defPrompt, paint, sayParts, actLog, errText, stopped, _loop3, _ret, round, content;
-      return _regenerator().w(function (_context9) {
-        while (1) switch (_context9.n) {
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.n) {
           case 0:
             bubble = $("#stream-bubble", streamingEl);
             sc = $("#chat-scroll");
@@ -1716,200 +1775,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             errText = "";
             stopped = false;
             _loop3 = /*#__PURE__*/_regenerator().m(function _loop3() {
-              var raw, parsed, res, _iterator0, _step0, r;
-              return _regenerator().w(function (_context8) {
-                while (1) switch (_context8.n) {
+              var raw, parsed, res, _iterator10, _step10, r;
+              return _regenerator().w(function (_context9) {
+                while (1) switch (_context9.n) {
                   case 0:
                     paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(CONN_MAX_ROUNDS)) + " …]", true);
                     raw = "";
-                    _context8.n = 1;
-                    return new Promise(function (resolve) {
-                      streamHandle = OC.providers.streamChat({
-                        provider: pick.provider,
-                        model: pick.model,
-                        messages: msgs,
-                        temperature: 0.2,
-                        maxTokens: store.getUserSettings().maxOutputTokens,
-                        onDelta: function onDelta(full) {
-                          raw = full;
-                          paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + full, true);
-                        },
-                        onDone: function onDone(_ref9) {
-                          var usage = _ref9.usage,
-                            estimated = _ref9.estimated,
-                            tin = _ref9.tin,
-                            tout = _ref9.tout,
-                            text = _ref9.text;
-                          streamHandle = null;
-                          raw = text || raw;
-                          aMsg.usage = {
-                            tin: tin || 0,
-                            tout: tout || 0
-                          };
-                          aMsg.estimated = !!estimated;
-                          resolve();
-                        },
-                        onError: function onError(e) {
-                          streamHandle = null;
-                          errText = e.message || t("errorOccurred");
-                          resolve();
-                        },
-                        onAbort: function onAbort(partial) {
-                          streamHandle = null;
-                          raw = partial || raw;
-                          stopped = true;
-                          resolve();
-                        }
-                      });
-                    });
-                  case 1:
-                    if (!errText) {
-                      _context8.n = 2;
-                      break;
-                    }
-                    return _context8.a(2, 0);
-                  case 2:
-                    parsed = OC.connectors.parseActions(raw, a.type);
-                    if (parsed && parsed.say) sayParts.push(parsed.say);
-                    if (!(!parsed || !parsed.actions.length)) {
-                      _context8.n = 3;
-                      break;
-                    }
-                    if (raw && !parsed) sayParts.push(raw);
-                    return _context8.a(2, 0);
-                  case 3:
-                    msgs.push({
-                      role: "assistant",
-                      content: raw
-                    });
-                    paint(sayParts.join("\n\n") + "\n\n[" + t("connWorking") + "]", true);
-                    _context8.n = 4;
-                    return OC.connectors.runActions(conn, parsed.actions);
-                  case 4:
-                    res = _context8.v;
-                    _iterator0 = _createForOfIteratorHelper(res.results);
-                    try {
-                      for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
-                        r = _step0.value;
-                        actLog.push(r.text.split("\n")[0]);
-                        msgs.push({
-                          role: "user",
-                          content: "[TOOL RESULT]\n" + r.text
-                        });
-                      }
-                    } catch (err) {
-                      _iterator0.e(err);
-                    } finally {
-                      _iterator0.f();
-                    }
-                    if (!stopped) {
-                      _context8.n = 5;
-                      break;
-                    }
-                    return _context8.a(2, 0);
-                  case 5:
-                    return _context8.a(2);
-                }
-              }, _loop3);
-            });
-            round = 1;
-          case 1:
-            if (!(round <= CONN_MAX_ROUNDS)) {
-              _context9.n = 4;
-              break;
-            }
-            return _context9.d(_regeneratorValues(_loop3()), 2);
-          case 2:
-            _ret = _context9.v;
-            if (!(_ret === 0)) {
-              _context9.n = 3;
-              break;
-            }
-            return _context9.a(3, 4);
-          case 3:
-            round++;
-            _context9.n = 1;
-            break;
-          case 4:
-            content = sayParts.filter(Boolean).join("\n\n");
-            if (actLog.length) {
-              content += (content ? "\n\n" : "") + "**" + (isFa ? "اقدامات انجام‌شده" : "Actions taken") + " (" + U.faNum(String(actLog.length)) + "):**\n" + actLog.slice(0, 12).map(function (x) {
-                return "- `" + x.replace(/`/g, "'") + "`";
-              }).join("\n") + (actLog.length > 12 ? "\n- …" : "");
-            }
-            if (errText) {
-              aMsg.error = errText;
-              content = (content ? content + "\n\n" : "") + errText;
-              store.recordUsage({
-                fail: true
-              });
-            } else {
-              store.recordUsage({
-                tin: aMsg.usage && aMsg.usage.tin || 0,
-                tout: aMsg.usage && aMsg.usage.tout || 0,
-                estimated: aMsg.estimated,
-                provider: pick.provider.id,
-                model: pick.model
-              });
-              store.logActivity(store.currentUser().email, "chat", pick.model + " · conn:" + a.type);
-            }
-            aMsg.content = content;
-            if (a) aMsg.conn = a.type + ":" + a.name;
-            conv.messages.push(aMsg);
-            store.putConv(conv);
-            finishStream(conv, streamingEl, aMsg);
-            renderPending();
-          case 5:
-            return _context9.a(2);
-        }
-      }, _callee8);
-    }));
-    return _respondWithConn.apply(this, arguments);
-  }
-  var GH_MAX_ROUNDS = 6;
-  function respondWithRepo(_x0, _x1, _x10, _x11, _x12) {
-    return _respondWithRepo.apply(this, arguments);
-  }
-  function _respondWithRepo() {
-    _respondWithRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(conv, userText, aMsg, streamingEl, pick) {
-      var bubble, sc, at, msgs, defPrompt, paint, sayParts, stagedPaths, stagedTotal, aborted, errText, _loop4, _ret2, round, content, isFa;
-      return _regenerator().w(function (_context1) {
-        while (1) switch (_context1.n) {
-          case 0:
-            bubble = $("#stream-bubble", streamingEl);
-            sc = $("#chat-scroll");
-            at = OC.github.attached();
-            msgs = [];
-            defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
-              return x.id === conv.promptId;
-            }) || null : OC.promptsDef();
-            if (defPrompt) msgs.push({
-              role: "system",
-              content: defPrompt.text
-            });
-            msgs.push({
-              role: "user",
-              content: userText + OC.github.contextBlock()
-            });
-            paint = function paint(txt, busy) {
-              if (!bubble) return;
-              bubble.innerHTML = U.esc(String(txt == null ? "" : txt)).replace(/\n/g, "<br>") + (busy ? '<span class="cursor-blink"></span>' : "");
-              if (sc && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) sc.scrollTop = sc.scrollHeight;
-            };
-            sayParts = [];
-            stagedPaths = [];
-            stagedTotal = 0;
-            aborted = false;
-            errText = "";
-            _loop4 = /*#__PURE__*/_regenerator().m(function _loop4() {
-              var raw, stopped, parsed, res, _iterator1, _step1, r;
-              return _regenerator().w(function (_context0) {
-                while (1) switch (_context0.n) {
-                  case 0:
-                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(GH_MAX_ROUNDS)) + " …]", true);
-                    raw = "";
-                    stopped = false;
-                    _context0.n = 1;
+                    _context9.n = 1;
                     return new Promise(function (resolve) {
                       streamHandle = OC.providers.streamChat({
                         provider: pick.provider,
@@ -1951,46 +1823,233 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                     });
                   case 1:
                     if (!errText) {
-                      _context0.n = 2;
+                      _context9.n = 2;
                       break;
                     }
-                    return _context0.a(2, 0);
+                    return _context9.a(2, 0);
+                  case 2:
+                    parsed = OC.connectors.parseActions(raw, a.type);
+                    if (parsed && parsed.say) sayParts.push(parsed.say);
+                    if (!(!parsed || !parsed.actions.length)) {
+                      _context9.n = 3;
+                      break;
+                    }
+                    if (raw && !parsed) sayParts.push(raw);
+                    return _context9.a(2, 0);
+                  case 3:
+                    msgs.push({
+                      role: "assistant",
+                      content: raw
+                    });
+                    paint(sayParts.join("\n\n") + "\n\n[" + t("connWorking") + "]", true);
+                    _context9.n = 4;
+                    return OC.connectors.runActions(conn, parsed.actions);
+                  case 4:
+                    res = _context9.v;
+                    _iterator10 = _createForOfIteratorHelper(res.results);
+                    try {
+                      for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+                        r = _step10.value;
+                        actLog.push(r.text.split("\n")[0]);
+                        msgs.push({
+                          role: "user",
+                          content: "[TOOL RESULT]\n" + r.text
+                        });
+                      }
+                    } catch (err) {
+                      _iterator10.e(err);
+                    } finally {
+                      _iterator10.f();
+                    }
+                    if (!stopped) {
+                      _context9.n = 5;
+                      break;
+                    }
+                    return _context9.a(2, 0);
+                  case 5:
+                    return _context9.a(2);
+                }
+              }, _loop3);
+            });
+            round = 1;
+          case 1:
+            if (!(round <= CONN_MAX_ROUNDS)) {
+              _context0.n = 4;
+              break;
+            }
+            return _context0.d(_regeneratorValues(_loop3()), 2);
+          case 2:
+            _ret = _context0.v;
+            if (!(_ret === 0)) {
+              _context0.n = 3;
+              break;
+            }
+            return _context0.a(3, 4);
+          case 3:
+            round++;
+            _context0.n = 1;
+            break;
+          case 4:
+            content = sayParts.filter(Boolean).join("\n\n");
+            if (actLog.length) {
+              content += (content ? "\n\n" : "") + "**" + (isFa ? "اقدامات انجام‌شده" : "Actions taken") + " (" + U.faNum(String(actLog.length)) + "):**\n" + actLog.slice(0, 12).map(function (x) {
+                return "- `" + x.replace(/`/g, "'") + "`";
+              }).join("\n") + (actLog.length > 12 ? "\n- …" : "");
+            }
+            if (errText) {
+              aMsg.error = errText;
+              content = (content ? content + "\n\n" : "") + errText;
+              store.recordUsage({
+                fail: true
+              });
+            } else {
+              store.recordUsage({
+                tin: aMsg.usage && aMsg.usage.tin || 0,
+                tout: aMsg.usage && aMsg.usage.tout || 0,
+                estimated: aMsg.estimated,
+                provider: pick.provider.id,
+                model: pick.model
+              });
+              store.logActivity(store.currentUser().email, "chat", pick.model + " · conn:" + a.type);
+            }
+            aMsg.content = content;
+            if (a) aMsg.conn = a.type + ":" + a.name;
+            conv.messages.push(aMsg);
+            store.putConv(conv);
+            finishStream(conv, streamingEl, aMsg);
+            renderPending();
+          case 5:
+            return _context0.a(2);
+        }
+      }, _callee9);
+    }));
+    return _respondWithConn.apply(this, arguments);
+  }
+  var GH_MAX_ROUNDS = 6;
+  function respondWithRepo(_x0, _x1, _x10, _x11, _x12) {
+    return _respondWithRepo.apply(this, arguments);
+  }
+  function _respondWithRepo() {
+    _respondWithRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(conv, userText, aMsg, streamingEl, pick) {
+      var bubble, sc, at, msgs, defPrompt, paint, sayParts, stagedPaths, stagedTotal, aborted, errText, _loop4, _ret2, round, content, isFa;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.n) {
+          case 0:
+            bubble = $("#stream-bubble", streamingEl);
+            sc = $("#chat-scroll");
+            at = OC.github.attached();
+            msgs = [];
+            defPrompt = conv.promptId ? store.getPrompts().find(function (x) {
+              return x.id === conv.promptId;
+            }) || null : OC.promptsDef();
+            if (defPrompt) msgs.push({
+              role: "system",
+              content: defPrompt.text
+            });
+            msgs.push({
+              role: "user",
+              content: userText + OC.github.contextBlock()
+            });
+            paint = function paint(txt, busy) {
+              if (!bubble) return;
+              bubble.innerHTML = U.esc(String(txt == null ? "" : txt)).replace(/\n/g, "<br>") + (busy ? '<span class="cursor-blink"></span>' : "");
+              if (sc && sc.scrollHeight - sc.scrollTop - sc.clientHeight < 200) sc.scrollTop = sc.scrollHeight;
+            };
+            sayParts = [];
+            stagedPaths = [];
+            stagedTotal = 0;
+            aborted = false;
+            errText = "";
+            _loop4 = /*#__PURE__*/_regenerator().m(function _loop4() {
+              var raw, stopped, parsed, res, _iterator11, _step11, r;
+              return _regenerator().w(function (_context1) {
+                while (1) switch (_context1.n) {
+                  case 0:
+                    paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + "[" + t("ghRound") + " " + U.faNum(String(round)) + "/" + U.faNum(String(GH_MAX_ROUNDS)) + " …]", true);
+                    raw = "";
+                    stopped = false;
+                    _context1.n = 1;
+                    return new Promise(function (resolve) {
+                      streamHandle = OC.providers.streamChat({
+                        provider: pick.provider,
+                        model: pick.model,
+                        messages: msgs,
+                        temperature: 0.2,
+                        maxTokens: store.getUserSettings().maxOutputTokens,
+                        onDelta: function onDelta(full) {
+                          raw = full;
+                          paint(sayParts.join("\n\n") + (sayParts.length ? "\n\n" : "") + full, true);
+                        },
+                        onDone: function onDone(_ref1) {
+                          var usage = _ref1.usage,
+                            estimated = _ref1.estimated,
+                            tin = _ref1.tin,
+                            tout = _ref1.tout,
+                            text = _ref1.text;
+                          streamHandle = null;
+                          raw = text || raw;
+                          aMsg.usage = {
+                            tin: tin || 0,
+                            tout: tout || 0
+                          };
+                          aMsg.estimated = !!estimated;
+                          resolve();
+                        },
+                        onError: function onError(e) {
+                          streamHandle = null;
+                          errText = e.message || t("errorOccurred");
+                          resolve();
+                        },
+                        onAbort: function onAbort(partial) {
+                          streamHandle = null;
+                          raw = partial || raw;
+                          stopped = true;
+                          resolve();
+                        }
+                      });
+                    });
+                  case 1:
+                    if (!errText) {
+                      _context1.n = 2;
+                      break;
+                    }
+                    return _context1.a(2, 0);
                   case 2:
                     parsed = OC.github.parseActions(raw);
                     if (parsed && parsed.say) sayParts.push(parsed.say);
                     if (parsed) {
-                      _context0.n = 3;
+                      _context1.n = 3;
                       break;
                     }
                     if (raw) sayParts.push(raw);
-                    return _context0.a(2, 0);
+                    return _context1.a(2, 0);
                   case 3:
                     msgs.push({
                       role: "assistant",
                       content: raw
                     });
                     paint(sayParts.join("\n\n") + "\n\n[" + t("ghWorking") + "]", true);
-                    _context0.n = 4;
+                    _context1.n = 4;
                     return OC.github.runActions(parsed.actions);
                   case 4:
-                    res = _context0.v;
+                    res = _context1.v;
                     stagedTotal += res.staged;
-                    _iterator1 = _createForOfIteratorHelper(res.results);
+                    _iterator11 = _createForOfIteratorHelper(res.results);
                     try {
-                      for (_iterator1.s(); !(_step1 = _iterator1.n()).done;) {
-                        r = _step1.value;
+                      for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+                        r = _step11.value;
                         if (r.type === "write") stagedPaths.push(r.path);
                       }
                     } catch (err) {
-                      _iterator1.e(err);
+                      _iterator11.e(err);
                     } finally {
-                      _iterator1.f();
+                      _iterator11.f();
                     }
                     if (!(res.done || stopped || !res.results.length)) {
-                      _context0.n = 5;
+                      _context1.n = 5;
                       break;
                     }
-                    return _context0.a(2, 0);
+                    return _context1.a(2, 0);
                   case 5:
                     msgs.push({
                       role: "user",
@@ -1999,33 +2058,33 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                       }).join("\n\n") + (OC.i18n.locale() === "fa" ? "\n\n[ادامه بده: فایل بعدی را با read ببین، اصلاح‌ها را با write اعمال کن؛ کار تمام شد با done تمامش کن.]" : "\n\n[Continue: read the next file, apply edits with write; finish with done.]")
                     });
                     if (!stopped) {
-                      _context0.n = 6;
+                      _context1.n = 6;
                       break;
                     }
                     aborted = true;
-                    return _context0.a(2, 0);
+                    return _context1.a(2, 0);
                   case 6:
-                    return _context0.a(2);
+                    return _context1.a(2);
                 }
               }, _loop4);
             });
             round = 1;
           case 1:
             if (!(round <= GH_MAX_ROUNDS)) {
-              _context1.n = 4;
+              _context10.n = 4;
               break;
             }
-            return _context1.d(_regeneratorValues(_loop4()), 2);
+            return _context10.d(_regeneratorValues(_loop4()), 2);
           case 2:
-            _ret2 = _context1.v;
+            _ret2 = _context10.v;
             if (!(_ret2 === 0)) {
-              _context1.n = 3;
+              _context10.n = 3;
               break;
             }
-            return _context1.a(3, 4);
+            return _context10.a(3, 4);
           case 3:
             round++;
-            _context1.n = 1;
+            _context10.n = 1;
             break;
           case 4:
             content = sayParts.filter(Boolean).join("\n\n");
@@ -2058,9 +2117,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             finishStream(conv, streamingEl, aMsg);
             renderPending();
           case 5:
-            return _context1.a(2);
+            return _context10.a(2);
         }
-      }, _callee9);
+      }, _callee0);
     }));
     return _respondWithRepo.apply(this, arguments);
   }
@@ -2134,59 +2193,59 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 
   /* ---------- project delivery ---------- */
   OC.deliverProject = /*#__PURE__*/function () {
-    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(conv) {
-      var blocks, _iterator9, _step9, _m2, _m, data, fmtCard, body, m, _t2;
-      return _regenerator().w(function (_context6) {
-        while (1) switch (_context6.p = _context6.n) {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(conv) {
+      var blocks, _iterator1, _step1, _m2, _m, data, fmtCard, body, m, _t4;
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.p = _context7.n) {
           case 0:
             if (!(!conv || !conv.messages.length)) {
-              _context6.n = 1;
+              _context7.n = 1;
               break;
             }
             toast(t("noCodeBlocks"), "err");
-            return _context6.a(2);
+            return _context7.a(2);
           case 1:
             blocks = [];
-            _iterator9 = _createForOfIteratorHelper(conv.messages);
-            _context6.p = 2;
-            _iterator9.s();
+            _iterator1 = _createForOfIteratorHelper(conv.messages);
+            _context7.p = 2;
+            _iterator1.s();
           case 3:
-            if ((_step9 = _iterator9.n()).done) {
-              _context6.n = 6;
+            if ((_step1 = _iterator1.n()).done) {
+              _context7.n = 6;
               break;
             }
-            _m2 = _step9.value;
+            _m2 = _step1.value;
             if (!(_m2.role !== "assistant")) {
-              _context6.n = 4;
+              _context7.n = 4;
               break;
             }
-            return _context6.a(3, 5);
+            return _context7.a(3, 5);
           case 4:
             blocks.push.apply(blocks, _toConsumableArray(OC.markdown.render(_m2.content || "").codeBlocks));
           case 5:
-            _context6.n = 3;
+            _context7.n = 3;
             break;
           case 6:
-            _context6.n = 8;
+            _context7.n = 8;
             break;
           case 7:
-            _context6.p = 7;
-            _t2 = _context6.v;
-            _iterator9.e(_t2);
+            _context7.p = 7;
+            _t4 = _context7.v;
+            _iterator1.e(_t4);
           case 8:
-            _context6.p = 8;
-            _iterator9.f();
-            return _context6.f(8);
+            _context7.p = 8;
+            _iterator1.f();
+            return _context7.f(8);
           case 9:
             if (blocks.length) {
-              _context6.n = 10;
+              _context7.n = 10;
               break;
             }
             _m = OC.modal({
               title: t("projectDelivery"),
               body: "<p class='muted'>" + t("noCodeBlocksDesc") + "</p>"
             });
-            return _context6.a(2);
+            return _context7.a(2);
           case 10:
             data = {
               title: conv.title,
@@ -2196,34 +2255,112 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             fmtCard = function fmtCard(id, label, ext) {
               return '<button class="fmt-chip" data-fmt="' + id + '"><span>' + label + '</span><span class="fx">.' + ext + "</span></button>";
             };
-            body = el('<div><div class="muted small" style="margin-bottom:10px">' + t("filesCount") + ": " + U.faNum(blocks.length) + " — " + t("chooseExportFmt") + "</div>" + '<div class="fmt-grid">' + fmtCard("zip", t("fmtZip"), "zip") + fmtCard("md", "Markdown", "md") + fmtCard("html", "HTML", "html") + fmtCard("txt", "Plain Text", "txt") + fmtCard("json", "JSON", "json") + fmtCard("pdf", "PDF", "pdf") + "</div></div>");
+            body = el('<div><div class="muted small" style="margin-bottom:10px">' + t("filesCount") + ": " + U.faNum(blocks.length) + " — " + t("chooseExportFmt") + "</div>" + '<div class="fmt-grid">' + fmtCard("zip", t("fmtZip"), "zip") + fmtCard("md", "Markdown", "md") + fmtCard("html", "HTML", "html") + fmtCard("txt", "Plain Text", "txt") + fmtCard("json", "JSON", "json") + fmtCard("pdf", "PDF", "pdf") + (OC.github ? fmtCard("gh", t("fmtGhPrivate") + " 🔒", "github") : "") + "</div></div>");
             m = OC.modal({
               title: t("projectDelivery"),
               body: body,
               foot: []
             });
             $$(".fmt-chip", body).forEach(function (b) {
-              b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
-                var fmt, _OC$exporter$buildPro, blob, safeTitle, manifest, _doc, w, doc, _t;
-                return _regenerator().w(function (_context5) {
-                  while (1) switch (_context5.p = _context5.n) {
+              b.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
+                var fmt, ghState, safeTitle, usedF, files, ex, m2, _OC$exporter$buildPro, blob, _safeTitle, manifest, _doc, w, doc, _t2, _t3;
+                return _regenerator().w(function (_context6) {
+                  while (1) switch (_context6.p = _context6.n) {
                     case 0:
                       fmt = b.dataset.fmt;
-                      _context5.p = 1;
-                      if (!(fmt === "zip")) {
-                        _context5.n = 2;
+                      _context6.p = 1;
+                      if (!(fmt === "gh")) {
+                        _context6.n = 7;
                         break;
                       }
-                      _OC$exporter$buildPro = OC.exporter.buildProjectZip(data), blob = _OC$exporter$buildPro.blob, safeTitle = _OC$exporter$buildPro.safeTitle, manifest = _OC$exporter$buildPro.manifest;
-                      U.download(safeTitle + ".zip", blob);
+                      ghState = OC.github.state();
+                      if (ghState.connected) {
+                        _context6.n = 2;
+                        break;
+                      }
+                      toast(t("ghNotConnected"), "err");
+                      return _context6.a(2);
+                    case 2:
+                      safeTitle = String(conv.title || "open-code-project").replace(/[\\/:*?"<>|\s]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "open-code-project";
+                      usedF = {};
+                      files = [];
+                      (data.codeBlocks || []).forEach(function (cb, i) {
+                        var ext = OC.exporter.langExt(cb.lang);
+                        var fname = cb.filename ? OC.exporter.safeFilename(cb.filename, i, ext) : OC.exporter.safeFilename("", i, ext);
+                        if (usedF[fname]) {
+                          var dot = fname.lastIndexOf(".");
+                          fname = fname.slice(0, dot) + "-" + (i + 1) + fname.slice(dot);
+                        }
+                        usedF[fname] = true;
+                        files.push({
+                          path: safeTitle + "/" + fname,
+                          content: cb.code
+                        });
+                      });
+                      files.push({
+                        path: safeTitle + "/README.md",
+                        content: "# " + (conv.title || "Open Code Project") + "\n\n> " + t("projectDelivery") + " — Open Code\n\n" + files.length + " files exported from Open Code."
+                      });
+                      m.close();
+                      toast(t("ghExporting"), "ok");
+                      _context6.p = 3;
+                      _context6.n = 4;
+                      return OC.github.exportRepo(safeTitle, files, {
+                        private: true,
+                        description: "Open Code project delivery — " + (conv.title || "")
+                      });
+                    case 4:
+                      ex = _context6.v;
+                      m2 = OC.modal({
+                        title: t("ghExportDoneTitle"),
+                        body: '<div class="stack"><p class="p-desc">' + t("ghExportDoneDesc") + " (" + U.faNum(ex.files) + " " + t("filesUnit") + ')</p>' + '<div class="field"><input class="input" id="ghexp-link" readonly style="direction:ltr" value="' + U.esc(ex.url) + '"></div>' + '<div class="flex"><button class="btn btn-primary" id="ghexp-copy">' + I.download + t("copyLink") + "</button>" + '<a class="btn" href="' + U.esc(ex.url) + '" target="_blank" rel="noopener">' + I.globe + "GitHub</a></div></div>",
+                        foot: []
+                      });
+                      $("#ghexp-copy", m2.body).onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+                        var _t;
+                        return _regenerator().w(function (_context5) {
+                          while (1) switch (_context5.p = _context5.n) {
+                            case 0:
+                              _context5.p = 0;
+                              _context5.n = 1;
+                              return navigator.clipboard.writeText(ex.url);
+                            case 1:
+                              toast(t("copiedLink"), "ok");
+                              _context5.n = 3;
+                              break;
+                            case 2:
+                              _context5.p = 2;
+                              _t = _context5.v;
+                              $("#ghexp-link", m2.body).select();
+                            case 3:
+                              return _context5.a(2);
+                          }
+                        }, _callee5, null, [[0, 2]]);
+                      }));
+                      store.logActivity(store.currentUser().email, "github-export", ex.repo + " · " + ex.files + " files");
+                      _context6.n = 6;
+                      break;
+                    case 5:
+                      _context6.p = 5;
+                      _t2 = _context6.v;
+                      toast(_t2.message || t("ghError"), "err");
+                    case 6:
+                      return _context6.a(2);
+                    case 7:
+                      if (!(fmt === "zip")) {
+                        _context6.n = 8;
+                        break;
+                      }
+                      _OC$exporter$buildPro = OC.exporter.buildProjectZip(data), blob = _OC$exporter$buildPro.blob, _safeTitle = _OC$exporter$buildPro.safeTitle, manifest = _OC$exporter$buildPro.manifest;
+                      U.download(_safeTitle + ".zip", blob);
                       store.logActivity(store.currentUser().email, "export-project", manifest.length + " files");
                       m.close();
-                      OC.deliverManifestModal(safeTitle, manifest);
+                      OC.deliverManifestModal(_safeTitle, manifest);
                       toast(t("packageDownloaded"), "ok");
-                      return _context5.a(2);
-                    case 2:
+                      return _context6.a(2);
+                    case 8:
                       if (!(fmt === "pdf")) {
-                        _context5.n = 4;
+                        _context6.n = 10;
                         break;
                       }
                       _doc = OC.exporter.buildDoc(Object.assign({}, data, {
@@ -2231,12 +2368,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                       }));
                       w = window.open("", "_blank");
                       if (w) {
-                        _context5.n = 3;
+                        _context6.n = 9;
                         break;
                       }
                       toast(t("pdfPopupBlocked"), "err");
-                      return _context5.a(2);
-                    case 3:
+                      return _context6.a(2);
+                    case 9:
                       w.document.write(_doc.content);
                       w.document.close();
                       setTimeout(function () {
@@ -2248,40 +2385,40 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
                       store.logActivity(store.currentUser().email, "export-project", "pdf");
                       m.close();
                       toast(t("pdfPrintHint"), "ok");
-                      return _context5.a(2);
-                    case 4:
+                      return _context6.a(2);
+                    case 10:
                       doc = OC.exporter.buildDoc(Object.assign({}, data, {
                         format: fmt
                       }));
                       if (doc) {
-                        _context5.n = 5;
+                        _context6.n = 11;
                         break;
                       }
                       toast(t("errorOccurred"), "err");
-                      return _context5.a(2);
-                    case 5:
+                      return _context6.a(2);
+                    case 11:
                       U.download(doc.filename, new Blob([doc.content], {
                         type: doc.mime
                       }));
                       store.logActivity(store.currentUser().email, "export-project", fmt);
                       m.close();
                       toast(t("packageDownloaded"), "ok");
-                      _context5.n = 7;
+                      _context6.n = 13;
                       break;
-                    case 6:
-                      _context5.p = 6;
-                      _t = _context5.v;
-                      toast(_t.message || t("errorOccurred"), "err");
-                    case 7:
-                      return _context5.a(2);
+                    case 12:
+                      _context6.p = 12;
+                      _t3 = _context6.v;
+                      toast(_t3.message || t("errorOccurred"), "err");
+                    case 13:
+                      return _context6.a(2);
                   }
-                }, _callee5, null, [[1, 6]]);
+                }, _callee6, null, [[3, 5], [1, 12]]);
               }));
             });
           case 11:
-            return _context6.a(2);
+            return _context7.a(2);
         }
-      }, _callee6, null, [[2, 7, 8, 9]]);
+      }, _callee7, null, [[2, 7, 8, 9]]);
     }));
     return function (_x13) {
       return _ref6.apply(this, arguments);

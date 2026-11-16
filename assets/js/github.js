@@ -15,17 +15,56 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     store = _OC.store;
   var API = "https://api.github.com";
 
-  /* ================= connection (token per user, XOR-obfuscated) ================= */
+  /* ================= connection (multi-account, v1.5.0) ================= */
   function ghKey() {
     var u = store.currentUser();
     return u ? "oc-gh-" + u.id : null;
   }
+  function accKey() {
+    var u = store.currentUser();
+    return u ? "oc-gh-acc-" + u.id : null;
+  }
+  function actKey() {
+    var u = store.currentUser();
+    return u ? "oc-gh-act-" + u.id : null;
+  }
+  function listAccounts() {
+    var k = accKey();
+    return k ? store.kvGet(k, []) : [];
+  }
+  function saveAccounts(list) {
+    var k = accKey();
+    if (k) store.kvSet(k, list);
+  }
+  function activeId() {
+    var k = actKey();
+    return k ? store.kvGet(k, "") : "";
+  }
   function state() {
+    var list = listAccounts();
+    if (list.length) {
+      var acc = list.find(function (a) {
+        return a.id === activeId();
+      }) || list[0];
+      return {
+        connected: true,
+        user: {
+          login: acc.login,
+          name: acc.name,
+          avatar: acc.avatar
+        },
+        tokenEnc: acc.tokenEnc,
+        accounts: list,
+        activeId: acc.id
+      };
+    }
     var k = ghKey();
     if (!k) return {
       connected: false,
       user: null,
-      tokenEnc: ""
+      tokenEnc: "",
+      accounts: [],
+      activeId: ""
     };
     var s = store.kvGet(k, {
       tokenEnc: "",
@@ -34,19 +73,22 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return {
       connected: !!s.tokenEnc,
       user: s.user || null,
-      tokenEnc: s.tokenEnc || ""
+      tokenEnc: s.tokenEnc || "",
+      accounts: [],
+      activeId: ""
     };
   }
   function token() {
     var s = state();
     return s.tokenEnc ? store.decKey(s.tokenEnc) : "";
   }
+  /* connect = add-or-update account + make it active */
   function connect(_x) {
     return _connect.apply(this, arguments);
   }
   function _connect() {
     _connect = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(rawToken) {
-      var tok, user, k;
+      var tok, user, info, list, acc, k;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.n) {
           case 0:
@@ -68,27 +110,64 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
           case 3:
             user = _context.v;
             // validates the token
-            k = ghKey();
-            store.kvSet(k, {
-              tokenEnc: store.encKey(tok),
-              user: {
-                login: user.login,
-                name: user.name || user.login,
-                avatar: user.avatar_url || ""
-              }
-            });
-            store.logActivity(store.currentUser().email, "github-connect", user.login);
-            return _context.a(2, {
+            info = {
               login: user.login,
               name: user.name || user.login,
               avatar: user.avatar_url || ""
+            };
+            list = listAccounts().filter(function (a) {
+              return a.login !== info.login;
             });
+            acc = {
+              id: "acc-" + info.login,
+              login: info.login,
+              name: info.name,
+              avatar: info.avatar,
+              tokenEnc: store.encKey(tok),
+              ts: Date.now()
+            };
+            list.push(acc);
+            saveAccounts(list);
+            store.kvSet(actKey(), acc.id);
+            k = ghKey();
+            if (k) store.kvSet(k, {
+              tokenEnc: store.encKey(tok),
+              user: info
+            }); // legacy mirror
+            treeCache = {};
+            store.logActivity(store.currentUser().email, "github-connect", info.login);
+            return _context.a(2, info);
         }
       }, _callee);
     }));
     return _connect.apply(this, arguments);
   }
+  function switchAccount(id) {
+    var list = listAccounts();
+    if (!list.some(function (a) {
+      return a.id === id;
+    })) return false;
+    store.kvSet(actKey(), id);
+    treeCache = {};
+    return true;
+  }
+  function removeAccount(id) {
+    var list = listAccounts();
+    var next = list.filter(function (a) {
+      return a.id !== id;
+    });
+    saveAccounts(next);
+    if (activeId() === id) store.kvSet(actKey(), next.length ? next[0].id : "");
+    if (!next.length) {
+      var k = ghKey();
+      if (k) store.kvDel(k);
+    }
+    treeCache = {};
+    return next;
+  }
   function disconnect() {
+    saveAccounts([]);
+    store.kvDel(actKey());
     var k = ghKey();
     if (k) store.kvDel(k);
     clearStage();
@@ -269,74 +348,43 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return _branches.apply(this, arguments);
   }
   var BINARY_EXT = /\.(png|jpe?g|gif|webp|ico|woff2?|ttf|eot|otf|mp3|mp4|webm|pdf|zip|gz|tar|exe|dll|so|bin|db|sqlite|jar|class|apk|node|pack|idx)$/i;
-  function tree(_x7, _x8) {
-    return _tree.apply(this, arguments);
-  }
   /* ================= read file ================= */
-  function _tree() {
-    _tree = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(repo, branch) {
-      var j, all;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.n) {
-          case 0:
-            _context5.n = 1;
-            return api("/repos/" + repo + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
-          case 1:
-            j = _context5.v;
-            all = (j.tree || []).filter(function (x) {
-              return x.type === "blob" && !BINARY_EXT.test(x.path);
-            });
-            return _context5.a(2, {
-              sha: j.sha,
-              truncated: !!j.truncated,
-              files: all.map(function (x) {
-                return {
-                  p: x.path,
-                  size: x.size || 0
-                };
-              })
-            });
-        }
-      }, _callee5);
-    }));
-    return _tree.apply(this, arguments);
-  }
   function b64ToUtf8(b64) {
     var bin = atob(String(b64 || "").replace(/\s/g, ""));
     var bytes = new Uint8Array(bin.length);
     for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return new TextDecoder("utf-8").decode(bytes);
   }
-  function readFile(_x9, _x0, _x1) {
+  function readFile(_x7, _x8, _x9) {
     return _readFile.apply(this, arguments);
   }
   /* ================= staging (pending commit changes) ================= */
   function _readFile() {
-    _readFile = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(repo, branch, path) {
+    _readFile = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(repo, branch, path) {
       var enc, j;
-      return _regenerator().w(function (_context6) {
-        while (1) switch (_context6.n) {
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.n) {
           case 0:
             enc = path.split("/").map(encodeURIComponent).join("/");
-            _context6.n = 1;
+            _context5.n = 1;
             return api("/repos/" + repo + "/contents/" + enc + "?ref=" + encodeURIComponent(branch));
           case 1:
-            j = _context6.v;
+            j = _context5.v;
             if (!Array.isArray(j)) {
-              _context6.n = 2;
+              _context5.n = 2;
               break;
             }
             throw new Error(t("ghIsDir"));
           case 2:
             if (!(j.encoding === "base64")) {
-              _context6.n = 3;
+              _context5.n = 3;
               break;
             }
-            return _context6.a(2, b64ToUtf8(j.content));
+            return _context5.a(2, b64ToUtf8(j.content));
           case 3:
-            return _context6.a(2, j.content || "");
+            return _context5.a(2, j.content || "");
         }
-      }, _callee6);
+      }, _callee5);
     }));
     return _readFile.apply(this, arguments);
   }
@@ -392,15 +440,15 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
 
   /* ================= commit & push (Git Data API) ================= */
-  function commit(_x10) {
+  function commit(_x0) {
     return _commit.apply(this, arguments);
   }
   /* ================= export ================= */
   function _commit() {
-    _commit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(opts) {
+    _commit = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(opts) {
       var repo, branch, items, message, refInfo, baseSha, baseCommit, blobs, _iterator2, _step2, it, b, treeRes, commitRes, targetBranch, created, _t5, _t6;
-      return _regenerator().w(function (_context7) {
-        while (1) switch (_context7.p = _context7.n) {
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.p = _context6.n) {
           case 0:
             repo = opts.repo;
             branch = opts.branch;
@@ -408,40 +456,40 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               return s.repo === repo && s.branch === branch;
             });
             if (items.length) {
-              _context7.n = 1;
+              _context6.n = 1;
               break;
             }
             throw new Error(t("ghNothingStaged"));
           case 1:
             message = String(opts.message || "").trim() || t("ghDefaultCommitMsg");
-            _context7.p = 2;
-            _context7.n = 3;
+            _context6.p = 2;
+            _context6.n = 3;
             return api("/repos/" + repo + "/git/ref/heads/" + encodeURIComponent(branch));
           case 3:
-            refInfo = _context7.v;
-            _context7.n = 5;
+            refInfo = _context6.v;
+            _context6.n = 5;
             break;
           case 4:
-            _context7.p = 4;
-            _t5 = _context7.v;
+            _context6.p = 4;
+            _t5 = _context6.v;
             throw new Error(t("ghBranchMissing") + " (" + branch + ")");
           case 5:
             baseSha = refInfo.object.sha;
-            _context7.n = 6;
+            _context6.n = 6;
             return api("/repos/" + repo + "/git/commits/" + baseSha);
           case 6:
-            baseCommit = _context7.v;
+            baseCommit = _context6.v;
             blobs = [];
             _iterator2 = _createForOfIteratorHelper(items);
-            _context7.p = 7;
+            _context6.p = 7;
             _iterator2.s();
           case 8:
             if ((_step2 = _iterator2.n()).done) {
-              _context7.n = 11;
+              _context6.n = 11;
               break;
             }
             it = _step2.value;
-            _context7.n = 9;
+            _context6.n = 9;
             return api("/repos/" + repo + "/git/blobs", {
               method: "POST",
               body: {
@@ -450,7 +498,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               }
             });
           case 9:
-            b = _context7.v;
+            b = _context6.v;
             blobs.push({
               path: it.path,
               mode: "100644",
@@ -458,21 +506,21 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               sha: b.sha
             });
           case 10:
-            _context7.n = 8;
+            _context6.n = 8;
             break;
           case 11:
-            _context7.n = 13;
+            _context6.n = 13;
             break;
           case 12:
-            _context7.p = 12;
-            _t6 = _context7.v;
+            _context6.p = 12;
+            _t6 = _context6.v;
             _iterator2.e(_t6);
           case 13:
-            _context7.p = 13;
+            _context6.p = 13;
             _iterator2.f();
-            return _context7.f(13);
+            return _context6.f(13);
           case 14:
-            _context7.n = 15;
+            _context6.n = 15;
             return api("/repos/" + repo + "/git/trees", {
               method: "POST",
               body: {
@@ -481,8 +529,8 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               }
             });
           case 15:
-            treeRes = _context7.v;
-            _context7.n = 16;
+            treeRes = _context6.v;
+            _context6.n = 16;
             return api("/repos/" + repo + "/git/commits", {
               method: "POST",
               body: {
@@ -492,15 +540,15 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               }
             });
           case 16:
-            commitRes = _context7.v;
+            commitRes = _context6.v;
             targetBranch = branch;
             created = false;
             if (!opts.newBranch) {
-              _context7.n = 18;
+              _context6.n = 18;
               break;
             }
             targetBranch = String(opts.newBranch).replace(/[^A-Za-z0-9._\/-]/g, "-").replace(/^\/+|\/+$/g, "") || "opencode/" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
-            _context7.n = 17;
+            _context6.n = 17;
             return api("/repos/" + repo + "/git/refs", {
               method: "POST",
               body: {
@@ -510,10 +558,10 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             });
           case 17:
             created = true;
-            _context7.n = 19;
+            _context6.n = 19;
             break;
           case 18:
-            _context7.n = 19;
+            _context6.n = 19;
             return api("/repos/" + repo + "/git/refs/heads/" + encodeURIComponent(branch), {
               method: "PATCH",
               body: {
@@ -530,7 +578,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             });
             persistStage();
             store.logActivity(store.currentUser().email, "github-commit", repo + "@" + targetBranch + " · " + items.length + " files");
-            return _context7.a(2, {
+            return _context6.a(2, {
               sha: commitRes.sha,
               branch: targetBranch,
               created: created,
@@ -538,26 +586,26 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               html: commitRes.html_url || ""
             });
         }
-      }, _callee7, null, [[7, 12, 13, 14], [2, 4]]);
+      }, _callee6, null, [[7, 12, 13, 14], [2, 4]]);
     }));
     return _commit.apply(this, arguments);
   }
-  function exportZip(_x11, _x12) {
+  function exportZip(_x1, _x10) {
     return _exportZip.apply(this, arguments);
   }
   function _exportZip() {
-    _exportZip = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(repo, branch) {
+    _exportZip = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(repo, branch) {
       var res, blob;
-      return _regenerator().w(function (_context8) {
-        while (1) switch (_context8.n) {
+      return _regenerator().w(function (_context7) {
+        while (1) switch (_context7.n) {
           case 0:
             if (navigator.onLine) {
-              _context8.n = 1;
+              _context7.n = 1;
               break;
             }
             throw new Error(t("networkDown"));
           case 1:
-            _context8.n = 2;
+            _context7.n = 2;
             return fetch(API + "/repos/" + repo + "/zipball/" + encodeURIComponent(branch), {
               headers: {
                 "Authorization": "Bearer " + token(),
@@ -565,21 +613,21 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               }
             });
           case 2:
-            res = _context8.v;
+            res = _context7.v;
             if (res.ok) {
-              _context8.n = 3;
+              _context7.n = 3;
               break;
             }
             throw new Error(t("ghError") + " (" + res.status + ")");
           case 3:
-            _context8.n = 4;
+            _context7.n = 4;
             return res.blob();
           case 4:
-            blob = _context8.v;
+            blob = _context7.v;
             U.download(repo.split("/")[1] + "-" + branch + ".zip", blob);
-            return _context8.a(2, blob.size);
+            return _context7.a(2, blob.size);
         }
-      }, _callee8);
+      }, _callee7);
     }));
     return _exportZip.apply(this, arguments);
   }
@@ -605,6 +653,169 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
   /* ================= attached repo (per-chat agent mode, v1.4.2) ================= */
   var attach = null; // {repo, branch, tree, truncated, ts} — belongs to the CURRENT chat only
+  var treeCache = {}; // repo@branch → {ts, tr} — 120s TTL for speed
+  function tree(_x11, _x12, _x13) {
+    return _tree.apply(this, arguments);
+  }
+  /* v1.5.0 — export files to a NEW private repo and return its link */
+  function _tree() {
+    _tree = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(repo, branch, force) {
+      var key, c, j, all, tr;
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.n) {
+          case 0:
+            key = repo + "@" + branch;
+            c = treeCache[key];
+            if (!(!force && c && Date.now() - c.ts < 120000)) {
+              _context8.n = 1;
+              break;
+            }
+            return _context8.a(2, c.tr);
+          case 1:
+            _context8.n = 2;
+            return api("/repos/" + repo + "/git/trees/" + encodeURIComponent(branch) + "?recursive=1");
+          case 2:
+            j = _context8.v;
+            all = (j.tree || []).filter(function (x) {
+              return x.type === "blob" && !BINARY_EXT.test(x.path);
+            });
+            tr = {
+              sha: j.sha,
+              truncated: !!j.truncated,
+              files: all.map(function (x) {
+                return {
+                  p: x.path,
+                  size: x.size || 0
+                };
+              })
+            };
+            treeCache[key] = {
+              ts: Date.now(),
+              tr: tr
+            };
+            return _context8.a(2, tr);
+        }
+      }, _callee8);
+    }));
+    return _tree.apply(this, arguments);
+  }
+  function exportRepo(_x14, _x15, _x16) {
+    return _exportRepo.apply(this, arguments);
+  }
+  function _exportRepo() {
+    _exportRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(name, files, opts) {
+      var safe, rname, isPrivate, r, list, blobs, _loop, i, treeRes, c;
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.n) {
+          case 0:
+            opts = opts || {};
+            safe = String(name || "").toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "opencode-project";
+            rname = safe + "-" + new Date().toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+            isPrivate = opts.private !== false;
+            _context0.n = 1;
+            return api("/user/repos", {
+              method: "POST",
+              body: {
+                name: rname,
+                private: isPrivate,
+                description: String(opts.description || "Exported by Open Code").slice(0, 180),
+                auto_init: false
+              }
+            });
+          case 1:
+            r = _context0.v;
+            list = (files || []).filter(function (f) {
+              return f.path && f.content != null;
+            }).slice(0, 800);
+            blobs = [];
+            _loop = /*#__PURE__*/_regenerator().m(function _loop() {
+              var chunk, res;
+              return _regenerator().w(function (_context9) {
+                while (1) switch (_context9.n) {
+                  case 0:
+                    chunk = list.slice(i, i + 3);
+                    _context9.n = 1;
+                    return Promise.all(chunk.map(function (f) {
+                      return api("/repos/" + r.full_name + "/git/blobs", {
+                        method: "POST",
+                        body: {
+                          content: f.content,
+                          encoding: "utf-8"
+                        }
+                      });
+                    }));
+                  case 1:
+                    res = _context9.v;
+                    chunk.forEach(function (f, k) {
+                      return blobs.push({
+                        path: f.path,
+                        mode: "100644",
+                        type: "blob",
+                        sha: res[k].sha
+                      });
+                    });
+                  case 2:
+                    return _context9.a(2);
+                }
+              }, _loop);
+            });
+            i = 0;
+          case 2:
+            if (!(i < list.length)) {
+              _context0.n = 4;
+              break;
+            }
+            return _context0.d(_regeneratorValues(_loop()), 3);
+          case 3:
+            i += 3;
+            _context0.n = 2;
+            break;
+          case 4:
+            if (!blobs.length) {
+              _context0.n = 7;
+              break;
+            }
+            _context0.n = 5;
+            return api("/repos/" + r.full_name + "/git/trees", {
+              method: "POST",
+              body: {
+                tree: blobs
+              }
+            });
+          case 5:
+            treeRes = _context0.v;
+            _context0.n = 6;
+            return api("/repos/" + r.full_name + "/git/commits", {
+              method: "POST",
+              body: {
+                message: opts.message || "Initial export — Open Code",
+                tree: treeRes.sha,
+                parents: []
+              }
+            });
+          case 6:
+            c = _context0.v;
+            _context0.n = 7;
+            return api("/repos/" + r.full_name + "/git/refs", {
+              method: "POST",
+              body: {
+                ref: "refs/heads/main",
+                sha: c.sha
+              }
+            });
+          case 7:
+            store.logActivity(store.currentUser().email, "github-export", r.full_name + " · " + list.length + " files");
+            return _context0.a(2, {
+              repo: r.full_name,
+              url: r.html_url,
+              files: list.length,
+              private: isPrivate
+            });
+        }
+      }, _callee9);
+    }));
+    return _exportRepo.apply(this, arguments);
+  }
   function curConv() {
     try {
       if (!OC.store || !OC._currentConvId) return null;
@@ -618,19 +829,19 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     if (gh) conv.gh = gh;else delete conv.gh;
     OC.store.putConv(conv);
   }
-  function attachRepo(_x13, _x14) {
+  function attachRepo(_x17, _x18) {
     return _attachRepo.apply(this, arguments);
   }
   function _attachRepo() {
-    _attachRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(repo, branch) {
+    _attachRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(repo, branch) {
       var tr;
-      return _regenerator().w(function (_context9) {
-        while (1) switch (_context9.n) {
+      return _regenerator().w(function (_context1) {
+        while (1) switch (_context1.n) {
           case 0:
-            _context9.n = 1;
+            _context1.n = 1;
             return tree(repo, branch);
           case 1:
-            tr = _context9.v;
+            tr = _context1.v;
             attach = {
               repo: repo,
               branch: branch,
@@ -647,9 +858,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               if (OC.renderGhChip) OC.renderGhChip();
               if (OC.renderSidebar) OC.renderSidebar();
             } catch (e) {}
-            return _context9.a(2, attach);
+            return _context1.a(2, attach);
         }
-      }, _callee9);
+      }, _callee0);
     }));
     return _attachRepo.apply(this, arguments);
   }
@@ -699,37 +910,37 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   /* bind in-memory attach to a freshly created conv (first message of a new chat) */
   function _syncChat() {
-    _syncChat = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
+    _syncChat = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1() {
       var gh, _t7;
-      return _regenerator().w(function (_context0) {
-        while (1) switch (_context0.p = _context0.n) {
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.p = _context10.n) {
           case 0:
             gh = chatGh();
             if (!(gh && gh.on && gh.repo)) {
-              _context0.n = 4;
+              _context10.n = 4;
               break;
             }
             if (!(attach && attach.repo === gh.repo && attach.branch === gh.branch)) {
-              _context0.n = 1;
+              _context10.n = 1;
               break;
             }
-            return _context0.a(2, attach);
+            return _context10.a(2, attach);
           case 1:
-            _context0.p = 1;
-            _context0.n = 2;
+            _context10.p = 1;
+            _context10.n = 2;
             return attachRepo(gh.repo, gh.branch);
           case 2:
-            return _context0.a(2, _context0.v);
+            return _context10.a(2, _context10.v);
           case 3:
-            _context0.p = 3;
-            _t7 = _context0.v;
+            _context10.p = 3;
+            _t7 = _context10.v;
             attach = null;
-            return _context0.a(2, null);
+            return _context10.a(2, null);
           case 4:
             attach = null;
-            return _context0.a(2, null);
+            return _context10.a(2, null);
         }
-      }, _callee0, null, [[1, 3]]);
+      }, _callee1, null, [[1, 3]]);
     }));
     return _syncChat.apply(this, arguments);
   }
@@ -794,20 +1005,20 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     return null;
   }
   var MAX_FILE_CONTEXT = 8000;
-  function runActions(_x15) {
+  function runActions(_x19) {
     return _runActions.apply(this, arguments);
   }
   function _runActions() {
-    _runActions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(actions) {
-      var results, staged, done, say, _iterator3, _step3, _loop, _t9;
-      return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.p = _context10.n) {
+    _runActions = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(actions) {
+      var results, staged, done, say, _iterator3, _step3, _loop2, _t9;
+      return _regenerator().w(function (_context12) {
+        while (1) switch (_context12.p = _context12.n) {
           case 0:
             if (attach) {
-              _context10.n = 1;
+              _context12.n = 1;
               break;
             }
-            return _context10.a(2, {
+            return _context12.a(2, {
               results: [],
               staged: 0,
               done: false,
@@ -817,24 +1028,24 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             results = [];
             staged = 0, done = false, say = "";
             _iterator3 = _createForOfIteratorHelper((actions || []).slice(0, 3));
-            _context10.p = 2;
-            _loop = /*#__PURE__*/_regenerator().m(function _loop() {
+            _context12.p = 2;
+            _loop2 = /*#__PURE__*/_regenerator().m(function _loop2() {
               var a, type, p, c, trimmed, dir, kids, _t8;
-              return _regenerator().w(function (_context1) {
-                while (1) switch (_context1.p = _context1.n) {
+              return _regenerator().w(function (_context11) {
+                while (1) switch (_context11.p = _context11.n) {
                   case 0:
                     a = _step3.value;
                     type = String(a.t || a.action || "").toLowerCase();
                     p = String(a.p || a.path || "");
-                    _context1.p = 1;
+                    _context11.p = 1;
                     if (!(type === "read" && p)) {
-                      _context1.n = 3;
+                      _context11.n = 3;
                       break;
                     }
-                    _context1.n = 2;
+                    _context11.n = 2;
                     return readFile(attach.repo, attach.branch, p);
                   case 2:
-                    c = _context1.v;
+                    c = _context11.v;
                     trimmed = c.length > MAX_FILE_CONTEXT ? c.slice(0, MAX_FILE_CONTEXT) + "\n... [TRUNCATED]" : c;
                     results.push({
                       ok: true,
@@ -842,7 +1053,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                       path: p,
                       text: "[FILE " + p + "]\n" + trimmed
                     });
-                    _context1.n = 4;
+                    _context11.n = 4;
                     break;
                   case 3:
                     if (type === "write" && p && typeof a.c === "string") {
@@ -879,11 +1090,11 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                       });
                     }
                   case 4:
-                    _context1.n = 6;
+                    _context11.n = 6;
                     break;
                   case 5:
-                    _context1.p = 5;
-                    _t8 = _context1.v;
+                    _context11.p = 5;
+                    _t8 = _context11.v;
                     results.push({
                       ok: false,
                       type: type,
@@ -891,40 +1102,40 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                       text: "[ERROR " + p + "] " + (_t8.message || String(_t8))
                     });
                   case 6:
-                    return _context1.a(2);
+                    return _context11.a(2);
                 }
-              }, _loop, null, [[1, 5]]);
+              }, _loop2, null, [[1, 5]]);
             });
             _iterator3.s();
           case 3:
             if ((_step3 = _iterator3.n()).done) {
-              _context10.n = 5;
+              _context12.n = 5;
               break;
             }
-            return _context10.d(_regeneratorValues(_loop()), 4);
+            return _context12.d(_regeneratorValues(_loop2()), 4);
           case 4:
-            _context10.n = 3;
+            _context12.n = 3;
             break;
           case 5:
-            _context10.n = 7;
+            _context12.n = 7;
             break;
           case 6:
-            _context10.p = 6;
-            _t9 = _context10.v;
+            _context12.p = 6;
+            _t9 = _context12.v;
             _iterator3.e(_t9);
           case 7:
-            _context10.p = 7;
+            _context12.p = 7;
             _iterator3.f();
-            return _context10.f(7);
+            return _context12.f(7);
           case 8:
-            return _context10.a(2, {
+            return _context12.a(2, {
               results: results,
               staged: staged,
               done: done,
               say: say
             });
         }
-      }, _callee1, null, [[2, 6, 7, 8]]);
+      }, _callee10, null, [[2, 6, 7, 8]]);
     }));
     return _runActions.apply(this, arguments);
   }
@@ -947,6 +1158,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     commit: commit,
     exportZip: exportZip,
     exportStagedZip: exportStagedZip,
+    exportRepo: exportRepo,
     attachRepo: attachRepo,
     detach: detach,
     attached: attached,
@@ -954,6 +1166,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
     setChatGh: setChatGh,
     syncChat: syncChat,
     bindConv: bindConv,
+    listAccounts: listAccounts,
+    switchAccount: switchAccount,
+    removeAccount: removeAccount,
     contextBlock: contextBlock,
     parseActions: parseActions,
     runActions: runActions

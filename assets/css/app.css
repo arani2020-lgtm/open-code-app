@@ -898,3 +898,11 @@ mark { background: rgb(var(--accent) / .35); border-radius: 3px; padding: 0 2px;
 }
 .fmt-chip:hover { border-color: rgb(var(--pri)); background: rgb(var(--soft)); }
 .fmt-chip .fx { color: rgb(var(--pri)); font-size: 11px; font-weight: 500; opacity: .8; direction: ltr; }
+
+/* v1.5.0 — multi-account chips + export card */
+.gh-acc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid rgb(var(--border)); border-radius: 999px; cursor: pointer; font-size: 12px; }
+.gh-acc-chip:hover { border-color: rgb(var(--brand) / .6); }
+.gh-acc-chip.active { border-color: rgb(var(--brand)); background: rgb(var(--brand-soft) / .7); font-weight: 600; }
+.gh-acc-chip .icon-btn { opacity: .55; }
+.gh-acc-chip .icon-btn:hover { opacity: 1; }
+.bp-eta { font-variant-numeric: tabular-nums; }

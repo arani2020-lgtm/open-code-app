@@ -309,6 +309,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var logLines = [];
     var accChars = 0;
     var startedAt = Date.now();
+    var phaseT0 = {}; // phaseId → start ts (v1.5.0 durations)
+    var lastPhase = null;
+    function fmtDur(ms) {
+      var s = Math.max(1, Math.round(ms / 1000));
+      return fa(s) + "s";
+    }
+    function stamp() {
+      var s = Math.round((Date.now() - startedAt) / 1000);
+      return "[" + fa(Math.floor(s / 60)) + ":" + fa(s % 60 < 10 ? "0" + s % 60 : s % 60) + "]";
+    }
     var body = document.createElement("div");
     var m = OC.modal({
       title: t("bpTitle"),
@@ -316,7 +326,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       foot: [],
       wide: true
     });
-    body.innerHTML = '<div class="bp-wrap">' + '<div class="bp-head"><b>' + esc(repoFull) + '</b><span class="badge" id="bp-branch">…</span>' + '<span class="badge bp-status" id="bp-state">' + t("bpStarting") + "</span>" + '<span class="muted small bp-elapsed" id="bp-elapsed">0s</span></div>' + '<div class="flex check-row" style="gap:8px;margin:10px 2px 0">' + '<label class="check-row" style="margin:0"><input type="checkbox" id="bp-all" checked><span>' + t("bpAllModels") + "</span></label>" + '<span class="muted small" id="bp-models-count"></span></div>' + '<div class="bp-mid">' + '<div class="bp-ring" id="bp-ring"><span class="bp-pct" id="bp-pct">۰٪</span></div>' + '<div class="bp-phases" id="bp-phases">' + PHASES.map(function (p, i) {
+    body.innerHTML = '<div class="bp-wrap">' + '<div class="bp-head"><b>' + esc(repoFull) + '</b><span class="badge" id="bp-branch">…</span>' + '<span class="badge bp-status" id="bp-state">' + t("bpStarting") + "</span>" + '<span class="muted small bp-elapsed" id="bp-elapsed">0s</span></div>' + '<div class="flex check-row" style="gap:8px;margin:10px 2px 0;flex-wrap:wrap">' + '<label class="check-row" style="margin:0"><input type="checkbox" id="bp-all" checked><span>' + t("bpAllModels") + "</span></label>" + (OC.github && OC.github.state().connected ? '<label class="check-row" style="margin:0"><input type="checkbox" id="bp-export" checked><span>' + t("bpAutoExport") + "</span></label>" : "") + '<span class="muted small" id="bp-models-count"></span></div>' + '<div class="bp-mid">' + '<div class="bp-ring" id="bp-ring"><span class="bp-pct" id="bp-pct">۰٪</span></div>' + '<div class="bp-phases" id="bp-phases">' + PHASES.map(function (p, i) {
       return '<div class="bp-phase" id="' + p + '"><span class="ph-dot">' + I.check + "</span><span>" + t("bpPh" + (i + 1)) + '</span><span style="flex:1"></span><span class="muted small" data-pph="' + p + '"></span></div>';
     }).join("") + "</div></div>" + '<div class="bp-log" id="bp-log"></div>' + '<div class="bp-result" id="bp-result">' + '<div class="bp-stats" id="bp-stats"></div>' + '<div class="bp-links" id="bp-links"></div>' + '<div class="flex" style="gap:8px;flex-wrap:wrap" id="bp-acts"></div></div>' + '<div class="flex" style="justify-content:flex-end" id="bp-foot-row"><button class="btn btn-danger-ghost" id="bp-stop">' + I.x + t("bpStop") + "</button></div>" + "</div>";
     var ring = $("#bp-ring", body),
@@ -346,7 +356,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     function _tryModel() {
       _tryModel = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(cand, prompt, onChunk) {
-        var res, _t7;
+        var res, _t8;
         return _regenerator().w(function (_context4) {
           while (1) switch (_context4.p = _context4.n) {
             case 0:
@@ -364,16 +374,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               });
             case 2:
               _context4.p = 2;
-              _t7 = _context4.v;
-              if (!(cancel || String(_t7 && _t7.message || _t7) === "__cancelled__")) {
+              _t8 = _context4.v;
+              if (!(cancel || String(_t8 && _t8.message || _t8) === "__cancelled__")) {
                 _context4.n = 3;
                 break;
               }
-              throw _t7;
+              throw _t8;
             case 3:
               return _context4.a(2, {
                 ok: false,
-                err: String(_t7 && _t7.message || _t7)
+                err: String(_t8 && _t8.message || _t8)
               });
           }
         }, _callee2, null, [[0, 2]]);
@@ -394,7 +404,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       stateEl.className = "badge bp-status" + (cls ? " " + cls : "");
     }
     function log(msg) {
-      logLines.push(msg);
+      logLines.push(stamp() + " " + msg);
       if (logLines.length > 50) logLines = logLines.slice(-50);
       logEl.innerHTML = logLines.map(function (l) {
         return "<div>" + esc(l) + "</div>";
@@ -402,18 +412,36 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       logEl.scrollTop = logEl.scrollHeight;
     }
     function setPhase(i) {
+      if (lastPhase && phaseT0[lastPhase] && !phaseT0[lastPhase].done) {
+        phaseT0[lastPhase].done = true;
+        var el2 = $("[data-pph=" + lastPhase + "]", body);
+        if (el2) el2.textContent = fmtDur(Date.now() - phaseT0[lastPhase].t0);
+      }
+      var cur = PHASES[i];
+      if (cur && !phaseT0[cur]) phaseT0[cur] = {
+        t0: Date.now(),
+        done: false
+      };
+      lastPhase = cur;
       for (var j = 0; j < PHASES.length; j++) {
         var elx = $("#" + PHASES[j], body);
         elx.className = "bp-phase" + (j < i ? " done" : j === i ? " active" : "");
         if (j < i) {
-          var el2 = $("[data-pph=" + PHASES[j] + "]", body);
-          if (el2) el2.textContent = "✓";
+          var _el = $("[data-pph=" + PHASES[j] + "]", body);
+          if (_el && !_el.textContent) _el.textContent = "✓";
         }
       }
     }
     var tickTimer = setInterval(function () {
-      var s = Math.round((Date.now() - startedAt) / 1000);
-      $("#bp-elapsed", body).textContent = s >= 60 ? Math.floor(s / 60) + "m " + s % 60 + "s" : s + "s";
+      var el = Date.now() - startedAt;
+      var s = Math.round(el / 1000);
+      var base = s >= 60 ? Math.floor(s / 60) + "m " + s % 60 + "s" : s + "s";
+      var eta = "";
+      if (pct >= 8 && pct < 100) {
+        var etaS = Math.round(el / pct * (100 - pct) / 1000);
+        eta = " · " + t("bpEta") + " ≈ " + (etaS >= 60 ? Math.floor(etaS / 60) + "m " + etaS % 60 + "s" : fa(etaS) + "s");
+      }
+      $("#bp-elapsed", body).textContent = base + eta;
     }, 1000);
     $("#bp-stop", body).onclick = function () {
       cancel = true;
@@ -447,7 +475,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       store.logActivity(store.currentUser().email, "build-pipeline", repoFull + "@" + (r.branch || branchHint || "main"));
     };
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var bs, branch, st, rev, revPick, tried, lastErr, order, _iterator5, _step5, _loop3, _iterator6, _step6, _cand2, _att3, revJ, next, plan, round, stagedTotal, done, mpick, ep, att, j, mp2, att2, ra, from, to, fpick, att4, j4, ra4, finalScore, finalIssues, extra, stagedNow0, vres, vp, vcands, _iterator7, _step7, _loop2, _i2, _vcands, cand, _att, mp, ep2, attE, j2, _mp, attE2, ra2, v2, vp2, _iterator8, _step8, _cand, _att2, stagedNow, zipBlob, commitUrl, commitSha, newBranch, result_pr, zw, _iterator9, _step9, s, commitMsg, cr, pr, repoUrl, links, _t, _t2, _t3, _t4, _t5, _t6;
+      var bs, branch, st, rev, revPick, tried, lastErr, order, _iterator5, _step5, _loop3, _iterator6, _step6, _cand2, _att3, revJ, next, plan, round, stagedTotal, done, mpick, ep, att, j, mp2, att2, ra, from, to, fpick, att4, j4, ra4, finalScore, finalIssues, extra, stagedNow0, vres, vp, vcands, _iterator7, _step7, _loop2, _i2, _vcands, cand, _att, mp, ep2, attE, j2, _mp, attE2, ra2, v2, vp2, _iterator8, _step8, _cand, _att2, stagedNow, zipBlob, commitUrl, commitSha, newBranch, result_pr, exportUrl, exportRepoName, zw, _iterator9, _step9, s, commitMsg, cr, pr, expEl, slug, ex, repoUrl, links, _t, _t2, _t3, _t4, _t5, _t6, _t7;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -887,9 +915,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             if (!stagedNow.length) {
               log(isFa() ? "تغییری پله نشده — فقط گزارش بازبینی موجود است" : "nothing staged — review-only result");
             }
-            zipBlob = null, commitUrl = "", commitSha = "", newBranch = "", result_pr = "";
+            zipBlob = null, commitUrl = "", commitSha = "", newBranch = "", result_pr = "", exportUrl = "", exportRepoName = "";
             if (!stagedNow.length) {
-              _context3.n = 70;
+              _context3.n = 74;
               break;
             }
             zw = new OC.zip.ZipWriter();
@@ -947,6 +975,38 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             _t5 = _context3.v;
             log("PR skipped (" + (_t5.message || "").slice(0, 80) + ")");
           case 70:
+            /* v1.5.0 — automatic PRIVATE repo export with link */
+            expEl = $("#bp-export", body);
+            if (!(expEl && expEl.checked)) {
+              _context3.n = 74;
+              break;
+            }
+            setState(t("bpExporting"), "badge-warn");
+            _context3.p = 71;
+            slug = (repoFull.split("/")[1] || "project").replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 50);
+            _context3.n = 72;
+            return OC.github.exportRepo(slug, stagedNow.map(function (s) {
+              return {
+                path: s.path,
+                content: s.content
+              };
+            }), {
+              private: true,
+              description: "Open Code export — " + repoFull + " (score " + rev.score + "/100)",
+              message: "Initial export from Open Code pipeline — " + repoFull
+            });
+          case 72:
+            ex = _context3.v;
+            exportUrl = ex.url;
+            exportRepoName = ex.repo;
+            log(t("bpExportDone") + " → " + ex.repo + " (" + ex.files + " " + t("filesUnit") + ")");
+            _context3.n = 74;
+            break;
+          case 73:
+            _context3.p = 73;
+            _t6 = _context3.v;
+            log("export: " + (_t6.message || "").slice(0, 90));
+          case 74:
             setPct(94);
 
             /* phase 6 — output links */
@@ -956,6 +1016,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             links = [];
             if (commitUrl) links.push([t("bpLinkCommit"), commitUrl, I.check]);
             if (result_pr) links.push([t("bpLinkPr"), result_pr, I.package]);
+            if (exportUrl) links.push([t("bpLinkExport") + (exportRepoName ? ": " + exportRepoName : ""), exportUrl, I.book]);
             links.push([t("bpLinkBranch") + (newBranch ? ": " + newBranch : ""), newBranch ? "https://github.com/" + repoFull + "/tree/" + newBranch : repoUrl + "/tree/" + branch, I.book]);
             links.push([t("bpLinkRepo"), repoUrl, I.globe]);
             $("#bp-links", body).innerHTML = links.map(function (l) {
@@ -984,17 +1045,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             saveResult({
               branch: newBranch || branch,
               score: rev.score,
-              files: stagedNow.length
+              files: stagedNow.length,
+              exportUrl: exportUrl,
+              pr: result_pr
             });
             toast(t("bpDoneToast"), "ok");
-            _context3.n = 72;
+            _context3.n = 76;
             break;
-          case 71:
-            _context3.p = 71;
-            _t6 = _context3.v;
+          case 75:
+            _context3.p = 75;
+            _t7 = _context3.v;
             clearInterval(tickTimer);
             running = null;
-            if (cancel || String(_t6.message) === "__cancelled__") {
+            if (cancel || String(_t7.message) === "__cancelled__") {
               setState(t("bpStopped"), "badge-warn");
               log(t("bpStoppedLog"));
               $("#bp-result", body).classList.add("show");
@@ -1012,21 +1075,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
               };
             } else {
               setState(t("bpFailed"), "badge-err");
-              log("error: " + (_t6.message || _t6));
+              log("error: " + (_t7.message || _t7));
               $("#bp-acts", body).innerHTML = '<button class="btn btn-primary" id="bp-close3">' + t("close") + "</button>";
               $("#bp-close3", body).onclick = function () {
                 return m.close();
               };
-              toast(_t6.message || t("bpFailed"), "err");
+              toast(_t7.message || t("bpFailed"), "err");
             }
             return _context3.a(2);
-          case 72:
+          case 76:
             clearInterval(tickTimer);
             running = null;
-          case 73:
+          case 77:
             return _context3.a(2);
         }
-      }, _callee, null, [[67, 69], [55, 60, 61, 62], [35, 40, 41, 42], [11, 19, 20, 21], [3, 8, 9, 10], [0, 71]]);
+      }, _callee, null, [[71, 73], [67, 69], [55, 60, 61, 62], [35, 40, 41, 42], [11, 19, 20, 21], [3, 8, 9, 10], [0, 75]]);
     }))();
   }
   window.OC = window.OC || {};
