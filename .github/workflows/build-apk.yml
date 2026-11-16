@@ -30,7 +30,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
+          packages: platform-tools platforms;android-34 build-tools;34.0.0
 
       - name: Generate signing key
         run: |
@@ -41,104 +41,60 @@ jobs:
             -storepass android -keypass android \
             -dname "CN=Open Code, OU=Mobile, O=OpenCode, L=Tehran, C=IR"
 
-      - name: Prepare TWA project
+      - name: Write bubblewrap config
         run: |
-          mkdir -p twa && cd twa
-          # Write config so bubblewrap knows jdk + sdk paths
           mkdir -p "$HOME/.bubblewrap"
-          cat > "$HOME/.bubblewrap/config.json" <<EOF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          EOF
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > "$HOME/.bubblewrap/config.json"
           cat "$HOME/.bubblewrap/config.json"
 
-          python3 - <<'PY'
+      - name: Prepare TWA folder
+        run: |
+          mkdir -p twa
+          python3 -c "
           import json, os
-          m = json.load(open("../twa-manifest.json"))
-          m["signingKey"] = {
-            "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
-            "alias": "android"
-          }
-          # Ensure host/startUrl match live site
-          m["host"] = "arani2020-lgtm.github.io"
-          m["startUrl"] = "/open-code-app/"
-          m["fullScopeUrl"] = "https://arani2020-lgtm.github.io/open-code-app/"
-          m["webManifestUrl"] = "https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest"
-          m["iconUrl"] = "https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-512.png"
-          m["maskableIconUrl"] = "https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-maskable-512.png"
-          json.dump(m, open("twa-manifest.json", "w"), indent=2)
-          print("twa-manifest ready")
-          PY
+          m = json.load(open('twa-manifest.json'))
+          m['signingKey'] = {'path': os.environ['GITHUB_WORKSPACE'] + '/android.keystore', 'alias': 'android'}
+          m['host'] = 'arani2020-lgtm.github.io'
+          m['startUrl'] = '/open-code-app/'
+          m['fullScopeUrl'] = 'https://arani2020-lgtm.github.io/open-code-app/'
+          m['webManifestUrl'] = 'https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest'
+          m['iconUrl'] = 'https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-512.png'
+          m['maskableIconUrl'] = 'https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-maskable-512.png'
+          json.dump(m, open('twa/twa-manifest.json', 'w'), indent=2)
+          print('ok')
+          "
 
-          # Generate Android project from twa-manifest (no interactive prompts if config exists)
-          set +e
-          bubblewrap update --skipPwaValidation 2>&1
-          # If update needs project, try init once
-          if [ ! -f app/build.gradle ] && [ ! -f app/build.gradle.kts ]; then
-            bubblewrap init \
-              --manifest=https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest \
-              --directory=. \
-              --skipPwaValidation true 2>&1 <<ANSWERS
-n
-n
-n
-n
-n
-ANSWERS
-          fi
-          # Keep our manifest/signing
-          python3 - <<'PY'
-          import json, os
-          m = json.load(open("../twa-manifest.json"))
-          m["signingKey"] = {
-            "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
-            "alias": "android"
-          }
-          json.dump(m, open("twa-manifest.json", "w"), indent=2)
-          PY
-          ls -la
-          find . -maxdepth 3 -type f | head -40
-          set -e
-
-      - name: Build APK
+      - name: Bubblewrap init
         working-directory: twa
         run: |
           set +e
-          bubblewrap build \
-            --skipPwaValidation \
-            --storePassword android \
-            --keyPassword android 2>&1
-          echo "bubblewrap exit: $?"
+          echo n | bubblewrap update --skipPwaValidation
+          if [ ! -f app/build.gradle ] && [ ! -f app/build.gradle.kts ] && [ ! -f build.gradle ]; then
+            yes n | bubblewrap init --manifest=https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest --directory=. --skipPwaValidation true
+          fi
+          ls -la
+          find . -maxdepth 4 -type f | head -50
+          set -e
 
+      - name: Bubblewrap build
+        working-directory: twa
+        run: |
+          set +e
+          yes n | bubblewrap build --skipPwaValidation --storePassword android --keyPassword android
+          echo bubblewrap_exit:$?
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew assembleRelease \
-              -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android.keystore \
-              -Pandroid.injected.signing.store.password=android \
-              -Pandroid.injected.signing.key.alias=android \
-              -Pandroid.injected.signing.key.password=android 2>&1
-            echo "gradle release exit: $?"
-            ./gradlew assembleDebug 2>&1
-            echo "gradle debug exit: $?"
+            ./gradlew assembleRelease || ./gradlew assembleDebug
+            echo gradle_exit:$?
           fi
-
-          echo "=== APK files ==="
-          find "$GITHUB_WORKSPACE" -name "*.apk" -type f -print
+          find "$GITHUB_WORKSPACE" -name '*.apk' -type f -print
           set -e
-          # Fail the job if no apk was produced
-          count=$(find "$GITHUB_WORKSPACE" -name "*.apk" -type f | wc -l)
-          if [ "$count" -eq 0 ]; then
-            echo "No APK produced"
-            exit 1
-          fi
+          test "$(find "$GITHUB_WORKSPACE" -name '*.apk' -type f | wc -l)" -gt 0
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: open-code-apk
-          path: |
-            **/*.apk
+          path: "**/*.apk"
           if-no-files-found: error
           retention-days: 14
