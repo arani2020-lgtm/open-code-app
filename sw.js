@@ -1,11 +1,13 @@
-/* Open Code — service worker: offline app shell. Designer: Abbas Sedigh */
-const CACHE = "open-code-v2.5.0";
+/* Open Code — service worker v2.6.0 */
+const CACHE = "open-code-v2.6.0";
 const CORE = [
   "./",
   "index.html",
+  "version.json",
   "manifest.webmanifest",
   "assets/css/app.css",
   "assets/css/mobile.css",
+  "assets/css/update-ui.css",
   "assets/fonts/Vazirmatn-Variable.woff2",
   "assets/js/polyfills.js",
   "assets/js/regen.js",
@@ -23,11 +25,12 @@ const CORE = [
   "assets/js/ui-wizard.js",
   "assets/js/ui-build.js",
   "assets/js/updater.js",
+  "assets/js/auto-update.js",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
   "assets/icons/icon-maskable-512.png",
   "assets/icons/favicon-32.png",
-  "assets/icons/apple-touch-icon.png",
+  "assets/icons/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", (e) => {
@@ -44,35 +47,36 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  if (url.origin === location.origin) {
-    if (e.request.mode === "navigate") {
-      e.respondWith(
-        fetch(e.request)
-          .then((res) => {
-            if (res.ok) {
-              const copy = res.clone();
-              caches.open(CACHE).then((c) => c.put(e.request, copy));
-            }
-            return res;
-          })
-          .catch(() => caches.match(e.request).then((h) => h || caches.match("index.html")))
-      );
-      return;
-    }
+  if (url.origin !== location.origin) return;
+
+  // Always network-first for version check + navigation
+  if (e.request.mode === "navigate" || url.pathname.endsWith("version.json")) {
     e.respondWith(
-      caches.match(e.request).then((hit) => {
-        const fetching = fetch(e.request)
-          .then((res) => {
-            if (res.ok) {
-              const copy = res.clone();
-              caches.open(CACHE).then((c) => c.put(e.request, copy));
-            }
-            return res;
-          })
-          .catch(() => hit);
-        return hit || fetching;
-      })
+      fetch(e.request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request).then((h) => h || caches.match("index.html")))
     );
     return;
   }
+
+  e.respondWith(
+    caches.match(e.request).then((hit) => {
+      const fetching = fetch(e.request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy));
+          }
+          return res;
+        })
+        .catch(() => hit);
+      return hit || fetching;
+    })
+  );
 });
