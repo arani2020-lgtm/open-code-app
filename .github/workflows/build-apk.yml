@@ -29,92 +29,110 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Accept Android licenses
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
+        with:
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
 
       - name: Generate signing key
         run: |
           keytool -genkeypair -v \
-            -keystore $GITHUB_WORKSPACE/android.keystore \
+            -keystore "$GITHUB_WORKSPACE/android.keystore" \
             -alias android \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android \
             -dname "CN=Open Code, OU=Mobile, O=OpenCode, L=Tehran, C=IR"
 
-      - name: Init TWA (non-interactive)
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+      - name: Prepare TWA project
         run: |
-          mkdir -p twa
-          cd twa
-          cp ../twa-manifest.json .
-          # Point signing key to workspace keystore
+          mkdir -p twa && cd twa
+          # Write config so bubblewrap knows jdk + sdk paths
+          mkdir -p "$HOME/.bubblewrap"
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          EOF
+          cat "$HOME/.bubblewrap/config.json"
+
           python3 - <<'PY'
           import json, os
-          p = "twa-manifest.json"
-          with open(p) as f:
-              m = json.load(f)
+          m = json.load(open("../twa-manifest.json"))
           m["signingKey"] = {
-              "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
-              "alias": "android"
+            "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
+            "alias": "android"
           }
-          with open(p, "w") as f:
-              json.dump(m, f, indent=2)
-          print("manifest ready")
+          # Ensure host/startUrl match live site
+          m["host"] = "arani2020-lgtm.github.io"
+          m["startUrl"] = "/open-code-app/"
+          m["fullScopeUrl"] = "https://arani2020-lgtm.github.io/open-code-app/"
+          m["webManifestUrl"] = "https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest"
+          m["iconUrl"] = "https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-512.png"
+          m["maskableIconUrl"] = "https://arani2020-lgtm.github.io/open-code-app/assets/icons/icon-maskable-512.png"
+          json.dump(m, open("twa-manifest.json", "w"), indent=2)
+          print("twa-manifest ready")
           PY
-          # Answer prompts: use existing JDK (n), use existing Android SDK (n if asked)
-          # bubblewrap init from existing twa-manifest.json
+
+          # Generate Android project from twa-manifest (no interactive prompts if config exists)
           set +e
-          printf 'n\nn\nn\n' | bubblewrap update --skipPwaValidation 2>&1 || true
-          printf 'n\nn\nn\n' | bubblewrap init \
-            --manifest=https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest \
-            --directory=. \
-            --skipPwaValidation true 2>&1 || true
-          # Restore our manifest after init may overwrite
-          cp ../twa-manifest.json ./twa-manifest.json
+          bubblewrap update --skipPwaValidation 2>&1
+          # If update needs project, try init once
+          if [ ! -f app/build.gradle ] && [ ! -f app/build.gradle.kts ]; then
+            bubblewrap init \
+              --manifest=https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest \
+              --directory=. \
+              --skipPwaValidation true 2>&1 <<ANSWERS
+n
+n
+n
+n
+n
+ANSWERS
+          fi
+          # Keep our manifest/signing
           python3 - <<'PY'
           import json, os
-          p = "twa-manifest.json"
-          with open(p) as f:
-              m = json.load(f)
+          m = json.load(open("../twa-manifest.json"))
           m["signingKey"] = {
-              "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
-              "alias": "android"
+            "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
+            "alias": "android"
           }
-          with open(p, "w") as f:
-              json.dump(m, f, indent=2)
+          json.dump(m, open("twa-manifest.json", "w"), indent=2)
           PY
           ls -la
+          find . -maxdepth 3 -type f | head -40
           set -e
 
-      - name: Build APK (non-interactive)
+      - name: Build APK
         working-directory: twa
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           set +e
-          # Prefer build with passwords; feed n for any leftover prompts
-          printf 'n\nn\nn\n' | bubblewrap build \
+          bubblewrap build \
             --skipPwaValidation \
             --storePassword android \
             --keyPassword android 2>&1
-          BUILD_EXIT=$?
-          echo "bubblewrap exit: $BUILD_EXIT"
-          # Fallback gradle if project exists
-          if [ -f "./gradlew" ]; then
+          echo "bubblewrap exit: $?"
+
+          if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android.keystore \
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android.keystore \
               -Pandroid.injected.signing.store.password=android \
               -Pandroid.injected.signing.key.alias=android \
-              -Pandroid.injected.signing.key.password=android 2>&1 || \
+              -Pandroid.injected.signing.key.password=android 2>&1
+            echo "gradle release exit: $?"
             ./gradlew assembleDebug 2>&1
+            echo "gradle debug exit: $?"
           fi
-          echo "=== APK search ==="
+
+          echo "=== APK files ==="
           find "$GITHUB_WORKSPACE" -name "*.apk" -type f -print
           set -e
+          # Fail the job if no apk was produced
+          count=$(find "$GITHUB_WORKSPACE" -name "*.apk" -type f | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "No APK produced"
+            exit 1
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -122,7 +140,5 @@ jobs:
           name: open-code-apk
           path: |
             **/*.apk
-            twa/app/build/outputs/apk/**/*.apk
-            twa/*.apk
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
