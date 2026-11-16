@@ -1,5 +1,5 @@
 /* Open Code — service worker: offline app shell. Designer: Abbas Sedigh */
-const CACHE = "open-code-v2.3.0";
+const CACHE = "open-code-v2.4.0";
 const CORE = [
   "./",
   "index.html",
@@ -13,10 +13,15 @@ const CORE = [
   "assets/js/providers.js",
   "assets/js/markdown.js",
   "assets/js/zip.js",
+  "assets/js/connectors.js",
   "assets/js/ui.js",
   "assets/js/github.js",
   "assets/js/ui-github.js",
   "assets/js/ui-panels.js",
+  "assets/js/ui-connect.js",
+  "assets/js/ui-wizard.js",
+  "assets/js/ui-build.js",
+  "assets/js/updater.js",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
   "assets/icons/icon-maskable-512.png",
