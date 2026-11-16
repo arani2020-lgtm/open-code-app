@@ -1,10 +1,11 @@
 /* Open Code — service worker: offline app shell. Designer: Abbas Sedigh */
-const CACHE = "open-code-v2.4.0";
+const CACHE = "open-code-v2.5.0";
 const CORE = [
   "./",
   "index.html",
   "manifest.webmanifest",
   "assets/css/app.css",
+  "assets/css/mobile.css",
   "assets/fonts/Vazirmatn-Variable.woff2",
   "assets/js/polyfills.js",
   "assets/js/regen.js",
@@ -43,7 +44,6 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
-  // same-origin: pages network-first (instant updates), assets cache-first with refresh
   if (url.origin === location.origin) {
     if (e.request.mode === "navigate") {
       e.respondWith(
@@ -75,5 +75,4 @@ self.addEventListener("fetch", (e) => {
     );
     return;
   }
-  // cross-origin API calls (providers, search): network only, no cache
 });
