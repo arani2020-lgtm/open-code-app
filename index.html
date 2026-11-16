@@ -15,8 +15,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png" />
     <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
-    <link rel="manifest" href="manifest.webmanifest?v=1.6.1.1794820012" />
-    <link rel="stylesheet" href="assets/css/app.css?v=1.6.1.1794820012" />
+    <link rel="manifest" href="manifest.webmanifest?v=1.6.2" />
+    <link rel="stylesheet" href="assets/css/app.css?v=1.6.2" />
     <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <title>Open Code</title>
     <script>
@@ -44,79 +44,222 @@
         font-weight: 100 900;
         font-display: swap;
       }
-      /* boot splash */
-      #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-              background: #f7f8fb; z-index: 999; transition: opacity .25s; }
+
+      /* ========== Improved Boot Screen ========== */
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f7f8fb;
+        z-index: 9999;
+        transition: opacity .4s ease, visibility .4s ease;
+        gap: 0;
+      }
       html.dark #boot { background: #0a0c12; }
-      #boot .b-logo { width: 76px; height: 76px; border-radius: 22px;
-        box-shadow: 0 24px 60px -18px rgba(79, 70, 229, .55); animation: bpulse 1.4s ease-in-out infinite; }
-      @keyframes bpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-      #boot .b-name { position: absolute; margin-top: 130px; font-weight: 800; color: #12151f;
-        font-family: "Vazirmatn", sans-serif; font-size: 17px; }
+
+      #boot .b-logo-wrap {
+        position: relative;
+        width: 88px;
+        height: 88px;
+        margin-bottom: 28px;
+      }
+      #boot .b-logo {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px -12px rgba(79, 70, 229, .5);
+        animation: bpulse 1.6s ease-in-out infinite;
+      }
+      @keyframes bpulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      #boot .b-name {
+        font-family: "Vazirmatn", sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.3px;
+        color: #12151f;
+        margin: 0 0 6px;
+      }
       html.dark #boot .b-name { color: #eceef4; }
+
+      #boot .b-tag {
+        font-family: "Vazirmatn", sans-serif;
+        font-size: 13px;
+        color: #686f7e;
+        margin: 0 0 32px;
+        font-weight: 500;
+      }
+      html.dark #boot .b-tag { color: #969dac; }
+
+      /* Progress bar */
+      #boot .b-progress {
+        width: 160px;
+        height: 3px;
+        background: rgba(79, 70, 229, .12);
+        border-radius: 99px;
+        overflow: hidden;
+      }
+      html.dark #boot .b-progress { background: rgba(138, 134, 255, .15); }
+      #boot .b-progress-bar {
+        height: 100%;
+        width: 30%;
+        background: linear-gradient(90deg, #4f46e5, #8a86ff);
+        border-radius: 99px;
+        animation: bload 1.4s ease-in-out infinite;
+      }
+      @keyframes bload {
+        0% { width: 20%; margin-inline-start: 0; }
+        50% { width: 60%; margin-inline-start: 20%; }
+        100% { width: 20%; margin-inline-start: 80%; }
+      }
+
+      #boot.boot-out {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      /* Error state inside boot */
+      #boot .b-error {
+        text-align: center;
+        padding: 28px 24px;
+        max-width: 340px;
+        direction: rtl;
+        font-family: "Vazirmatn", sans-serif;
+      }
+      #boot .b-error h2 {
+        font-size: 17px;
+        font-weight: 800;
+        margin: 0 0 10px;
+        color: #12151f;
+      }
+      html.dark #boot .b-error h2 { color: #eceef4; }
+      #boot .b-error p {
+        font-size: 13.5px;
+        line-height: 1.9;
+        color: #686f7e;
+        margin: 0 0 20px;
+      }
+      html.dark #boot .b-error p { color: #969dac; }
+      #boot .b-error button {
+        padding: 11px 28px;
+        border: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #fff;
+        font-size: 14.5px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 8px 20px -8px rgba(79, 70, 229, .55);
+      }
     </style>
   </head>
   <body>
     <div id="boot">
-      <svg class="b-logo" viewBox="0 0 64 64"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#8a86ff"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg1)"/><path d="M22 22 14 32l8 10" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M42 22l8 10-8 10" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M35.5 19 28 45" stroke="#d6b26a" stroke-width="5" stroke-linecap="round" fill="none"/></svg>
+      <div class="b-logo-wrap">
+        <svg class="b-logo" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4f46e5"/>
+              <stop offset="1" stop-color="#8a86ff"/>
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="16" fill="url(#bg1)"/>
+          <path d="M22 22 14 32l8 10" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M42 22l8 10-8 10" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M35.5 19 28 45" stroke="#d6b26a" stroke-width="5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
       <div class="b-name">Open Code</div>
+      <div class="b-tag">یک فضای کاری، همه‌ی مدل‌ها</div>
+      <div class="b-progress" aria-hidden="true"><div class="b-progress-bar"></div></div>
     </div>
+
     <div id="root"></div>
 
-    <script src="assets/js/polyfills.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/regen.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/i18n.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/store.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/providers.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/markdown.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/zip.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/connectors.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui-panels.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/github.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui-github.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui-connect.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui-wizard.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/ui-build.js?v=1.6.1.1794820012"></script>
-    <script src="assets/js/updater.js?v=1.6.1.1794820012"></script>
+    <script src="assets/js/polyfills.js?v=1.6.2"></script>
+    <script src="assets/js/regen.js?v=1.6.2"></script>
+    <script src="assets/js/i18n.js?v=1.6.2"></script>
+    <script src="assets/js/store.js?v=1.6.2"></script>
+    <script src="assets/js/providers.js?v=1.6.2"></script>
+    <script src="assets/js/markdown.js?v=1.6.2"></script>
+    <script src="assets/js/zip.js?v=1.6.2"></script>
+    <script src="assets/js/connectors.js?v=1.6.2"></script>
+    <script src="assets/js/ui.js?v=1.6.2"></script>
+    <script src="assets/js/ui-panels.js?v=1.6.2"></script>
+    <script src="assets/js/github.js?v=1.6.2"></script>
+    <script src="assets/js/ui-github.js?v=1.6.2"></script>
+    <script src="assets/js/ui-connect.js?v=1.6.2"></script>
+    <script src="assets/js/ui-wizard.js?v=1.6.2"></script>
+    <script src="assets/js/ui-build.js?v=1.6.2"></script>
+    <script src="assets/js/updater.js?v=1.6.2"></script>
     <script>
       (function () {
         var ok = false;
         try {
-          if (window.OC && typeof OC.boot === "function") { OC.boot(); ok = true; }
-        } catch (e) { console.error(e); }
+          if (window.OC && typeof OC.boot === "function") {
+            OC.boot();
+            ok = true;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+
         var b = document.getElementById("boot");
         if (ok) {
-          if (b) { b.style.opacity = "0"; setTimeout(function () { b.remove(); }, 300); }
-        } else {
-          // never leave a blank screen: old WebView / failed scripts / no network
+          // Smoother exit
           if (b) {
-            b.innerHTML = '<div style="text-align:center;padding:24px;direction:rtl">' +
-              '<div style="font-size:16px;font-weight:800;margin-bottom:10px">برنامه بارگذاری نشد</div>' +
-              '<div style="font-size:13.5px;line-height:2;opacity:.85">WebView این دستگاه قدیمی است یا اتصال برقرار نشده.<br>از Chrome به‌روز استفاده کنید و یک بار صفحه را رفرش کنید.</div>' +
-              '<button onclick="location.reload()" style="margin-top:16px;padding:11px 26px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-size:15px">تلاش مجدد</button></div>';
+            b.classList.add("boot-out");
+            setTimeout(function () {
+              if (b && b.parentNode) b.remove();
+            }, 420);
+          }
+        } else {
+          // Never leave a blank screen
+          if (b) {
+            b.innerHTML =
+              '<div class="b-error">' +
+              "<h2>برنامه بارگذاری نشد</h2>" +
+              "<p>ممکن است WebView دستگاه قدیمی باشد یا اتصال برقرار نشده باشد.<br>از Chrome به‌روز استفاده کنید و صفحه را یک‌بار رفرش کنید.</p>" +
+              '<button type="button" onclick="location.reload()">تلاش مجدد</button>' +
+              "</div>";
           }
           return;
         }
+
         // PWA service worker (skip on local dev hosts)
         var isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
         if ("serviceWorker" in navigator && location.protocol.startsWith("http") && !isLocal) {
-          navigator.serviceWorker.register("sw.js").catch(function (e) { /* offline shell optional */ });
+          navigator.serviceWorker.register("sw.js").catch(function () {});
         } else if ("serviceWorker" in navigator && isLocal) {
-          navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); });
+          navigator.serviceWorker.getRegistrations().then(function (rs) {
+            rs.forEach(function (r) { r.unregister(); });
+          });
         }
+
         // PWA install prompt
         var deferredPrompt = null;
         window.addEventListener("beforeinstallprompt", function (e) {
           e.preventDefault();
           deferredPrompt = e;
         });
-        OC.installPWA = function () {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
-          }
-        };
+        if (window.OC) {
+          OC.installPWA = function () {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(function () {
+                deferredPrompt = null;
+              });
+            }
+          };
+        }
       })();
     </script>
   </body>
