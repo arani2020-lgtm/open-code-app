@@ -704,7 +704,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
   }
   function _exportRepo() {
     _exportRepo = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9(name, files, opts) {
-      var safe, rname, isPrivate, r, list, blobs, _loop, i, treeRes, c;
+      var safe, rname, isPrivate, r, list, br, ref, baseCommit, blobs, _loop, i, treeRes, c;
       return _regenerator().w(function (_context0) {
         while (1) switch (_context0.n) {
           case 0:
@@ -712,6 +712,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             safe = String(name || "").toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "opencode-project";
             rname = safe + "-" + new Date().toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
             isPrivate = opts.private !== false;
+            /* auto_init:true → repo has an initial commit on the default branch; the git data API needs a non-empty repo */
             _context0.n = 1;
             return api("/user/repos", {
               method: "POST",
@@ -719,7 +720,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
                 name: rname,
                 private: isPrivate,
                 description: String(opts.description || "Exported by Open Code").slice(0, 180),
-                auto_init: false
+                auto_init: true
               }
             });
           case 1:
@@ -727,6 +728,19 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
             list = (files || []).filter(function (f) {
               return f.path && f.content != null;
             }).slice(0, 800);
+            br = r.default_branch || "main";
+            if (!list.length) {
+              _context0.n = 9;
+              break;
+            }
+            _context0.n = 2;
+            return api("/repos/" + r.full_name + "/git/ref/heads/" + encodeURIComponent(br));
+          case 2:
+            ref = _context0.v;
+            _context0.n = 3;
+            return api("/repos/" + r.full_name + "/git/commits/" + ref.object.sha);
+          case 3:
+            baseCommit = _context0.v;
             blobs = [];
             _loop = /*#__PURE__*/_regenerator().m(function _loop() {
               var chunk, res;
@@ -760,50 +774,47 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
               }, _loop);
             });
             i = 0;
-          case 2:
-            if (!(i < list.length)) {
-              _context0.n = 4;
-              break;
-            }
-            return _context0.d(_regeneratorValues(_loop()), 3);
-          case 3:
-            i += 3;
-            _context0.n = 2;
-            break;
           case 4:
-            if (!blobs.length) {
-              _context0.n = 7;
+            if (!(i < list.length)) {
+              _context0.n = 6;
               break;
             }
-            _context0.n = 5;
+            return _context0.d(_regeneratorValues(_loop()), 5);
+          case 5:
+            i += 3;
+            _context0.n = 4;
+            break;
+          case 6:
+            _context0.n = 7;
             return api("/repos/" + r.full_name + "/git/trees", {
               method: "POST",
               body: {
+                base_tree: baseCommit.tree.sha,
                 tree: blobs
               }
             });
-          case 5:
+          case 7:
             treeRes = _context0.v;
-            _context0.n = 6;
+            _context0.n = 8;
             return api("/repos/" + r.full_name + "/git/commits", {
               method: "POST",
               body: {
                 message: opts.message || "Initial export — Open Code",
                 tree: treeRes.sha,
-                parents: []
+                parents: [ref.object.sha]
               }
             });
-          case 6:
+          case 8:
             c = _context0.v;
-            _context0.n = 7;
-            return api("/repos/" + r.full_name + "/git/refs", {
-              method: "POST",
+            _context0.n = 9;
+            return api("/repos/" + r.full_name + "/git/refs/heads/" + encodeURIComponent(br), {
+              method: "PATCH",
               body: {
-                ref: "refs/heads/main",
-                sha: c.sha
+                sha: c.sha,
+                force: false
               }
             });
-          case 7:
+          case 9:
             store.logActivity(store.currentUser().email, "github-export", r.full_name + " · " + list.length + " files");
             return _context0.a(2, {
               repo: r.full_name,
