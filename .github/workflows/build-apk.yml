@@ -76,7 +76,7 @@ jobs:
           find . -maxdepth 4 -type f | head -50
           set -e
 
-      - name: Bubblewrap build
+      - name: Bubblewrap / Gradle build
         working-directory: twa
         run: |
           set +e
@@ -84,17 +84,73 @@ jobs:
           echo bubblewrap_exit:$?
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew assembleRelease || ./gradlew assembleDebug
-            echo gradle_exit:$?
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android.keystore \
+              -Pandroid.injected.signing.store.password=android \
+              -Pandroid.injected.signing.key.alias=android \
+              -Pandroid.injected.signing.key.password=android
+            echo gradle_release_exit:$?
+            ./gradlew assembleDebug
+            echo gradle_debug_exit:$?
           fi
           find "$GITHUB_WORKSPACE" -name '*.apk' -type f -print
           set -e
-          test "$(find "$GITHUB_WORKSPACE" -name '*.apk' -type f | wc -l)" -gt 0
 
-      - name: Upload APK
+      - name: Sign APK (jarsigner + apksigner)
+        run: |
+          set -e
+          mkdir -p dist
+          # Prefer any existing signed release, else take unsigned and sign it
+          CANDIDATE=$(find "$GITHUB_WORKSPACE" -name '*-release*.apk' -type f | head -1)
+          if [ -z "$CANDIDATE" ]; then
+            CANDIDATE=$(find "$GITHUB_WORKSPACE" -name '*.apk' -type f | head -1)
+          fi
+          if [ -z "$CANDIDATE" ]; then
+            echo "No APK found to sign"
+            exit 1
+          fi
+          echo "Source APK: $CANDIDATE"
+          cp "$CANDIDATE" dist/OpenCode-unsigned.apk
+
+          # jarsigner (v1) always available with JDK
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore "$GITHUB_WORKSPACE/android.keystore" \
+            -storepass android -keypass android \
+            dist/OpenCode-unsigned.apk android
+
+          # zipalign + apksigner when build-tools exist (v2/v3)
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | sort -V | tail -1)
+          if [ -n "$BT" ] && [ -x "$BT/zipalign" ] && [ -x "$BT/apksigner" ]; then
+            echo "Using build-tools: $BT"
+            "$BT/zipalign" -f -p 4 dist/OpenCode-unsigned.apk dist/OpenCode-aligned.apk
+            "$BT/apksigner" sign \
+              --ks "$GITHUB_WORKSPACE/android.keystore" \
+              --ks-key-alias android \
+              --ks-pass pass:android \
+              --key-pass pass:android \
+              --out dist/OpenCode-1.6.4-release.apk \
+              dist/OpenCode-aligned.apk
+            "$BT/apksigner" verify --verbose dist/OpenCode-1.6.4-release.apk || true
+          else
+            echo "apksigner not found — shipping jarsigner-signed APK"
+            cp dist/OpenCode-unsigned.apk dist/OpenCode-1.6.4-release.apk
+          fi
+
+          # Also keep a debug copy if present
+          DEBUG=$(find "$GITHUB_WORKSPACE" -name '*-debug*.apk' -type f | head -1 || true)
+          if [ -n "$DEBUG" ]; then
+            cp "$DEBUG" dist/OpenCode-debug.apk
+          fi
+
+          ls -la dist/
+          test -f dist/OpenCode-1.6.4-release.apk
+
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
           name: open-code-apk
-          path: "**/*.apk"
+          path: |
+            dist/OpenCode-1.6.4-release.apk
+            dist/OpenCode-debug.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
