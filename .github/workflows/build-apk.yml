@@ -1,0 +1,67 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Generate signing key (CI ephemeral)
+        run: |
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias android \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Open Code, OU=Mobile, O=OpenCode, L=Tehran, C=IR"
+
+      - name: Init TWA project
+        run: |
+          mkdir -p twa && cd twa
+          cp ../twa-manifest.json ./twa-manifest.json
+          npx --yes @bubblewrap/cli init --manifest=../manifest.webmanifest \
+            --directory=. --skipPwaValidation true || true
+          cp ../twa-manifest.json ./twa-manifest.json
+
+      - name: Build APK
+        working-directory: twa
+        run: |
+          if [ -f twa-manifest.json ]; then
+            npx --yes @bubblewrap/cli build --skipPwaValidation true \
+              --storePassword android --keyPassword android || true
+          fi
+          if [ -f app/build.gradle ] || [ -f app/build.gradle.kts ]; then
+            chmod +x gradlew || true
+            ./gradlew assembleRelease || ./gradlew assembleDebug
+          fi
+          find . -name "*.apk" -print
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-code-apk
+          path: |
+            twa/**/*.apk
+            **/*.apk
+          if-no-files-found: warn

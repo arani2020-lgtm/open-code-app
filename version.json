@@ -1,0 +1,11 @@
+{
+  "version": "1.6.4.0",
+  "short": "1.6.4",
+  "released": "2026-11-16",
+  "minSupported": "1.6.0.0",
+  "notes": {
+    "fa": "به‌روزرسانی خودکار داخل برنامه، بهبود موبایل و UI، آمادهٔ خروجی APK",
+    "en": "In-app auto-update, mobile & UI polish, APK pipeline ready"
+  },
+  "force": false
+}
