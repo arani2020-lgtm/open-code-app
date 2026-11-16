@@ -27,41 +27,102 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
-      - name: Generate signing key (CI ephemeral)
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
+
+      - name: Generate signing key
         run: |
           keytool -genkeypair -v \
-            -keystore android.keystore \
+            -keystore $GITHUB_WORKSPACE/android.keystore \
             -alias android \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android \
             -dname "CN=Open Code, OU=Mobile, O=OpenCode, L=Tehran, C=IR"
 
-      - name: Init TWA project
+      - name: Init TWA (non-interactive)
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
-          mkdir -p twa && cd twa
+          mkdir -p twa
+          cd twa
+          cp ../twa-manifest.json .
+          # Point signing key to workspace keystore
+          python3 - <<'PY'
+          import json, os
+          p = "twa-manifest.json"
+          with open(p) as f:
+              m = json.load(f)
+          m["signingKey"] = {
+              "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
+              "alias": "android"
+          }
+          with open(p, "w") as f:
+              json.dump(m, f, indent=2)
+          print("manifest ready")
+          PY
+          # Answer prompts: use existing JDK (n), use existing Android SDK (n if asked)
+          # bubblewrap init from existing twa-manifest.json
+          set +e
+          printf 'n\nn\nn\n' | bubblewrap update --skipPwaValidation 2>&1 || true
+          printf 'n\nn\nn\n' | bubblewrap init \
+            --manifest=https://arani2020-lgtm.github.io/open-code-app/manifest.webmanifest \
+            --directory=. \
+            --skipPwaValidation true 2>&1 || true
+          # Restore our manifest after init may overwrite
           cp ../twa-manifest.json ./twa-manifest.json
-          npx --yes @bubblewrap/cli init --manifest=../manifest.webmanifest \
-            --directory=. --skipPwaValidation true || true
-          cp ../twa-manifest.json ./twa-manifest.json
+          python3 - <<'PY'
+          import json, os
+          p = "twa-manifest.json"
+          with open(p) as f:
+              m = json.load(f)
+          m["signingKey"] = {
+              "path": os.environ["GITHUB_WORKSPACE"] + "/android.keystore",
+              "alias": "android"
+          }
+          with open(p, "w") as f:
+              json.dump(m, f, indent=2)
+          PY
+          ls -la
+          set -e
 
-      - name: Build APK
+      - name: Build APK (non-interactive)
         working-directory: twa
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
-          if [ -f twa-manifest.json ]; then
-            npx --yes @bubblewrap/cli build --skipPwaValidation true \
-              --storePassword android --keyPassword android || true
+          set +e
+          # Prefer build with passwords; feed n for any leftover prompts
+          printf 'n\nn\nn\n' | bubblewrap build \
+            --skipPwaValidation \
+            --storePassword android \
+            --keyPassword android 2>&1
+          BUILD_EXIT=$?
+          echo "bubblewrap exit: $BUILD_EXIT"
+          # Fallback gradle if project exists
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android.keystore \
+              -Pandroid.injected.signing.store.password=android \
+              -Pandroid.injected.signing.key.alias=android \
+              -Pandroid.injected.signing.key.password=android 2>&1 || \
+            ./gradlew assembleDebug 2>&1
           fi
-          if [ -f app/build.gradle ] || [ -f app/build.gradle.kts ]; then
-            chmod +x gradlew || true
-            ./gradlew assembleRelease || ./gradlew assembleDebug
-          fi
-          find . -name "*.apk" -print
+          echo "=== APK search ==="
+          find "$GITHUB_WORKSPACE" -name "*.apk" -type f -print
+          set -e
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: open-code-apk
           path: |
-            twa/**/*.apk
             **/*.apk
+            twa/app/build/outputs/apk/**/*.apk
+            twa/*.apk
           if-no-files-found: warn
+          retention-days: 14
